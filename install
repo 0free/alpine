@@ -99,8 +99,10 @@ packages_list() {
         PACKAGES+=(
             # gnome session
             gdm gdm-openrc polkit-gnome mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell-extensions gnome-shell-schemas gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs
+            # theme
+            adwaita-icon-theme hicolor-icon-theme
             # gnome tools
-            adwaita-icon-theme gnome-keyring gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
+            gnome-keyring gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
             # nautilus
             nautilus
             # text
@@ -1002,7 +1004,7 @@ GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
 GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=true
-GRUB_CMDLINE_LINUX_DEFAULT=""
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mitigations=off"
 GRUB_CMDLINE_LINUX=""
 EOF
 
