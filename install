@@ -51,21 +51,9 @@ packages_list() {
         gufw ufw ufw-openrc ufw-bash-completion
         # wireless
         wireless-regdb wireless-tools iwd iwd-openrc
-
         # sound
-        if grep -q alsa /root/list; then
-            alsa-utils alsa-utils-openrc alsa-lib alsaconf alsa-ucm-conf
-        fi
-
-        if grep -q pipewire /root/list; then
-            pipewire pipewire-alsa pipewire-tools pipewire-pulse pipewire-zeroconf
-            pipewire-spa-bluez pipewire-spa-vulkan wireplumber
-        fi
-
-        if grep -q pulseaudio /root/list; then
-            pulseaudio pulseaudio-bash-completion pulseaudio-openrc pulseaudio-utils pulseaudio-bluez pulseaudio-zeroconf pulseaudio-equalizer pulseaudio-alsa alsa-utils alsa-plugins-pulse
-        fi
-
+        alsa-plugins-pulse alsa-lib
+        pipewire pipewire-media-session pipewire-alsa pipewire-libs pipewire-pulse pipewire-tools
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
         # firmware
@@ -387,16 +375,12 @@ setup_drive() {
     bootloaders=(grub syslinux)
     menu 'select a desktop' bootloader ${bootloaders[@]}
 
-    sounds=(pipewire pulseaudio)
-    menu 'select a sound driver' sound ${sounds[@]}
-
     echo ">>> adding options"
     echo $drive >> /root/list
     echo $filesystem >> /root/list
     echo $computer >> /root/list
     echo $desktop >> /root/list
     echo $bootloader >> /root/list
-    echo $sound >> /root/list
 
     if ! test sgdisk; then
         echo ">>> installing sgdisk"
@@ -811,10 +795,6 @@ EOF
     rc-update add bluetooth default
     rc-update add fwupd
 
-    if grep -q pulseaudio /root/list; then
-        rc-update add pulseaudio default
-    fi
-
     if [[ $swapfile != '0' ]]; then
         rc-update add swap default
     fi
@@ -858,20 +838,17 @@ wifi.backend=iwd
 EOF
 
     cat >> /etc/security/limits.conf << EOF
-@audio - rtprio 99
+@audio - rtprio 88
 @audio - memlock 256
 @audio - nice -11
 EOF
 
-    if grep -q pipewire /root/list; then
-        if [ ! -d /etc/pipewire ]; then
-            mkdir /etc/pipewire
-        fi
-        cp /usr/share/pipewire/pipewire.conf /etc/pipewire/
-        echo '{ path = "wireplumber"  args = "" }' >> /etc/pipewire/pipewire.conf
-        if ! grep -q 'snd_seq' /etc/modules; then
-            echo snd_seq >> /etc/modules
-        fi
+    if [ ! -d /etc/pipewire ]; then
+        mkdir /etc/pipewire
+    fi
+    cp /usr/share/pipewire/pipewire.conf /etc/pipewire/
+    if ! grep -q 'snd_seq' /etc/modules; then
+        echo snd_seq >> /etc/modules
     fi
 
     if [[ ! -d /usr/share/icons/windows-11-icons ]]; then
@@ -1004,7 +981,7 @@ GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
 GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=true
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mitigations=off"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
 EOF
 
