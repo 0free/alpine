@@ -108,7 +108,7 @@ packages_list() {
             # firmware
             gnome-firmware-updater
             # gnome theme
-            arc-theme arc-dark arc-dark-gnome papirus-icon-theme
+            arc-theme arc-dark arc-dark-gnome
             # gedit spell check
             aspell hunspell hunspell-en nuspell
             # network
@@ -248,8 +248,6 @@ packages_list() {
             gradle android-tools android-tools-bash-completion go-mtpfs gvfs-mtp scrcpy scrcpy-bash-completion
             # iPhone/iPod/mac
             ifuse ideviceinstaller idevicerestore libirecovery libirecovery-progs libideviceactivation libimobiledevice libimobiledevice-progs
-            # icons
-            moka-icon-theme numix-icon-theme
             # pdf
             corepdf pdfarranger
             # drives
@@ -872,6 +870,14 @@ EOF
         if ! grep -q 'snd_seq' /etc/modules; then
             echo snd_seq >> /etc/modules
         fi
+    fi
+
+    if [[ ! -d /usr/share/icons/windows-11-icons ]]; then
+        echo ">>> cloning Windows-11-icons"
+        if [[ ! -d windows-11-icons ]]; then
+            git clone https://github.com/0free/windows-11-icons.git
+        fi
+        mv windows-11-icons /usr/share/icons/
     fi
 
 }
