@@ -22,7 +22,7 @@ packages_list() {
         ibus ibus-bash-completion
         udev-init-scripts udev-init-scripts-openrc
         eudev eudev-openrc eudev-libs
-        musl-locales openrc-bash-completion dconf-bash-completion
+        musl-locales openrc-bash-completion dconf dconf-bash-completion
         xorg-server xf86-input-libinput
         polkit polkit-openrc polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
@@ -86,7 +86,7 @@ packages_list() {
 
         PACKAGES+=(
             # gnome session
-            gdm gdm-openrc polkit-gnome mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell-extensions gnome-shell-schemas gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs
+            gdm gdm-openrc polkit-gnome mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-extensions gnome-shell-schemas gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs
             # theme
             adwaita-icon-theme hicolor-icon-theme
             # gnome tools
