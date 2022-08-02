@@ -53,7 +53,7 @@ packages_list() {
         wireless-regdb wireless-tools iwd iwd-openrc
         # sound
         alsa-plugins-pulse alsa-lib
-        pipewire pipewire-media-session pipewire-alsa pipewire-libs pipewire-pulse pipewire-tools
+        pipewire pipewire-media-session pipewire-alsa pipewire-libs pipewire-pulse pipewire-tools gst-plugin-pipewire
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
         # firmware
