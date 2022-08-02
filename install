@@ -1,0 +1,1071 @@
+#!/bin/bash
+
+bootsize='199MiB'
+swapfile='2048MiB' # '0' to disable
+timezone='Asia/Muscat'
+mirror='https://dl-cdn.alpinelinux.org/alpine'
+arch='x86_64'
+branch='edge'
+version='v3.16'
+pool='rpool'
+hostname='linux'
+user='user'
+password='0000'
+
+packages_list() {
+
+    PACKAGES+=(
+        # micro-codes
+        amd-ucode intel-ucode
+        # desktop
+        dbus dbus-openrc dbus-x11 iio-sensor-proxy
+        ibus ibus-bash-completion
+        udev-init-scripts udev-init-scripts-openrc
+        eudev eudev-openrc eudev-libs
+        musl-locales openrc-bash-completion dconf-bash-completion
+        xorg-server xf86-input-libinput
+        polkit polkit-openrc polkit-elogind polkit-elogind-libs
+        elogind elogind-openrc elogind-bash-completion
+        mesa mesa-dri-gallium
+        # hardware
+        hwids hwids-net hwids-pci hwids-udev hwids-usb
+        # wayland
+        xwayland
+        # network
+        ethtool ethtool-bash-completion rsync rsync-openrc
+        # hardware
+        bolt pciutils lm-sensors tpm2-tools tpm2-tools-bash-completion
+        # efi boot
+        efibootmgr
+        # base
+        sudo bash bash-completion build-base fakeroot rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-login util-linux-misc util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less nano curl wget coreutils gawk diffutils
+        # utilities
+        openssl ncurses-dev
+        # git
+        git git-bash-completion
+        # compression
+        brotli zstd libzip zip lz4 lzo unzip
+        # disks
+        e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk udisks2 mmc-utils jfsutils
+        # firewall
+        gufw ufw ufw-openrc ufw-bash-completion
+        # wireless
+        wireless-regdb wireless-tools iwd iwd-openrc
+
+        # sound
+        if grep -q alsa /root/list; then
+            alsa-utils alsa-utils-openrc alsa-lib alsaconf alsa-ucm-conf
+        fi
+
+        if grep -q pipewire /root/list; then
+            pipewire pipewire-alsa pipewire-tools pipewire-pulse pipewire-zeroconf
+            pipewire-spa-bluez pipewire-spa-vulkan wireplumber
+        fi
+
+        if grep -q pulseaudio /root/list; then
+            pulseaudio pulseaudio-bash-completion pulseaudio-openrc pulseaudio-utils pulseaudio-bluez pulseaudio-zeroconf pulseaudio-equalizer pulseaudio-alsa alsa-utils alsa-plugins-pulse
+        fi
+
+        # bluetooth
+        bluez-alsa bluez-alsa-openrc bluez-alsa-utils
+        # firmware
+        fwupd fwupd-openrc fwup-bash-completion fwupd-efi fwupd-plugin-bios fwupd-plugin-cpu fwupd-plugin-tpm fwupd-plugin-nvme fwupd-plugin-ata
+        # trackpad
+        xf86-input-synaptics xf86-input-mtrack
+        # browser
+        chromium-chromedriver
+        # mesa
+        mesa mesa-vulkan-layers
+        # intel GPU
+        xf86-video-intel mesa-vulkan-intel intel-media-driver
+        # nvidia GPU
+        nvidia-src
+        # amd GPU
+        xf86-video-amdgpu
+        # keyboard
+        setxkbmap
+        # timezone
+        tzdata
+    )
+
+    if grep -q btrfs /root/list; then
+        PACKAGES+=(
+            btrfs-progs btrfs-progs-extra btrfs-progs-libs btrfs-progs-bash-completion
+        )
+    fi
+
+    if grep -q gnome /root/list; then
+
+        PACKAGES+=(
+            # gnome session
+            gdm gdm-openrc polkit-gnome mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell-extensions gnome-shell-schemas gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs
+            # gnome tools
+            adwaita-icon-theme gnome-keyring gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
+            # nautilus
+            nautilus
+            # text
+            gedit gedit-plugins py3-cairo
+            # firmware
+            gnome-firmware-updater
+            # gnome theme
+            arc-theme arc-dark arc-dark-gnome papirus-icon-theme
+            # gedit spell check
+            aspell hunspell hunspell-en nuspell
+            # network
+            networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn network-manager-applet networkmanager-initrd-generator
+        )
+
+    fi
+
+    if grep -q kde /root/list; then
+
+        PACKAGES+=(
+            xdg-desktop-portal-kde sddm sddm-openrc sddm-kcm sddm-breeze plasma plasma-integration plasma-desktop plasma-workspace breeze kwin kinit kwayland kwayland-integration kdeplasma-addons kinfocenter kmenuedit dolphin dolphin-plugins konsole systemsettings kde-gtk-config discover kactivities kscreen kmenuedit bluedevil powerdevil kdecoration plasma-systemmonitor plasma-firewall plasma-pa plasma-nm krecorder
+        )
+
+    fi
+
+    if grep -q kde-mobile /root/list; then
+        packages+=(
+            plasma-mobile plasma-settings plasma-camera plasma-dialer plasma-videoplayer plasma-mobile-sounds plasmatube audiotube koko angelfish calindori okular-mobile krecorder
+        )
+    fi
+
+    if grep -q workstation /root/list; then
+
+        if grep -q gnome /root/list; then
+            packages+=(
+                # gnome apps
+                gnome-software gnome-software-plugin-apk gnome-software-plugin-flatpak gnome-photos gnome-music gnome-clocks gnome-contacts gnome-calculator gnome-maps gnome-logs gnome-remote-desktop gnome-screenshot gnome-boxes gnome-calendar gnome-sound-recorder gnome-font-viewer gnome-colors gnome-bluetooth gnome-podcasts gnome-characters gnome-builder gnome-shortwave getting-things-gnome sushi
+                # web
+                epiphany
+                # documents
+                evince evince-nautilus
+                # photos
+                gthumb eog shotwell
+                # mail
+                geary
+                # sound
+                gnome-metronome lollypop blanket
+                # other
+                glade ghex baobab confy
+                # bluetooth
+                blueman
+            )
+        fi
+
+        if grep -q kde /root/list; then
+            packages+=(
+                 kate kile kwrite kcalc shelf plasma-phonebook knetattach plasma-browser-integration plasma-thunderbolt plasma-disks ark kfind kmix kmail kiconthemes kdenlive kmediaplayer ktexteditor ktorrent kdeconnect kamera kamoso okular spectacle partitionmanager akregator okteta kphotoalbum kmymoney cantor kdeedu-data minuet kdevelop materia-kde materia-kde-plasma materia-kde-kvantum kalk rocs calligra print-manager skanlite kalgebra marble kamoso spectacle elisa okteta haruna clip nota buho vvave index communicator isoimagewriter qrca nota kdesdk-thumbnailers knotes kget kompare falkon sweeper step kmousetool k3b plasmatube
+            )
+        fi
+
+        PACKAGES+=(
+            # shell
+            starship
+            # wine
+            wine vkd3d
+            # thumbnail
+            ffmpegthumbnailer
+            # mkimage
+            abuild alpine-sdk apk-tools alpine-conf mkinitfs xorriso squashfs-tools
+            # fonts tools
+            font-manager font-viewer
+            # fonts
+            terminus-font ttf-inconsolata ttf-dejavu font-noto font-noto-cjk ttf-font-awesome font-arabic-misc font-noto-arabic font-noto-armenian font-noto-cherokee font-noto-devanagari font-noto-ethiopic font-noto-georgian ttf-droid ttf-droid-nonlatin font-inter font-opensans ttf-freefont font-roboto font-roboto-mono font-roboto-flex
+            # vulkan
+            vulkan-headers vulkan-loader vulkan-validation-layers vulkan-tools
+            # google
+            google-authenticator
+            # mail
+            thunderbird
+            # music
+            amberol musescore
+            # audio
+            ardour tenacity calf calf-jack calf-lv2
+            # video edit
+            shotcut  pitivi x265
+            # video subtitle
+            gaupol
+            # book
+            foliate
+            # openvc
+            opencv py3-opencv
+            # python
+            black
+            # JavaScript
+            npm npm-bash-completion nodejs esbuild reason
+            # code
+            code-oss code-oss-bash-completion lapce codeblocks geany
+            # code format
+            prettier tidyhtml
+            # html/css to pdf
+            weasyprint
+            # screenshot
+            flameshot
+            # electronic
+            kicad
+            # screen
+            obs-studio kooha peek
+            # video
+            mplayer totem celluloid
+            # photos
+            krita gimp inkscape gmic curtail
+            # printer
+            cups cups-openrc cups-pdf bluez-cups
+            # driver
+            xinput gkraken ccid solaar razercfg razercfg-gui razergenie openrazer
+            # math
+            mathjax2
+            # finance
+            homebank
+            # 2d
+            tiled
+            # 3d
+            blender freecad godot leocad solvespace goxel
+            # 3d printer
+            cura
+            # text editor
+            kakoune
+            # mauikit
+            mauikit mauikit-accounts mauikit-filebrowsing mauikit-imagetools mauikit-texteditor
+            # bitcoin
+            bitcoin bitcoin-openrc
+            # game emu
+            pcsx2 dolphin-emu xwiimote pcsxr
+            # rust
+            rust rustfmt rust-analysis cargo
+            # go
+            go
+            # php
+            composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
+            # android
+            gradle android-tools android-tools-bash-completion go-mtpfs gvfs-mtp scrcpy scrcpy-bash-completion
+            # iPhone/iPod/mac
+            ifuse ideviceinstaller idevicerestore libirecovery libirecovery-progs libideviceactivation libimobiledevice libimobiledevice-progs
+            # icons
+            moka-icon-theme numix-icon-theme
+            # pdf
+            corepdf pdfarranger
+            # drives
+            onedrive onedrive-openrc
+            # twitter
+            cawbird
+            # Corsair
+            ckb-next
+            # RGB
+            openrgb
+            # plan
+            planner
+            # music player
+            amberol sublime-music
+            # music server
+            navidrome navidrome-openrc
+            # youtube
+            ffmpeg yt-dlp yt-dlp-bash-completion pipe-viewer-gtk audiotube tartube youtube-viewer-gtk
+            # javascript/css
+            minify minify-bash-completion
+            # photos
+            darktable
+            # drawing
+            drawing
+            # remote
+            remmina
+            # touch
+            touchegg touchegg-openrc
+            # CPU
+            corectrl
+            # cctv
+            zoneminder zoneminder-openrc
+            # iso
+            thumbdrives
+        )
+
+    fi
+
+    if grep -q server /root/list; then
+
+        PACKAGES+=(
+            # system
+            rsyslog rsyslog-openrc rsyslog-mysql rsyslog-tls rsyslog-http
+            # SSL/TLS
+            certbot
+            # php 8.1.7
+            php81 php81-bcmath php81-brotli php81-bz2 php81-cgi php81-curl php81-common php81-phpdbg php81-dom php81-exif php81-fileinfo php81-fpm php81-gd php81-gettext php81-iconv php81-intl php81-litespeed php81-mbstring php81-memcache php81-memcached php81-mysqli php81-mysqlnd php81-opcache php81-openssl php81-phar php81-pear php81-redis php81-session php81-snmp php81-soap php81-xml php81-zip php81-pecl-imagick
+            # php admin
+            phpmyadmin
+            # database
+            mariadb
+            # mail
+            postfix postfix-openrc postfix-mysql postfix-pcre postfixadmin
+            dovecot dovecot-openrc dovecot-submissiond dovecot-ldap dovecot-lmtpd dovecot-pop3d dovecot-sql dovecot-mysql
+            opendkim opendkim-utils
+            cyrus-sasl
+            # tools
+            imagemagick redis redis-openrc memcached memcached-openrc
+            # server
+            litespeed litespeed-openrc
+            # http
+            hetty
+            # cab
+            cabextract
+        )
+
+    fi
+
+}
+
+menu() {
+
+    echo -e "\n --> $1:\n"
+    output=$2
+    shift 2
+    options=($@)
+    i=0
+    while true; do
+        for option in ${options[@]}; do
+            if [[ $option == ${options[$i]} ]]; then
+                echo -e "\t\e[7m$option\e[0m"
+            else
+                echo -e "\t$option"
+            fi
+        done
+        read -sn3 key
+        if [[ $key == $(echo -en "\e[A") ]] && [[ $i -gt 0 ]]; then
+            i=$(($i-1))
+        elif [[ $key == $(echo -en "\e[B") ]] && [[ $i -lt ${#options[@]} ]]; then
+            i=$(($i+1))
+        elif [[ -z $key ]]; then
+            break
+        fi
+        echo -en "\e[${#options[@]}A"
+    done
+    printf -v $output "${options[$i]}"
+
+}
+
+setup_drive() {
+
+    echo '# created by Saif AlSubhi'
+    printf -- '-%.0s' {1..100}; echo ''
+    lsblk -o name,size,fstype,mountpoint,label,model
+    printf -- '-%.0s' {1..100}; echo ''
+
+    drives=($(ls /dev/ | grep '^nvme.\{3\}$\|^sd.\{1\}$'))
+
+    for i in ${!drives[@]}; do
+        drives[$i]="/dev/${drives[$i]}"
+    done
+
+    menu 'select a drive' drive ${drives[@]}
+
+    if ls $drive* | grep "$drive.\{1\}$"; then
+        partitions=($(ls $drive*))
+        menu 'select a root partition or use the complete drive ' partition ${partitions[@]}
+        if [[ $drive != $partition ]] ; then
+            root_drive=$partition
+            partitions=($(ls $drive* | grep -v $drive | grep -v $partition | grep "$drive.\{1\}$"))
+            menu 'select a boot partition to mount ' partition ${partitions[@]}
+            boot_drive=$partition
+        fi
+    fi
+
+    filesystems=(zfs btrfs xfs ext4 exfat ntfs)
+    menu 'select a filesystem' filesystem ${filesystems[@]}
+
+    computers=(minimal workstation miner server)
+    menu 'select a computer' computer ${computers[@]}
+
+    desktops=(gnome kde kde-mobile)
+    menu 'select a desktop' desktop ${desktops[@]}
+
+    bootloaders=(grub syslinux)
+    menu 'select a desktop' bootloader ${bootloaders[@]}
+
+    sounds=(pipewire pulseaudio)
+    menu 'select a sound driver' sound ${sounds[@]}
+
+    echo ">>> adding options"
+    echo $drive >> /root/list
+    echo $filesystem >> /root/list
+    echo $computer >> /root/list
+    echo $desktop >> /root/list
+    echo $bootloader >> /root/list
+    echo $sound >> /root/list
+
+    if ! test sgdisk; then
+        echo ">>> installing sgdisk"
+        apk add sgdisk
+    fi
+
+    if [[ ! $root_drive ]]; then
+        echo ">>> wiping filesystm"
+        wipefs -a -f $drive
+        echo ">>> deleting partitions"
+        sgdisk -Z $drive
+        echo ">>> creating GPT"
+        sgdisk -U $drive
+        echo ">>> creating boot partition"
+        sgdisk -n 0:0:+$bootsize -c 0:EFI -t 0:ef00 $drive
+        echo ">>> creating root partition"
+        if grep -q zfs /root/list; then
+            sgdisk -n 0:0:0 -c 0:$pool -t 0:bf00 $drive
+        else
+            sgdisk -n 0:0:0 -c 0:LINUX -t 0:8300 $drive
+        fi
+        boot_drive=$drive"1"
+        root_drive=$drive"2"
+        echo ">>> reading partition tables"
+        mdev -s
+        echo ">>> creating boot filesystem"
+        mkfs.vfat -F32 -n BOOT $boot_drive
+    fi
+
+    echo ">>> creating root filesystem"
+    if grep -q zfs /root/list; then
+        create_zfs
+        set_zfs
+    elif grep -q btrfs /root/list; then
+        mkfs.btrfs -f -L btrfs $root_drive
+    elif grep -q ext4 /root/list; then
+        mkfs.ext4 -f -L ext4 $root_drive
+    elif grep -q exfat /root/list; then
+        mkfs.exfat -f -L exfat $root_drive
+    elif grep -q ntfs /root/list; then
+        mkfs.ntfs -f -C -L ntfs $root_drive
+    elif grep -q xfs /root/list; then
+        mkfs.xfs -f -L xfs $root_drive
+    fi
+
+    mount_root
+    mount_boot
+
+    install_base
+
+}
+
+create_zfs() {
+
+    echo ">>> loading ZFS modules"
+    /sbin/modprobe zfs
+    echo ">>> checking ZFS modules"
+    if ! lsmod | grep -qi zfs; then
+       echo 'ERROR: ZFS modules are missing'
+       create_rootfs
+    fi
+    echo ">>> creating ZFS pool"
+    zpool create -f -o ashift=12 -o autotrim=on \
+    -o cachefile=/etc/zfs/zpool.cache \
+    -O recordsize=8192 -O compression=lz4 -O acltype=posixacl \
+    -O devices=off -O xattr=sa -O relatime=off -O atime=off \
+    -O dnodesize=legacy -O normalization=formD \
+    -O canmount=noauto -O mountpoint=legacy -R /mnt $pool $root_drive
+    echo ">>> checking ZFS pool"
+    zpool status
+
+}
+
+mount_root() {
+
+    if grep -q zfs /root/list; then
+        echo ">>> exporting zpool"
+        zpool export $pool
+        echo ">>> importing zpool"
+        zpool import $pool -d $root_drive -R /mnt
+        echo ">>> mounting zfs dataset"
+        mount -t zfs rpool /mnt
+    else
+        echo ">>> mounting root drive"
+        mount $root_drive /mnt
+    fi
+
+    if ! mountpoint -q /mnt; then
+        exit
+    fi
+
+    if [[ ! -d /mnt/boot ]]; then
+        mkdir -p /mnt/boot
+    fi
+    if [[ ! -d /mnt/boot/EFI ]]; then
+        mkdir -p /mnt/boot/EFI
+    fi
+
+}
+
+mount_boot() {
+
+    echo ">>> mounting boot drive"
+    mount $boot_drive /mnt/boot
+
+}
+
+set_zfs() {
+
+    echo ">>> setting ZFS pool as rootfs"
+    zpool set bootfs=$pool $pool
+    echo ">>> setting ZFS cache"
+    mkdir -p /mnt/etc/zfs
+    cp /etc/zfs/zpool.cache /mnt/etc/zfs/zpool.cache
+    echo ">>> adding ZFS options"
+    mkdir -p /mnt/etc/modprobe.d/
+    echo "options zfs l2arc_noprefetch=0" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs l2arc_write_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs l2arc_write_boost=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs l2arc_headroom=12" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_arc_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_arc_min=268435456" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_prefetch_disable=0" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_top_maxinflight=320" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_txg_timeout=15" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_scheduler=deadline" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_async_read_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_async_read_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_async_write_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_async_write_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_sync_write_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_sync_write_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_sync_read_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_sync_read_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
+
+}
+
+install_base() {
+
+    echo ">>> updating packages"
+    echo "$mirror/$branch/main" > /etc/apk/repositories
+    echo "$mirror/$branch/community" >> /etc/apk/repositories
+    echo "$mirror/$branch/testing" >> /etc/apk/repositories
+    echo "$mirror/$version/main" >> /etc/apk/repositories
+    echo "$mirror/$version/community" >> /etc/apk/repositories
+
+    echo ">>> installing alpine-base"
+    apk add --root=/mnt --initdb alpine-base --keys-dir /etc/apk/keys --repositories-file /etc/apk/repositories
+
+    echo ">>> copying repositories"
+    cp /etc/apk/repositories /mnt/etc/apk/repositories
+
+    cp /root/list /mnt/root/list
+    rm /mnt/dev/null
+    cp /dev/null /mnt/dev/null
+    chmod 0666 /mnt/dev/null
+
+    set_network
+    set_fstab
+    setup_linux
+
+}
+
+set_network() {
+
+    echo ">>> adding name resolution"
+    echo 'nameserver 1.0.0.1' >> /mnt/etc/resolv.conf
+    echo 'nameserver 8.8.8.8' >> /mnt/etc/resolv.conf
+
+    echo ">>> adding interfaces"
+    cat > /mnt/etc/network/interfaces << EOF
+auto lo
+iface lo inet loopback
+EOF
+
+}
+
+set_fstab() {
+
+    echo ">>> setting fstab"
+
+    echo $filesystem >> /mnt/etc/modules
+
+    uuid=$(lsblk -dno UUID $root_drive)
+    echo $uuid > /mnt/root/uuid
+
+    if grep -q zfs /root/list; then
+        echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" >> /mnt/etc/fstab
+    else
+        echo "UUID=$uuid / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 2" >> /mnt/etc/fstab
+    fi
+
+    uuid=$(lsblk -dno UUID $boot_drive)
+    echo "UUID=$uuid /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 2" >> /mnt/etc/fstab
+
+}
+
+setup_linux() {
+
+    install_linux
+    install_packages
+    set_locale
+    set_timezone
+    set_host
+    change_root
+
+}
+
+install_linux() {
+
+    list='linux-pam'
+    if grep -q zfs /root/list; then
+        list+=' linux-lts zfs zfs-openrc zfs-libs'
+    else
+        list+=' linux-edge'
+    fi
+    list+=' linux-firmware-intel linux-firmware-i915'
+    list+=' linux-firmware-amd linux-firmware-amd-ucode'
+    list+=' linux-firmware-nvidia'
+    list+=' linux-firmware-amdgpu'
+    list+=' linux-firmware-other'
+    list+=' linux-firmware-brcm linux-firmware-qca'
+    list+=' linux-firmware-rtlwifi linux-firmware-rtl_bt linux-firmware-rtl_nic'
+    echo ">>> installing linux"
+    apk add --root=/mnt $list
+
+}
+
+install_packages() {
+
+    echo ">>> packages list"
+    packages_list
+
+    list=''
+    for i in ${!PACKAGES[@]}; do
+        list+=' '
+        list+=${PACKAGES[$i]}
+    done
+    echo ">>> installing packages"
+    apk add --root=/mnt $list
+    apk fix --root=/mnt
+
+}
+
+set_locale() {
+
+    echo ">>> setting locale"
+    sed -i 's|#unicode="NO"|unicode="YES"|' /mnt/etc/rc.conf
+
+}
+
+set_timezone() {
+
+    echo ">>> setting timezone"
+    if [[ -f /mnt/usr/share/zoneinfo/$timezone ]]; then
+        install -Dm 0644 /mnt/usr/share/zoneinfo/$timezone /mnt/etc/localtime
+        echo $timezone > /mnt/etc/timezone
+    else
+        read -p " --- timezone Asia/Muscat: " timezone
+        set_timezone
+    fi
+
+}
+
+set_host() {
+
+    echo ">>> setting hostname"
+    echo "$hostname" > /mnt/etc/hostname
+    echo "127.0.0.1 localhost $hostname" > /mnt/etc/hosts
+    echo "::1       localhost $hostname" >> /mnt/etc/hosts
+
+}
+
+change_root() {
+
+    echo ">>> loading modules"
+    /sbin/modprobe efivars
+
+    echo ">>> changing root"
+    if [[ -f install ]]; then
+        mv install /mnt/root/install
+    fi
+    mount --bind /proc /mnt/proc
+    mount --bind /dev /mnt/dev
+    mount --bind /sys /mnt/sys
+    echo '' > /mnt/root/chroot
+    chroot /mnt /bin/bash /root/install
+
+}
+
+configure() {
+
+    disable_root
+    create_user
+    setup_desktop
+
+}
+
+disable_root() {
+
+    echo ">>> setting root password"
+    echo -en "$password\n$password" | passwd root
+
+    echo ">>> disabling root"
+    passwd -l root
+
+}
+
+create_user() {
+
+    echo ">>> creating user"
+
+    if id $user &>/dev/null; then
+        userdel $user
+    fi
+
+    echo "%$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
+    chmod 0400 /etc/sudoers.d/$user
+    adduser -h /home/$user -s /bin/bash -g $user $user
+    adduser $user video
+    adduser $user audio
+    adduser $user input
+    adduser $user netdev
+
+    echo ">>> setting user password"
+    echo -en "$password\n$password" | passwd $user
+
+}
+
+setup_desktop() {
+
+    enable_services
+    configure_alpine
+    add_commands
+
+    if [[ $swapfile != '0' ]]; then
+        if ! grep -q swap /etc/fstab; then
+            create_swap_file
+        fi
+    fi
+
+    install_mkinitfs
+
+    if grep -q syslinux /root/list; then
+        install_syslinux
+    fi
+
+    if grep -q grub /root/list; then
+        install_grub
+    fi
+
+    finish
+
+}
+
+enable_services() {
+
+    echo ">>> enabling services"
+
+    rc-update add devfs sysinit
+    rc-update add dmesg sysinit
+    rc-update add mdev sysinit
+    rc-update add hwdrivers sysinit
+
+    if grep -q zfs /root/list; then
+        rc-update add zfs-import boot
+        rc-update add zfs-mount boot
+        rc-update add zfs-share boot
+        rc-update add zfs-zed boot
+        rc-update add zfs-load-key boot
+    fi
+
+    if grep -q btrfs /root/list; then
+        cat > /etc/init.d/btrfs-scan << EOF
+#!/sbin/openrc-run
+name="btrfs-scan"
+depend() {
+  before localmount
+}
+start() {
+  /sbin/btrfs device scan
+}
+EOF
+        chmod +x /etc/init.d/btrfs-scan
+        rc-update add btrfs-scan boot
+    fi
+
+    rc-update add modules boot
+    rc-update add hwclock boot
+    rc-update add sysctl boot
+    rc-update add hostname boot
+    rc-update add bootmisc boot
+    rc-update add networking boot
+
+    rc-update add mount-ro shutdown
+    rc-update add killprocs shutdown
+    rc-update add savecache shutdown
+
+    rc-update add networkmanager default
+    rc-update add networkmanager-dispatcher default
+    rc-update add iwd default
+    rc-update add udev default
+    rc-update add udev-settle default
+    rc-update add udev-trigger default
+    rc-update add udev-postmount default
+    rc-update add dbus default
+    rc-update add elogind default
+    rc-update add polkit default
+
+    rc-update add alsa default
+    rc-update add bluealsa default
+    rc-update add bluetooth default
+    rc-update add fwupd
+
+    if grep -q pulseaudio /root/list; then
+        rc-update add pulseaudio default
+    fi
+
+    if [[ $swapfile != '0' ]]; then
+        rc-update add swap default
+    fi
+
+    if grep -q gnome /root/list; then
+        rc-update add gdm default
+    fi
+
+    if grep -q kde /root/list; then
+        rc-update add sddm default
+    fi
+
+    if grep -q workstation /root/list; then
+        rc-update add cupsd default
+    fi
+
+    if grep -q server /root/list; then
+        rc-update add mariadb default
+        rc-update add litespeed default
+        rc-update add postfix default
+        rc-update add dovecot default
+        rc-update add opendkim default
+        mkdir /var/mysql && chown -R mysql:mysql /var/mysql
+        mkdir /var/log/mysql && chown -R mysql:mysql /var/log/mysql
+    fi
+
+}
+
+configure_alpine() {
+
+    echo ">>> configuring alpine"
+
+    cat > /etc/NetworkManager/NetworkManager.conf << EOF
+[main]
+dhcp=internal
+plugins=ifupdown,keyfile
+[ifupdown]
+managed=true
+[device]
+wifi.backend=iwd
+EOF
+
+    cat >> /etc/security/limits.conf << EOF
+@audio - rtprio 99
+@audio - memlock 256
+@audio - nice -11
+EOF
+
+    if grep -q pipewire /root/list; then
+        if [ ! -d /etc/pipewire ]; then
+            mkdir /etc/pipewire
+        fi
+        cp /usr/share/pipewire/pipewire.conf /etc/pipewire/
+        echo '{ path = "wireplumber"  args = "" }' >> /etc/pipewire/pipewire.conf
+        if ! grep -q 'snd_seq' /etc/modules; then
+            echo snd_seq >> /etc/modules
+        fi
+    fi
+
+}
+
+add_commands() {
+
+    echo ">>> adding bashrc"
+    echo "" > /home/$user/.bashrc
+
+    if grep -q workstation /root/list; then
+        echo "eval $(starship init bash)" >> /home/$user/.bashrc
+    fi
+
+    cat >> /home/$user/.bashrc << EOF
+
+alias search='sudo apk search'
+alias install='sudo apk add'
+alias update='sudo apk update && sudo apk upgrade'
+alias remove='sudo apk del'
+alias c='clear'
+alias edit='SUDO_EDITOR=gedit sudoedit'
+alias service='sudo rc-service'
+
+alias fwupd='fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update'
+
+alias youtube='yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 00:00:00\"'
+
+EOF
+
+}
+
+create_swap_file() {
+
+    echo ">>> creating swap file"
+    udevadm trigger
+    mount -t proc proc /proc
+    if ! grep -q zfs /root/list; then
+        if [[ ! -f /swapfile ]]; then
+            dd if=/dev/zero of=/swapfile bs=1M count=$swapfile status=progress
+        fi
+        chmod 0600 /swapfile
+        mkswap -f /swapfile
+        if ! grep -q swap /etc/fstab; then
+            echo -e '/swapfile none swap sw 0 0' >> /etc/fstab
+        fi
+    fi
+
+}
+
+install_mkinitfs() {
+
+    echo ">>> installing mkinitfs"
+
+    modules=(base ata ide nvme scsi usb lvm ext4 kms mmc raid keymap virtio)
+    modules+=(i915 intel_agp)
+    modules+=(amdgpu)
+    modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+
+    if grep -q btrfs /etc/fstab; then
+        modules+=(btrfs)
+    fi
+
+    if grep -q zfs /etc/fstab; then
+        modules+=(zfs)
+    fi
+
+    if grep -q xfs /etc/fstab; then
+        modules+=(xfs)
+    fi
+
+    if grep -q ext4 /etc/fstab; then
+        modules+=(ext4)
+    fi
+
+    list=''
+    for i in ${!modules[@]}; do
+        list+=${modules[$i]}
+        list+=' '
+    done
+
+    echo ">>> configuring mkinitfs"
+    echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
+
+    echo ">>> building initial ramdisk"
+    mkinitfs -b / -f /etc/fstab
+
+}
+
+install_syslinux() {
+
+    echo ">>> installing syslinux"
+    apk add syslinux
+    dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/gptmbr.bin of=$drive
+    mkdir -p /boot/extlinux/
+    extlinux --install /boot/extlinux/
+
+}
+
+install_grub() {
+
+    echo ">>> installing grub bootloader"
+    apk add grub-efi
+    grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine" --no-floppy
+
+    if [[ ! -d /boot/grub/themes/ ]]; then
+        mkdir /boot/grub/themes
+    fi
+
+    if [[ ! -d /boot/grub/themes/grub-theme/ ]]; then
+        echo ">>> cloning grub-theme"
+        cd /boot/grub/themes/
+        git clone https://github.com/0free/grub-theme.git
+        cd /root
+    fi
+
+    cat > /etc/default/grub << EOF
+loglevel=0
+GRUB_TIMEOUT=1
+GRUB_TIMEOUT=menu
+GRUB_SAVEDEFAULT=true
+GRUB_DISABLE_RECOVERY=true
+GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
+GRUB_DISABLE_OS_PROBER=false
+GRUB_DISABLE_SUBMENU=true
+GRUB_CMDLINE_LINUX_DEFAULT=""
+GRUB_CMDLINE_LINUX=""
+EOF
+
+    list='usb usb_keyboard msdospart part_gpt part_msdos part_apple chain ntfs'
+
+    if grep -q btrfs /etc/fstab; then
+        list+=' btrfs'
+    fi
+
+    if grep -q xfs /etc/fstab; then
+        list+=' xfs'
+    fi
+
+    if grep -q zfs /etc/fstab; then
+        echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
+        source /etc/profile.d/zpool_vdev_name_path.sh
+        echo "Defaults env_keep += \"ZPOOL_VDEV_NAME_PATH\"" >> /etc/sudoer
+        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="real_root=ZFS=$pool"|' >> /etc/default/grub
+        list+=' zfs zfscrypt zfsinfo'
+    fi
+
+    echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
+
+    echo ">>> making grub config"
+    grub-mkconfig -o /boot/grub/grub.cfg
+
+    echo ">>> checking grub-probe"
+    grub-probe /
+    grub-probe -t fs -d $(sed '1q;d' /root/list)"2"
+    grub-probe -t fs_label -d $(sed '1q;d' /root/list)"2"
+
+}
+
+finish() {
+
+    echo ">>> un-mount & reboot"
+    cmd='rm -r /root/*'
+    cmd+=' && umount -Rfl /mnt'
+    if grep -q zfs /root/list; then
+        cmd+=' && zfs umount -a && zpool export $pool'
+    fi
+    cmd+=' && reboot'
+    eval $cmd
+
+}
+
+clear && set -e
+
+if [[ -f /mnt/root/chroot ]]; then
+    if [[ -f install ]]; then
+        mv install /mnt/root/install
+    fi
+    chroot /mnt /bin/bash /root/install
+else
+    if [[ -f /root/chroot ]]; then
+        if [ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]; then
+            USER=$(ls /home)
+            setup_desktop
+        else
+            configure
+        fi
+    else
+        if mountpoint -q /mnt; then
+            if [[ -f /mnt/boot/initramfs-* ]]; then
+                install_packages
+            elif [[ -d /mnt/root/ ]]; then
+                setup_linux
+            else
+                install_base
+            fi
+        else
+            setup_drive
+        fi
+    fi
+fi
+
+#end
