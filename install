@@ -564,16 +564,15 @@ EOF
 set_fstab() {
 
     echo ">>> setting fstab"
-
     echo $filesystem >> /mnt/etc/modules
 
     uuid=$(lsblk -dno UUID $root_drive)
     echo $uuid > /mnt/root/uuid
 
     if grep -q zfs /root/list; then
-        echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" >> /mnt/etc/fstab
+        echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" > /mnt/etc/fstab
     else
-        echo "UUID=$uuid / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 2" >> /mnt/etc/fstab
+        echo "UUID=$uuid / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 2" > /mnt/etc/fstab
     fi
 
     uuid=$(lsblk -dno UUID $boot_drive)
