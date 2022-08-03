@@ -20,15 +20,15 @@ packages_list() {
         # desktop
         dbus dbus-openrc dbus-x11 iio-sensor-proxy
         ibus ibus-bash-completion
-        #udev-init-scripts udev-init-scripts-openrc
-        #eudev eudev-openrc eudev-libs
+        udev-init-scripts udev-init-scripts-openrc
+        eudev eudev-openrc eudev-libs
         musl-locales openrc-bash-completion dconf dconf-bash-completion
         xorg-server xf86-input-libinput
         polkit polkit-openrc polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
         mesa mesa-dri-gallium
         # hardware
-        #hwids hwids-net hwids-pci hwids-usb #hwids-udev
+        hwids hwids-net hwids-pci hwids-usb hwids-udev
         # wayland
         xwayland
         # network
@@ -782,10 +782,10 @@ EOF
     rc-update add networkmanager default
     rc-update add networkmanager-dispatcher default
     rc-update add iwd default
-    #rc-update add udev default
-    #rc-update add udev-settle default
-    #rc-update add udev-trigger default
-    #rc-update add udev-postmount default
+    rc-update add udev default
+    rc-update add udev-settle default
+    rc-update add udev-trigger default
+    rc-update add udev-postmount default
     rc-update add dbus default
     rc-update add elogind default
     rc-update add polkit default
