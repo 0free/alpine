@@ -20,15 +20,15 @@ packages_list() {
         # desktop
         dbus dbus-openrc dbus-x11 iio-sensor-proxy
         ibus ibus-bash-completion
-        udev-init-scripts udev-init-scripts-openrc
-        eudev eudev-openrc eudev-libs
+        #udev-init-scripts udev-init-scripts-openrc
+        #eudev eudev-openrc eudev-libs
         musl-locales openrc-bash-completion dconf dconf-bash-completion
         xorg-server xf86-input-libinput
         polkit polkit-openrc polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
         mesa mesa-dri-gallium
         # hardware
-        hwids hwids-net hwids-pci hwids-udev hwids-usb
+        hwids hwids-net hwids-pci hwids-usb #hwids-udev
         # wayland
         xwayland
         # network
@@ -38,7 +38,7 @@ packages_list() {
         # efi boot
         efibootmgr
         # base
-        sudo bash bash-completion build-base fakeroot rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-login util-linux-misc util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less micro curl wget coreutils gawk diffutils
+        sudo bash bash-completion build-base fakeroot rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-login util-linux-misc util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less micro curl wget coreutils gawk diffutils autoconf
         # utilities
         openssl ncurses-dev
         # git
@@ -53,7 +53,7 @@ packages_list() {
         wireless-regdb wireless-tools iwd iwd-openrc
         # sound
         alsa-plugins-pulse alsa-lib
-        pipewire pipewire-media-session pipewire-alsa pipewire-libs pipewire-pulse pipewire-tools gst-plugin-pipewire
+        pipewire pipewire-media-session pipewire-alsa pipewire-libs pipewire-pulse pipewire-tools
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
         # firmware
@@ -86,9 +86,9 @@ packages_list() {
 
         PACKAGES+=(
             # gnome session
-            gdm gdm-openrc polkit-gnome mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-extensions gnome-shell-schemas gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs
+            gdm gdm-openrc polkit-gnome mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
             # theme
-            adwaita-icon-theme hicolor-icon-theme
+            adwaita-icon-theme
             # gnome tools
             gnome-keyring gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
             # nautilus
@@ -782,10 +782,10 @@ EOF
     rc-update add networkmanager default
     rc-update add networkmanager-dispatcher default
     rc-update add iwd default
-    rc-update add udev default
-    rc-update add udev-settle default
-    rc-update add udev-trigger default
-    rc-update add udev-postmount default
+    #rc-update add udev default
+    #rc-update add udev-settle default
+    #rc-update add udev-trigger default
+    #rc-update add udev-postmount default
     rc-update add dbus default
     rc-update add elogind default
     rc-update add polkit default
@@ -857,6 +857,8 @@ EOF
             git clone https://github.com/0free/windows-11-icons.git
         fi
         mv windows-11-icons /usr/share/icons/
+        gtk-update-icon-cache /usr/share/icons/windows-11-icons
+        update-desktop-database
     fi
 
 }
