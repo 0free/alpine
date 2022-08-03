@@ -1004,7 +1004,7 @@ EOF
         echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
         source /etc/profile.d/zpool_vdev_name_path.sh
         echo "Defaults env_keep += \"ZPOOL_VDEV_NAME_PATH\"" >> /etc/sudoer
-        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="real_root=ZFS=$pool"|' >> /etc/default/grub
+        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="real_root=ZFS=$pool"|' /etc/default/grub
         list+=' zfs zfscrypt zfsinfo'
     fi
 
