@@ -236,7 +236,7 @@ packages_list() {
             # iPhone/iPod/mac
             ifuse ideviceinstaller idevicerestore libirecovery libirecovery-progs libideviceactivation libimobiledevice libimobiledevice-progs
             # pdf
-            corepdf pdfarranger
+            corepdf pdfarranger poppler
             # drives
             onedrive onedrive-openrc
             # twitter
