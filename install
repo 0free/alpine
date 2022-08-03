@@ -165,9 +165,6 @@ packages_list() {
             terminus-font ttf-inconsolata ttf-dejavu font-noto font-noto-cjk ttf-font-awesome font-arabic-misc font-noto-arabic font-noto-armenian font-noto-cherokee font-noto-devanagari font-noto-ethiopic font-noto-georgian ttf-droid ttf-droid-nonlatin font-inter font-opensans ttf-freefont font-roboto font-roboto-mono font-roboto-flex
             # office
             libreoffice-base libreoffice-common libreoffice-writer libreoffice-math libreoffice-calc libreoffice-draw libreoffice-lang-en_us libreoffice-lang-ar
-            if grep -q gnome /root/list; then
-                libreoffice-gnome
-            fi
             # vulkan
             vulkan-headers vulkan-loader vulkan-validation-layers vulkan-tools
             # google
@@ -273,6 +270,12 @@ packages_list() {
             # iso
             thumbdrives
         )
+
+        if grep -q gnome /root/list; then
+            PACKAGES+=(
+                libreoffice-gnome
+            )
+        fi
 
     fi
 
