@@ -200,7 +200,7 @@ packages_list() {
             # video
             mplayer totem celluloid
             # photos
-            krita gimp inkscape gmic curtail
+            krita gimp gmic curtail
             # printer
             cups cups-openrc cups-pdf bluez-cups
             # driver
