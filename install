@@ -745,6 +745,18 @@ enable_services() {
     rc-update add mdev sysinit
     rc-update add hwdrivers sysinit
 
+    rc-update add hwclock boot
+    rc-update add modules boot
+    rc-update add sysctl boot
+    rc-update add hostname boot
+    rc-update add bootmisc boot
+    rc-update add syslog boot
+    rc-update add networking boot
+
+    rc-update add mount-ro shutdown
+    rc-update add killprocs shutdown
+    rc-update add savecache shutdown
+
     if grep -q zfs /root/list; then
         rc-update add zfs-import boot
         rc-update add zfs-mount boot
@@ -767,17 +779,6 @@ EOF
         chmod +x /etc/init.d/btrfs-scan
         rc-update add btrfs-scan boot
     fi
-
-    rc-update add modules boot
-    rc-update add hwclock boot
-    rc-update add sysctl boot
-    rc-update add hostname boot
-    rc-update add bootmisc boot
-    rc-update add networking boot
-
-    rc-update add mount-ro shutdown
-    rc-update add killprocs shutdown
-    rc-update add savecache shutdown
 
     rc-update add networkmanager default
     rc-update add networkmanager-dispatcher default
