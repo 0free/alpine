@@ -794,7 +794,6 @@ EOF
     rc-update add elogind default
     rc-update add polkit default
 
-    rc-update add alsa default
     rc-update add bluealsa default
     rc-update add bluetooth default
     rc-update add fwupd
