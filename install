@@ -28,7 +28,7 @@ packages_list() {
         elogind elogind-openrc elogind-bash-completion
         mesa mesa-dri-gallium
         # hardware
-        hwids hwids-net hwids-pci hwids-usb #hwids-udev
+        #hwids hwids-net hwids-pci hwids-usb #hwids-udev
         # wayland
         xwayland
         # network
