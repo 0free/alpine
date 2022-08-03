@@ -163,6 +163,8 @@ packages_list() {
             font-manager font-viewer
             # fonts
             terminus-font ttf-inconsolata ttf-dejavu font-noto font-noto-cjk ttf-font-awesome font-arabic-misc font-noto-arabic font-noto-armenian font-noto-cherokee font-noto-devanagari font-noto-ethiopic font-noto-georgian ttf-droid ttf-droid-nonlatin font-inter font-opensans ttf-freefont font-roboto font-roboto-mono font-roboto-flex
+            # office
+            libreoffice-base libreoffice-common libreoffice-writer libreoffice-math libreoffice-calc libreoffice-draw libreoffice-lang-en_us libreoffice-lang-ar
             # vulkan
             vulkan-headers vulkan-loader vulkan-validation-layers vulkan-tools
             # google
@@ -200,7 +202,7 @@ packages_list() {
             # video
             mplayer totem celluloid
             # photos
-            krita gimp gmic curtail
+            krita gimp inkscape gmic curtail
             # printer
             cups cups-openrc cups-pdf bluez-cups
             # driver
@@ -268,6 +270,12 @@ packages_list() {
             # iso
             thumbdrives
         )
+
+        if grep -q gnome /root/list; then
+            PACKAGES+=(
+                libreoffice-gnome
+            )
+        fi
 
     fi
 
@@ -789,6 +797,7 @@ EOF
     rc-update add bluealsa default
     rc-update add bluetooth default
     rc-update add fwupd
+    rc-update add ufw
 
     if [[ $swapfile != '0' ]]; then
         rc-update add swap default
@@ -832,6 +841,7 @@ managed=true
 wifi.backend=iwd
 EOF
 
+    echo ">>> configuring pipewire"
     cat >> /etc/security/limits.conf << EOF
 @audio - rtprio 88
 @audio - memlock 256
@@ -855,6 +865,12 @@ EOF
         gtk-update-icon-cache /usr/share/icons/windows-11-icons
         update-desktop-database
     fi
+
+    echo ">>> configuring firewall"
+    ufw allow 80/tcp
+    ufw allow 443/tcp
+    ufw default allow outgoing
+    ufw default deny incoming
 
 }
 
