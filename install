@@ -86,7 +86,7 @@ packages_list() {
 
         PACKAGES+=(
             # gnome session
-            gdm gdm-openrc polkit-gnome mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
+            gdm gdm-openrc polkit-gnome mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector gnome-colors-common chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
             # theme
             adwaita-icon-theme
             # gnome tools
@@ -110,15 +110,14 @@ packages_list() {
     if grep -q kde /root/list; then
 
         PACKAGES+=(
-            xdg-desktop-portal-kde sddm sddm-openrc sddm-kcm sddm-breeze plasma plasma-integration plasma-desktop plasma-workspace breeze kwin kinit kwayland kwayland-integration kdeplasma-addons kinfocenter kmenuedit dolphin dolphin-plugins konsole systemsettings kde-gtk-config discover kactivities kscreen kmenuedit bluedevil powerdevil kdecoration plasma-systemmonitor plasma-firewall plasma-pa plasma-nm krecorder
+            # kde
+            xdg-desktop-portal-kde sddm sddm-openrc sddm-kcm sddm-breeze plasma plasma-integration plasma-desktop plasma-workspace breeze kwin kinit kwayland kwayland-integration kdeplasma-addons kinfocenter kmenuedit konsole systemsettings kde-gtk-config kactivities kscreen kmenuedit bluedevil powerdevil kdecoration plasma-systemmonitor plasma-firewall plasma-pa plasma-nm krecorder
+            # mobile
+            plasma-mobile plasma-settings plasma-camera plasma-dialer plasma-videoplayer plasma-mobile-sounds plasmatube audiotube koko angelfish calindori okular-mobile
+            # file manager
+            dolphin dolphin-plugins
         )
 
-    fi
-
-    if grep -q kde-mobile /root/list; then
-        packages+=(
-            plasma-mobile plasma-settings plasma-camera plasma-dialer plasma-videoplayer plasma-mobile-sounds plasmatube audiotube koko angelfish calindori okular-mobile krecorder
-        )
     fi
 
     if grep -q workstation /root/list; then
@@ -146,7 +145,21 @@ packages_list() {
 
         if grep -q kde /root/list; then
             packages+=(
-                 kate kile kwrite kcalc shelf plasma-phonebook knetattach plasma-browser-integration plasma-thunderbolt plasma-disks ark kfind kmix kmail kiconthemes kdenlive kmediaplayer ktexteditor ktorrent kdeconnect kamera kamoso okular spectacle partitionmanager akregator okteta kphotoalbum kmymoney cantor kdeedu-data minuet kdevelop materia-kde materia-kde-plasma materia-kde-kvantum kalk rocs calligra print-manager skanlite kalgebra marble kamoso spectacle elisa okteta haruna clip nota buho vvave index communicator isoimagewriter qrca nota kdesdk-thumbnailers knotes kget kompare falkon sweeper step kmousetool k3b plasmatube
+                 shelf plasma-phonebook knetattach plasma-browser-integration plasma-thunderbolt plasma-disks ark kfind kmix kmail kiconthemes kdenlive kmediaplayer ktexteditor ktorrent kdeconnect kamera kamoso okular spectacle partitionmanager akregator okteta kphotoalbum kmymoney cantor kdeedu-data minuet kdevelop materia-kde materia-kde-plasma materia-kde-kvantum kalk rocs calligra print-manager skanlite kalgebra marble kamoso spectacle elisa okteta haruna clip nota buho vvave index communicator isoimagewriter qrca nota kdesdk-thumbnailers knotes kget kompare falkon sweeper step kmousetool k3b plasmatube kclock
+                # network
+
+                # firewall
+                proute2 net-tools
+                # screen
+                kscreenlocker plasma-bigscreen
+                # software
+                discover
+                # editor
+                kate kile
+                # office
+                kwrite kcalc
+                # input
+                plasma-remotecontrollers
             )
         fi
 
@@ -372,7 +385,7 @@ setup_drive() {
     computers=(minimal workstation miner server)
     menu 'select a computer' computer ${computers[@]}
 
-    desktops=(gnome kde kde-mobile)
+    desktops=(gnome kde)
     menu 'select a desktop' desktop ${desktops[@]}
 
     bootloaders=(grub syslinux)
@@ -684,7 +697,8 @@ configure() {
 disable_root() {
 
     echo ">>> setting root password"
-    echo -en "$password\n$password" | passwd root
+    echo "root:$password" | chpasswd
+    usermod -s /bin/bash root
 
     echo ">>> disabling root"
     passwd -l root
@@ -829,6 +843,7 @@ EOF
 configure_alpine() {
 
     echo ">>> configuring alpine"
+    mount /dev/cdrom /media/cdrom
 
     cat > /etc/NetworkManager/NetworkManager.conf << EOF
 [main]
@@ -855,15 +870,17 @@ EOF
         echo snd_seq >> /etc/modules
     fi
 
-    if [[ ! -d /usr/share/icons/windows-11-icons ]]; then
+    if [[ ! -d /usr/share/icons/windows-11-icons/ ]]; then
         echo ">>> cloning Windows-11-icons"
-        if [[ ! -d windows-11-icons ]]; then
-            git clone https://github.com/0free/windows-11-icons.git
-        fi
-        mv windows-11-icons /usr/share/icons/
-        gtk-update-icon-cache /usr/share/icons/windows-11-icons
-        update-desktop-database
+        git clone https://github.com/0free/windows-11-icons.git
+    else
+        git pull
     fi
+
+    mv windows-11-icons /usr/share/icons/
+    gtk-update-icon-cache -f /usr/share/icons/hicolor/
+    gtk-update-icon-cache -f /usr/share/icons/windows-11-icons/
+    update-desktop-database
 
     echo ">>> configuring firewall"
     ufw allow 80/tcp
@@ -982,17 +999,20 @@ install_grub() {
         cd /boot/grub/themes/
         git clone https://github.com/0free/grub-theme.git
         cd /root
+    else
+        git pull
     fi
 
     cat > /etc/default/grub << EOF
 loglevel=0
+GRUB_DEFAULT=saved
 GRUB_TIMEOUT=1
 GRUB_TIMEOUT=menu
-GRUB_SAVEDEFAULT=true
-GRUB_DISABLE_RECOVERY=true
+GRUB_SAVEDEFAULT=TRUE
+GRUB_DISABLE_RECOVERY=TRUE
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
-GRUB_DISABLE_OS_PROBER=false
-GRUB_DISABLE_SUBMENU=true
+GRUB_DISABLE_OS_PROBER=FALSE
+GRUB_DISABLE_SUBMENU=TRUE
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
 EOF
