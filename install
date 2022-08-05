@@ -24,13 +24,13 @@ packages_list() {
         eudev eudev-openrc eudev-libs
         musl-locales openrc-bash-completion dconf dconf-bash-completion
         xorg-server xf86-input-libinput
-        polkit polkit-openrc polkit-elogind polkit-elogind-libs
+        polkit polkit-openrc polkit-elogind polit-common polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
         mesa mesa-dri-gallium
         # hardware
         hwids hwids-net hwids-pci hwids-usb hwids-udev
         # wayland
-        xwayland
+        xwayland weston-xwayland
         # network
         ethtool ethtool-bash-completion rsync rsync-openrc
         # hardware
@@ -110,10 +110,22 @@ packages_list() {
     if grep -q kde /root/list; then
 
         PACKAGES+=(
+            # desktop
+            xdg-desktop-portal-kde polkit-kde-agent-1
+            # sddm
+            sddm sddm-openrc sddm-kcm sddm-breeze
+            # plasma
+            plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-pa plasma-nm plasma-mobile plasma-settings
+            # theme
+            breeze breeze-gtk breeze-icons kholidays
+            # bluetooth
+            bluedevil powerdevil
+            # wayland
+            kwayland kwayland-integration
+            # system
+            systemsettings konsole kde-gtk-config
             # kde
-            xdg-desktop-portal-kde sddm sddm-openrc sddm-kcm sddm-breeze plasma plasma-integration plasma-desktop plasma-workspace breeze kwin kinit kwayland kwayland-integration kdeplasma-addons kinfocenter kmenuedit konsole systemsettings kde-gtk-config kactivities kscreen kmenuedit bluedevil powerdevil kdecoration plasma-systemmonitor plasma-firewall plasma-pa plasma-nm krecorder
-            # mobile
-            plasma-mobile plasma-settings plasma-camera plasma-dialer plasma-videoplayer plasma-mobile-sounds plasmatube audiotube koko angelfish calindori okular-mobile
+            kwin kinit kcron kdecoration krecorder kscreen kactivities kmenuedit kinfocenter kmix
             # file manager
             dolphin dolphin-plugins
         )
@@ -140,26 +152,49 @@ packages_list() {
                 glade ghex baobab confy
                 # bluetooth
                 blueman
+                # tools
+                karchive ark
             )
         fi
 
         if grep -q kde /root/list; then
             packages+=(
-                 shelf plasma-phonebook knetattach plasma-browser-integration plasma-thunderbolt plasma-disks ark kfind kmix kmail kiconthemes kdenlive kmediaplayer ktexteditor ktorrent kdeconnect kamera kamoso okular spectacle partitionmanager akregator okteta kphotoalbum kmymoney cantor kdeedu-data minuet kdevelop materia-kde materia-kde-plasma materia-kde-kvantum kalk rocs calligra print-manager skanlite kalgebra marble kamoso spectacle elisa okteta haruna clip nota buho vvave index communicator isoimagewriter qrca nota kdesdk-thumbnailers knotes kget kompare falkon sweeper step kmousetool k3b plasmatube kclock
+                # plasma
+                plasma-camera plasma-dialer plasma-videoplayer plasma-mobile-sounds plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
+                # kde
+                shelf knetattach kfind kmail kiconthemes ktexteditor ktorrent kdeconnect  partitionmanager akregator kphotoalbum kmymoney cantor kdeedu-data kdevelop kalk rocs calligra skanlite kalgebra marble elisa okteta haruna clip nota buho vvave index communicator isoimagewriter qrca nota kdesdk-thumbnailers knotes kompare falkon sweeper step kmousetool k3b kclock
+                # theme
+                materia-kde materia-kde-plasma materia-kde-kvantum 
                 # network
 
                 # firewall
                 proute2 net-tools
+                # print
+                print-manager
+                # mobile
+                koko angelfish calindori okular-mobile
                 # screen
-                kscreenlocker plasma-bigscreen
+                spectacle kscreenlocker plasma-bigscreen kruler
+                # image
+                gwenview
+                # audio
+                audiocd-kio juk kwave minuet
+                # video
+                kmediaplayer kdenlive dragon
+                # YouTube
+                plasmatube audiotube
+                # camera
+                kamera kamoso
                 # software
                 discover
                 # editor
                 kate kile
                 # office
-                kwrite kcalc
+                kwrite kcalc okular
                 # input
                 plasma-remotecontrollers
+                # draw
+                kolourpaint
             )
         fi
 
@@ -796,21 +831,23 @@ EOF
         rc-update add btrfs-scan boot
     fi
 
-    rc-update add networkmanager default
-    rc-update add networkmanager-dispatcher default
-    rc-update add iwd default
+    rc-update add dbus default
+    rc-update add elogind default
+    rc-update add polkit default
+
     rc-update add udev default
     rc-update add udev-settle default
     rc-update add udev-trigger default
     rc-update add udev-postmount default
-    rc-update add dbus default
-    rc-update add elogind default
-    rc-update add polkit default
 
     rc-update add bluealsa default
     rc-update add bluetooth default
     rc-update add fwupd
     rc-update add ufw
+
+    rc-update add networkmanager default
+    rc-update add networkmanager-dispatcher default
+    rc-update add iwd default
 
     if [[ $swapfile != '0' ]]; then
         rc-update add swap default
@@ -883,8 +920,8 @@ EOF
     update-desktop-database
 
     echo ">>> configuring firewall"
-    ufw allow 80/tcp
-    ufw allow 443/tcp
+    ufw allow 80
+    ufw allow 443
     ufw default allow outgoing
     ufw default deny incoming
 
