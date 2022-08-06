@@ -844,8 +844,6 @@ EOF
     rc-update add fwupd
     rc-update add ufw
 
-    rc-update add networkmanager default
-    rc-update add networkmanager-dispatcher default
     rc-update add iwd default
 
     if [[ $swapfile != '0' ]]; then
@@ -854,6 +852,8 @@ EOF
 
     if grep -q gnome /root/list; then
         rc-update add gdm default
+        rc-update add networkmanager default
+        rc-update add networkmanager-dispatcher default
     fi
 
     if grep -q kde /root/list; then
