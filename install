@@ -734,7 +734,7 @@ disable_root() {
     echo "root:$password" | chpasswd
     usermod -s /bin/bash root
 
-    echo ">>> disabling root"
+    echo ">>> disabling root login"
     passwd -l root
 
 }
@@ -756,7 +756,7 @@ create_user() {
     adduser $user netdev
 
     echo ">>> setting user password"
-    echo -en "$password\n$password" | passwd $user
+    echo "$user:$password" | chpasswd
 
 }
 
