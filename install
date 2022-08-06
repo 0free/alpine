@@ -24,7 +24,7 @@ packages_list() {
         eudev eudev-openrc eudev-libs
         musl-locales openrc-bash-completion dconf dconf-bash-completion
         xorg-server xf86-input-libinput
-        polkit polkit-openrc polkit-elogind polit-common polkit-elogind-libs
+        polkit polkit-openrc polkit-elogind polkit-common polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
         mesa mesa-dri-gallium
         # hardware
