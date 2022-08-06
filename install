@@ -86,7 +86,7 @@ packages_list() {
 
         PACKAGES+=(
             # gnome session
-            gdm gdm-openrc polkit-gnome mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector gnome-colors-common chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
+            gdm gdm-openrc mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector gnome-colors-common chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
             # theme
             adwaita-icon-theme
             # gnome tools
@@ -115,13 +115,13 @@ packages_list() {
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
-            plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-pa plasma-nm plasma-mobile plasma-settings
+            plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-pa plasma-nm plasma-mobile plasma-settings plasma-pass
             # theme
             breeze breeze-gtk breeze-icons kholidays
             # bluetooth
             bluedevil powerdevil
             # wayland
-            kwayland kwayland-integration
+            plasma-wayland-protocols kwayland kwayland-integration
             # system
             systemsettings konsole kde-gtk-config
             # kde
