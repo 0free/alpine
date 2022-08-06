@@ -15,8 +15,6 @@ password='0000'
 packages_list() {
 
     PACKAGES+=(
-        # micro-codes
-        amd-ucode intel-ucode
         # desktop
         dbus dbus-openrc dbus-x11 iio-sensor-proxy
         ibus ibus-bash-completion
@@ -642,7 +640,7 @@ setup_linux() {
 
 install_linux() {
 
-    list='linux-pam'
+    list='amd-ucode intel-ucode linux-pam'
     if grep -q zfs /root/list; then
         list+=' linux-lts zfs zfs-openrc zfs-libs'
     else
@@ -881,7 +879,6 @@ EOF
 configure_alpine() {
 
     echo ">>> configuring alpine"
-    mount /dev/cdrom /media/cdrom
 
     cat > /etc/NetworkManager/NetworkManager.conf << EOF
 [main]
