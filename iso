@@ -73,7 +73,7 @@ profile_linux() {
          linux-firmware-brcm
          linux-firmware-qca
          util-linux coreutils usbutils
-         bash bash-completion sudo nano openssl curl
+         bash bash-completion sudo nano micro openssl curl
          network-extras iwd dbus wireless-regdb
          e2fsprogs e2fsprogs-extra
          dosfstools mtools lvm2
