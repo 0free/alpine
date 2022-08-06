@@ -44,7 +44,7 @@ packages_list() {
         # git
         git git-bash-completion
         # compression
-        brotli zstd libzip zip lz4 lzo unzip
+        brotli zstd zlib libzip zip lz4 lzo unzip
         # disks
         e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk udisks2 mmc-utils jfsutils
         # firewall
@@ -86,7 +86,7 @@ packages_list() {
 
         PACKAGES+=(
             # gnome session
-            gdm gdm-openrc mutter mutter-schemas xdg-desktop-portal-gtk xdg-desktop-portal-gnome gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector gnome-colors-common chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
+            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector gnome-colors-common chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
             # theme
             adwaita-icon-theme
             # gnome tools
@@ -111,7 +111,7 @@ packages_list() {
 
         PACKAGES+=(
             # desktop
-            xdg-desktop-portal-kde polkit-kde-agent-1
+            polkit-kde-agent-1
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
