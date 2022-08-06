@@ -210,7 +210,8 @@ packages_list() {
             # fonts tools
             font-manager font-viewer
             # fonts
-            font-arabic-misc terminus-font ttf-dejavu font-noto ttf-font-awesome font-arabic-misc font-noto-arabic ttf-droid ttf-droid-nonlatin font-inter font-opensans ttf-freefont font-roboto font-roboto-mono font-roboto-flex font-xfree86-type1
+            font-arabic-misc terminus-font font-noto font-arabic-misc font-noto-arabic ttf-droid-nonlatin font-inter font-opensans font-roboto font-roboto-mono font-roboto-flex font-xfree86-type1
+            ttf-dejavu ttf-font-awesome ttf-freefont ttf-droid
             # office
             libreoffice-base libreoffice-common libreoffice-writer libreoffice-math libreoffice-calc libreoffice-draw libreoffice-lang-en_us libreoffice-lang-ar
             # vulkan
