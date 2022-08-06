@@ -908,9 +908,9 @@ EOF
     if [[ ! -d /usr/share/icons/windows-11-icons/ ]]; then
         echo ">>> cloning Windows-11-icons"
         git clone https://github.com/0free/windows-11-icons.git
+        mv windows-11-icons/ /usr/share/icons/
     fi
 
-    mv windows-11-icons /usr/share/icons/
     gtk-update-icon-cache -f /usr/share/icons/hicolor/
     gtk-update-icon-cache -f /usr/share/icons/windows-11-icons/
     update-desktop-database
@@ -1029,11 +1029,8 @@ install_grub() {
 
     if [[ ! -d /boot/grub/themes/grub-theme/ ]]; then
         echo ">>> cloning grub-theme"
-        cd /boot/grub/themes/
         git clone https://github.com/0free/grub-theme.git
-        cd /root
-    else
-        git pull
+        mv grub-theme/ /boot/grub/themes/
     fi
 
     cat > /etc/default/grub << EOF
