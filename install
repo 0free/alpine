@@ -908,8 +908,6 @@ EOF
     if [[ ! -d /usr/share/icons/windows-11-icons/ ]]; then
         echo ">>> cloning Windows-11-icons"
         git clone https://github.com/0free/windows-11-icons.git
-    else
-        git pull
     fi
 
     mv windows-11-icons /usr/share/icons/
