@@ -25,6 +25,8 @@ packages_list() {
         polkit polkit-openrc polkit-elogind polkit-common polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
         mesa mesa-dri-gallium
+        # fuse
+        fuse3 fuse-openrc fuse-common
         # hardware
         hwids hwids-net hwids-pci hwids-usb hwids-udev
         # wayland
@@ -36,7 +38,7 @@ packages_list() {
         # efi boot
         efibootmgr
         # base
-        sudo bash bash-completion build-base fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-login util-linux-misc util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less micro curl wget coreutils gawk diffutils autoconf
+        sudo bash bash-completion build-base fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less micro curl wget coreutils gawk diffutils autoconf
         # utilities
         openssl ncurses-dev
         # git
@@ -113,17 +115,25 @@ packages_list() {
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
-            plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-pa plasma-nm plasma-mobile plasma-settings plasma-pass
+            plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-pass
             # theme
             breeze breeze-gtk breeze-icons kholidays
             # bluetooth
-            bluedevil powerdevil
+            bluedevil
+            # power
+            powerdevil
             # wayland
             plasma-wayland-protocols kwayland kwayland-integration
             # system
-            systemsettings konsole kde-gtk-config
+            systemsettings kde-gtk-config
+            # network
+            plasma-nm
+            # firewall
+            iproute2 net-tools
+            # audio
+            plasma-pa
             # kde
-            kwin kinit kcron kdecoration krecorder kscreen kactivities kmenuedit kinfocenter kmix
+            kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit kinfocenter kmix konsole
             # file manager
             dolphin dolphin-plugins
         )
@@ -152,25 +162,23 @@ packages_list() {
                 blueman
                 # tools
                 karchive ark
+                # flatpak
+                xdg-desktop-portal xdg-desktop-portal-gnome xdg-desktop-portal-gtk
             )
         fi
 
         if grep -q kde /root/list; then
             packages+=(
                 # plasma
-                plasma-camera plasma-dialer plasma-videoplayer plasma-mobile-sounds plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
+                plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
                 # kde
                 shelf knetattach kfind kmail kiconthemes ktexteditor ktorrent kdeconnect  partitionmanager akregator kphotoalbum kmymoney cantor kdeedu-data kdevelop kalk rocs calligra skanlite kalgebra marble elisa okteta haruna clip nota buho vvave index communicator isoimagewriter qrca nota kdesdk-thumbnailers knotes kompare falkon sweeper step kmousetool k3b kclock
                 # theme
-                materia-kde materia-kde-plasma materia-kde-kvantum 
-                # network
-
-                # firewall
-                proute2 net-tools
+                materia-kde materia-kde-plasma materia-kde-kvantum
                 # print
                 print-manager
                 # mobile
-                koko angelfish calindori okular-mobile
+                koko angelfish calindori
                 # screen
                 spectacle kscreenlocker plasma-bigscreen kruler
                 # image
@@ -193,6 +201,8 @@ packages_list() {
                 plasma-remotecontrollers
                 # draw
                 kolourpaint
+                # flatpak
+                xdg-desktop-portal xdg-desktop-portal-kde
             )
         fi
 
@@ -416,10 +426,10 @@ setup_drive() {
     filesystems=(zfs btrfs xfs ext4 exfat ntfs)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
-    computers=(minimal workstation miner server)
+    computers=(base workstation miner server)
     menu 'select a computer' computer ${computers[@]}
 
-    desktops=(gnome kde)
+    desktops=(gnome kde minimal)
     menu 'select a desktop' desktop ${desktops[@]}
 
     bootloaders=(grub syslinux)
@@ -1080,13 +1090,21 @@ EOF
 finish() {
 
     echo ">>> un-mount & reboot"
-    cmd='rm -r /root/*'
-    cmd+=' && umount -Rfl /mnt'
+    rm -r /root/*
+    echo '' > reboot
+    chroot / bash install
+
+}
+
+reboot_system() {
+
+    umount -Rfl /mnt
     if grep -q zfs /root/list; then
-        cmd+=' && zfs umount -a && zpool export $pool'
+        zfs umount -a && zpool export $pool
     fi
-    cmd+=' && reboot'
-    eval $cmd
+    echo ">>> installation is completed"
+    read -p '>>> press enter to reboot'
+    reboot
 
 }
 
@@ -1107,7 +1125,9 @@ else
         fi
     else
         if mountpoint -q /mnt; then
-            if [[ -f /mnt/boot/initramfs-* ]]; then
+            if [[ -f /mnt/root/reboot ]]; then
+                reboot_system
+            elif [[ -f /mnt/boot/initramfs-* ]]; then
                 install_packages
             elif [[ -d /mnt/root/ ]]; then
                 setup_linux
