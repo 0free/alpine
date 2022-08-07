@@ -25,8 +25,6 @@ packages_list() {
         polkit polkit-openrc polkit-elogind polkit-common polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
         mesa mesa-dri-gallium
-        # fuse
-        fuse3 fuse-openrc fuse-common
         # hardware
         hwids hwids-net hwids-pci hwids-usb hwids-udev
         # wayland
@@ -1092,7 +1090,7 @@ finish() {
     echo ">>> installation is completed"
     rm -r /root/*
     echo '' > reboot
-    chroot / bash install
+    chroot / /bin/bash /root/install
 
 }
 
