@@ -720,7 +720,7 @@ change_root() {
 
     echo ">>> changing root"
     if [[ -f install ]]; then
-        mv install /mnt/root/install
+        cp install /mnt/root/install
     fi
     mount --bind /proc /mnt/proc
     mount --bind /dev /mnt/dev
@@ -1045,7 +1045,7 @@ install_grub() {
 
     cat > /etc/default/grub << EOF
 loglevel=0
-GRUB_DEFAULT=saved
+GRUB_DEFAULT=0
 GRUB_TIMEOUT=1
 GRUB_TIMEOUT=menu
 GRUB_SAVEDEFAULT=TRUE
