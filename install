@@ -1089,7 +1089,7 @@ EOF
 
 finish() {
 
-    echo ">>> un-mount & reboot"
+    echo ">>> installation is completed"
     rm -r /root/*
     echo '' > reboot
     chroot / bash install
@@ -1098,12 +1098,13 @@ finish() {
 
 reboot_system() {
 
+    echo ">>> un-mounting /mnt"
     umount -Rfl /mnt
     if grep -q zfs /root/list; then
         zfs umount -a && zpool export $pool
     fi
-    echo ">>> installation is completed"
-    read -p '>>> press enter to reboot'
+
+    read -p ">>> press enter to reboot"
     reboot
 
 }
