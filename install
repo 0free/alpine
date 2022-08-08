@@ -1,7 +1,7 @@
 #!/bin/bash
 
-bootsize='199MiB'
-swapfile='2048MiB' # '0' to disable
+bootSize='199MiB'
+swapSize='4096MiB' # '0' to disable
 timezone='Asia/Muscat'
 mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
@@ -84,7 +84,9 @@ packages_list() {
 
         PACKAGES+=(
             # gnome session
-            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-browser-connector gnome-colors-common chrome-gnome-shell gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
+            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-colors-common gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
+            # connector
+            chrome-gnome-shell gnome-browser-connector
             # theme
             adwaita-icon-theme hicolor-icon-theme
             # gnome tools
@@ -433,39 +435,48 @@ setup_drive() {
     bootloaders=(grub syslinux)
     menu 'select a desktop' bootloader ${bootloaders[@]}
 
-    echo ">>> adding options"
-    echo $drive >> /root/list
-    echo $filesystem >> /root/list
-    echo $computer >> /root/list
-    echo $desktop >> /root/list
-    echo $bootloader >> /root/list
-
     if ! test sgdisk; then
         echo ">>> installing sgdisk"
         apk add sgdisk
     fi
 
     if [[ ! $root_drive ]]; then
+
         echo ">>> wiping filesystm"
         wipefs -a -f $drive
         echo ">>> deleting partitions"
         sgdisk -Z $drive
         echo ">>> creating GPT"
         sgdisk -U $drive
+
         echo ">>> creating boot partition"
-        sgdisk -n 0:0:+$bootsize -c 0:EFI -t 0:ef00 $drive
+        sgdisk -n 0:0:+$bootSize -c 0:efi -t 0:ef00 $drive
+        boot_drive=$drive"1"
+
+        if [[ $swapSize != '0' ]]; then
+            echo ">>> creating swap partition"
+            sgdisk -n 0:0:+$swapSize -c 0:swap -t 0:8200 $drive
+            swap_drive=$drive"2"
+        fi
+
         echo ">>> creating root partition"
         if grep -q zfs /root/list; then
             sgdisk -n 0:0:0 -c 0:$pool -t 0:bf00 $drive
         else
-            sgdisk -n 0:0:0 -c 0:LINUX -t 0:8300 $drive
+            sgdisk -n 0:0:0 -c 0:linux -t 0:8300 $drive
         fi
-        boot_drive=$drive"1"
-        root_drive=$drive"2"
+        root_drive=$drive"3"
+
         echo ">>> reading partition tables"
         mdev -s
         echo ">>> creating boot filesystem"
         mkfs.vfat -F32 -n BOOT $boot_drive
+
+        if [[ $swap_drive ]]; then
+            echo ">>> creating swap filesystem"
+            mkswap $swap_drive
+        fi
+
     fi
 
     echo ">>> creating root filesystem"
@@ -486,6 +497,16 @@ setup_drive() {
 
     mount_root
     mount_boot
+
+    echo ">>> adding options"
+    echo $drive > /root/list
+    echo $filesystem >> /root/list
+    echo $computer >> /root/list
+    echo $desktop >> /root/list
+    echo $bootloader >> /root/list
+    echo $boot_drive >> /root/list
+    echo $root_drive >> /root/list
+    echo $swap_drive >> /root/list
 
     install_base
 
@@ -633,6 +654,10 @@ set_fstab() {
     uuid=$(lsblk -dno UUID $boot_drive)
     echo "UUID=$uuid /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 2" >> /mnt/etc/fstab
 
+    if ! grep -q swap /etc/fstab; then
+        echo "$swap_drive none swap sw 0 0" >> /mnt/etc/fstab
+    fi
+
 }
 
 setup_linux() {
@@ -773,23 +798,13 @@ setup_desktop() {
     enable_services
     configure_alpine
     add_commands
-
-    if [[ $swapfile != '0' ]]; then
-        if ! grep -q swap /etc/fstab; then
-            create_swap_file
-        fi
-    fi
-
     install_mkinitfs
-
     if grep -q syslinux /root/list; then
         install_syslinux
     fi
-
     if grep -q grub /root/list; then
         install_grub
     fi
-
     finish
 
 }
@@ -853,10 +868,7 @@ EOF
     rc-update add ufw
 
     rc-update add iwd default
-
-    if [[ $swapfile != '0' ]]; then
-        rc-update add swap default
-    fi
+    rc-update add swap default
 
     if grep -q gnome /root/list; then
         rc-update add gdm default
@@ -955,24 +967,6 @@ alias fwupd='fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates &&
 alias youtube='yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 00:00:00\"'
 
 EOF
-
-}
-
-create_swap_file() {
-
-    echo ">>> creating swap file"
-    udevadm trigger
-    mount -t proc proc /proc
-    if ! grep -q zfs /root/list; then
-        if [[ ! -f /swapfile ]]; then
-            dd if=/dev/zero of=/swapfile bs=1M count=$swapfile status=progress
-        fi
-        chmod 0600 /swapfile
-        mkswap -f /swapfile
-        if ! grep -q swap /etc/fstab; then
-            echo -e '/swapfile none swap sw 0 0' >> /etc/fstab
-        fi
-    fi
 
 }
 
@@ -1081,8 +1075,8 @@ EOF
 
     echo ">>> checking grub-probe"
     grub-probe /
-    grub-probe -t fs -d $(sed '1q;d' /root/list)"2"
-    grub-probe -t fs_label -d $(sed '1q;d' /root/list)"2"
+    grub-probe -t fs -d $(sed '6q;d' /root/list)
+    grub-probe -t fs_label -d $(sed '6q;d' /root/list)
 
 }
 
@@ -1109,6 +1103,13 @@ reboot_system() {
 }
 
 clear && set -e
+
+if [[ -f /root/list ]]; then
+    drive=$(sed '1q;d' /root/list)
+    boot_drive=$(sed '6q;d' /root/list)
+    root_drive=$(sed '7q;d' /root/list)
+    swap_drive=$(sed '8q;d' /root/list)
+fi
 
 if [[ -f /mnt/root/chroot ]]; then
     if [[ -f install ]]; then
