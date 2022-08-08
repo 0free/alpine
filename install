@@ -654,8 +654,9 @@ set_fstab() {
     uuid=$(lsblk -dno UUID $boot_drive)
     echo "UUID=$uuid /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 2" >> /mnt/etc/fstab
 
+    uuid=$(lsblk -dno UUID $swap_drive)
     if ! grep -q swap /etc/fstab; then
-        echo "$swap_drive none swap sw 0 0" >> /mnt/etc/fstab
+        echo "$uuid none swap sw 0 0" >> /mnt/etc/fstab
     fi
 
 }
