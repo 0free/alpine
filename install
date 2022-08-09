@@ -1038,6 +1038,7 @@ install_grub() {
     fi
 
     sed -i 's|CLASS=".*"|CLASS="--class $(cat . /etc/os-release; echo "ID")"|' /etc/grub.d/10_linux
+    sed -i "s|menuentry '\$LABEL'|menuentry '\$LABEL' --class efi|" /etc/grub.d/10_uefi-firmware
 
     cat > /etc/default/grub << EOF
 loglevel=0
