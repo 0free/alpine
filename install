@@ -137,7 +137,9 @@ packages_list() {
 
     if grep -q mate /root/list; then
         PACKAGES+=(
-            # desktop
+            # display manager
+            lightdm lightdm-openrc lightdm-bash-completion
+            # mate desktop
             mate-desktop mate-desktop-environment mate-session-manager
             mate-polkit
             mate-control-center mate-tweak mate-utils mate-menus mate-common mate-media
@@ -893,6 +895,10 @@ EOF
 
     if grep -q kde /root/list; then
         rc-update add sddm default
+    fi
+
+    if grep -q mate /root/list; then
+        rc-update add lightdm default
     fi
 
     if grep -q workstation /root/list; then
