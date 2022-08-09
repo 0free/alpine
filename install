@@ -759,10 +759,9 @@ change_root() {
     echo ">>> loading modules"
     /sbin/modprobe efivars
 
+    cp install /mnt/root/install
+
     echo ">>> changing root"
-    if [[ -f install ]]; then
-        cp install /mnt/root/install
-    fi
     mount --bind /proc /mnt/proc
     mount --bind /dev /mnt/dev
     mount --bind /sys /mnt/sys
