@@ -660,7 +660,6 @@ set_fstab() {
     echo $filesystem >> /mnt/etc/modules
 
     uuid=$(lsblk -dno UUID $root_drive)
-    echo $uuid > /mnt/root/uuid
 
     if grep -q zfs /root/list; then
         echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" > /mnt/etc/fstab
@@ -669,12 +668,12 @@ set_fstab() {
     fi
 
     uuid=$(lsblk -dno UUID $boot_drive)
-    echo "UUID=$uuid /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 2" >> /mnt/etc/fstab
+
+    echo "UUID=$uuid /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
 
     uuid=$(lsblk -dno UUID $swap_drive)
-    if ! grep -q swap /etc/fstab; then
-        echo "$uuid none swap sw 0 0" >> /mnt/etc/fstab
-    fi
+
+    echo "UUID=$uuid none swap sw 0 0" >> /mnt/etc/fstab
 
 }
 
@@ -758,14 +757,13 @@ change_root() {
 
     echo ">>> loading modules"
     /sbin/modprobe efivars
-
+    echo ">>> copying install script"
     cp install /mnt/root/install
-
     echo ">>> changing root"
+    echo '' > /mnt/root/chroot
     mount --bind /proc /mnt/proc
     mount --bind /dev /mnt/dev
     mount --bind /sys /mnt/sys
-    echo '' > /mnt/root/chroot
     chroot /mnt /bin/bash /root/install
 
 }
@@ -1122,7 +1120,7 @@ reboot_system() {
 
 }
 
-clear && set -e
+set -e
 
 if [[ -f /root/list ]]; then
     drive=$(. /root/list; echo $drive)
@@ -1156,6 +1154,7 @@ else
                 install_base
             fi
         else
+            clear
             setup_drive
         fi
     fi
