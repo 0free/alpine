@@ -435,6 +435,13 @@ setup_drive() {
     bootloaders=(grub syslinux)
     menu 'select a desktop' bootloader ${bootloaders[@]}
 
+    echo ">>> adding options"
+    echo "drive=$drive" > /root/list
+    echo "filesystem=$filesystem" >> /root/list
+    echo "computer=$computer" >> /root/list
+    echo "desktop=$desktop" >> /root/list
+    echo "bootloader=$bootloader" >> /root/list
+
     if ! test sgdisk; then
         echo ">>> installing sgdisk"
         apk add sgdisk
@@ -452,11 +459,13 @@ setup_drive() {
         echo ">>> creating boot partition"
         sgdisk -n 0:0:+$bootSize -c 0:efi -t 0:ef00 $drive
         boot_drive=$drive"1"
+        echo "boot_drive=$boot_drive" >> /root/list
 
         if [[ $swapSize != '0' ]]; then
             echo ">>> creating swap partition"
             sgdisk -n 0:0:+$swapSize -c 0:swap -t 0:8200 $drive
             swap_drive=$drive"2"
+            echo "swap_drive=$swap_drive" >> /root/list
         fi
 
         echo ">>> creating root partition"
@@ -466,6 +475,7 @@ setup_drive() {
             sgdisk -n 0:0:0 -c 0:linux -t 0:8300 $drive
         fi
         root_drive=$drive"3"
+        echo "root_drive=$root_drive" >> /root/list
 
         echo ">>> reading partition tables"
         mdev -s
@@ -497,17 +507,6 @@ setup_drive() {
 
     mount_root
     mount_boot
-
-    echo ">>> adding options"
-    echo $drive > /root/list
-    echo $filesystem >> /root/list
-    echo $computer >> /root/list
-    echo $desktop >> /root/list
-    echo $bootloader >> /root/list
-    echo $boot_drive >> /root/list
-    echo $root_drive >> /root/list
-    echo $swap_drive >> /root/list
-
     install_base
 
 }
@@ -1079,8 +1078,8 @@ EOF
 
     echo ">>> checking grub-probe"
     grub-probe /
-    grub-probe -t fs -d $(sed '6q;d' /root/list)
-    grub-probe -t fs_label -d $(sed '6q;d' /root/list)
+    grub-probe -t fs -d $(. /root/list; echo $root_drive)
+    grub-probe -t fs_label -d $(. /root/list; echo $root_drive)
 
 }
 
@@ -1109,10 +1108,10 @@ reboot_system() {
 clear && set -e
 
 if [[ -f /root/list ]]; then
-    drive=$(sed '1q;d' /root/list)
-    boot_drive=$(sed '6q;d' /root/list)
-    root_drive=$(sed '7q;d' /root/list)
-    swap_drive=$(sed '8q;d' /root/list)
+    drive=$(. /root/list; echo $drive)
+    boot_drive=$(. /root/list; echo $boot_drive)
+    root_drive=$(. /root/list; echo $root_drive)
+    swap_drive=$(. /root/list; echo $swap_drive)
 fi
 
 if [[ -f /mnt/root/chroot ]]; then
