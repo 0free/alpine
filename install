@@ -24,7 +24,6 @@ packages_list() {
         xorg-server xf86-input-libinput
         polkit polkit-openrc polkit-elogind polkit-common polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
-        mesa mesa-dri-gallium
         # hardware
         hwids hwids-net hwids-pci hwids-usb hwids-udev
         # wayland
@@ -61,7 +60,7 @@ packages_list() {
         # browser
         chromium-chromedriver
         # mesa
-        mesa mesa-vulkan-layers
+        mesa mesa-dri-gallium mesa-vulkan-layers
         # intel GPU
         xf86-video-intel mesa-vulkan-intel intel-media-driver
         # nvidia GPU
@@ -81,7 +80,6 @@ packages_list() {
     fi
 
     if grep -q gnome /root/list; then
-
         PACKAGES+=(
             # gnome session
             gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-colors-common gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome gvfs gst-plugin-pipewire
@@ -104,11 +102,9 @@ packages_list() {
             # network
             networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn network-manager-applet networkmanager-initrd-generator
         )
-
     fi
 
     if grep -q kde /root/list; then
-
         PACKAGES+=(
             # desktop
             polkit-kde-agent-1
@@ -137,7 +133,21 @@ packages_list() {
             # file manager
             dolphin dolphin-plugins
         )
+    fi
 
+    if grep -q mate /root/list; then
+        PACKAGES+=(
+            # desktop
+            mate-desktop mate-desktop-environment mate-session-manager
+            mate-polkit
+            mate-control-center mate-tweak mate-utils mate-menus mate-common mate-media
+            mate-settings-daemon mate-notification-daemon
+            mate-panel
+            mate-terminal mate-system-monitor mate-power-manager mate-calc
+            mate-themes mate-icon-theme
+            mate-applets mate-sensors-applet mate-indicator-applet
+
+        )
     fi
 
     if grep -q workstation /root/list; then
@@ -429,7 +439,7 @@ setup_drive() {
     computers=(base workstation miner server)
     menu 'select a computer' computer ${computers[@]}
 
-    desktops=(gnome kde minimal)
+    desktops=(gnome kde mate)
     menu 'select a desktop' desktop ${desktops[@]}
 
     bootloaders=(grub syslinux)
