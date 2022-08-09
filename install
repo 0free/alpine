@@ -146,7 +146,15 @@ packages_list() {
             mate-terminal mate-system-monitor mate-power-manager mate-calc
             mate-themes mate-icon-theme
             mate-applets mate-sensors-applet mate-indicator-applet
-
+            mozo
+            # file manager
+            caja caja-extensions
+            # text editor
+            pluma
+            # view
+            atril eom
+            # archieve
+            engrampa
         )
     fi
 
