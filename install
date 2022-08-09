@@ -84,7 +84,7 @@ packages_list() {
 
         PACKAGES+=(
             # gnome session
-            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-colors-common gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome clutter clutter-gst clutter-gtk gvfs gst-plugin-pipewire
+            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-colors-common gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome gvfs gst-plugin-pipewire
             # connector
             chrome-gnome-shell gnome-browser-connector
             # theme
@@ -1033,8 +1033,11 @@ install_grub() {
     if [[ ! -d /boot/grub/themes/grub-theme/ ]]; then
         echo ">>> cloning grub-theme"
         git clone https://github.com/0free/grub-theme.git
+        mv grub-theme/icons/ /boot/grub/themes/
         mv grub-theme/ /boot/grub/themes/
     fi
+
+    sed -i 's|CLASS=".*"|CLASS="--class $(cat . /etc/os-release; echo "ID")"|' /etc/grub.d/10_linux
 
     cat > /etc/default/grub << EOF
 loglevel=0
