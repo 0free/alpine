@@ -412,7 +412,7 @@ setup_drive() {
 
     menu 'select a drive' drive ${drives[@]}
 
-    if ls $drive* | grep "$drive.\{1\}$"; then
+    if ls $drive* | grep -q "$drive.\{1\}$"; then
         partitions=($(ls $drive*))
         menu 'select a root partition or use the complete drive ' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
