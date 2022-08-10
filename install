@@ -668,20 +668,17 @@ set_fstab() {
     echo ">>> setting fstab"
     echo $filesystem >> /mnt/etc/modules
 
-    uuid=$(lsblk -dno UUID $root_drive)
-
     if grep -q zfs /root/list; then
         echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" > /mnt/etc/fstab
     else
-        echo "UUID=$uuid / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 2" > /mnt/etc/fstab
+        uuid="$(lsblk -dno UUID $root_drive)"
+        echo "UUID=$uuid / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 0" > /mnt/etc/fstab
     fi
 
-    uuid=$(lsblk -dno UUID $boot_drive)
-
+    uuid="$(lsblk -dno UUID $boot_drive)"
     echo "UUID=$uuid /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
 
-    uuid=$(lsblk -dno UUID $swap_drive)
-
+    uuid="$(lsblk -dno UUID $swap_drive)"
     echo "UUID=$uuid none swap sw 0 0" >> /mnt/etc/fstab
 
 }
@@ -794,7 +791,8 @@ configure() {
 disable_root() {
 
     usermod -s /bin/bash root
-    echo "root:$password" | chpasswd
+    echo ">>> changing root password"
+    echo -en "$password/n$password" | passwd root
     echo ">>> disabling root login"
     passwd -l root
 
@@ -803,11 +801,9 @@ disable_root() {
 create_user() {
 
     echo ">>> creating user"
-
     if id $user &>/dev/null; then
         userdel $user
     fi
-
     echo "%$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
     chmod 0400 /etc/sudoers.d/$user
     echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -g $user $user
@@ -968,10 +964,8 @@ EOF
 
     echo ">>> configuring firewall"
     ufw enable
-    ufw allow 80/tcp
-    ufw allow 443/tcp
     ufw default allow outgoing
-    ufw default deny incoming
+    ufw default reject incoming
 
 }
 
