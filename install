@@ -141,7 +141,7 @@ packages_list() {
     if grep -q mate /root/list; then
         PACKAGES+=(
             # display manager
-            lightdm lightdm-openrc lightdm-bash-completion lightdm-gtk-greeter
+            lightdm lightdm-openrc lightdm-bash-completion slick-greeter
             # mate desktop
             mate-desktop mate-common mate-polkit
             mate-session-manager
@@ -597,7 +597,7 @@ mount_root() {
         echo ">>> importing zpool"
         zpool import $pool -d $root_drive -R /mnt
         echo ">>> mounting zfs dataset"
-        mount -t zfs rpool /mnt
+        mount -t zfs $pool /mnt
     else
         echo ">>> mounting root drive"
         mount $root_drive /mnt
@@ -993,7 +993,7 @@ configure_lightdm() {
     sed -i 's|#autologin-user-timeout=.*|autologin-user-timeout=0|' /etc/lightdm/lightdm.conf
     sed -i 's|#autologin-in-background=.*|autologin-in-background=false|' /etc/lightdm/lightdm.conf
     sed -i 's|user-session=.*|user-session=default|' /etc/lightdm/lightdm.conf
-    sed -i 's|#greeter-session=.*|greeter-session=lightdm-gtk-greeter|' /etc/lightdm/lightdm.conf
+    sed -i 's|#greeter-session=.*|greeter-session=slick-greeter|' /etc/lightdm/lightdm.conf
 
 }
 
