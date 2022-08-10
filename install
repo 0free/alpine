@@ -28,8 +28,6 @@ packages_list() {
         hwids hwids-net hwids-pci hwids-usb hwids-udev
         # wayland
         xwayland weston-xwayland
-        # network
-        ethtool ethtool-bash-completion rsync rsync-openrc
         # hardware
         bolt pciutils lm-sensors tpm2-tools tpm2-tools-bash-completion
         # efi boot
@@ -46,6 +44,9 @@ packages_list() {
         e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk udisks2 mmc-utils jfsutils
         # firewall
         gufw ufw ufw-openrc ufw-bash-completion
+        # network
+        ethtool ethtool-bash-completion rsync rsync-openrc
+        networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn networkmanager-initrd-generator
         # wireless
         wireless-regdb wireless-tools iwd iwd-openrc
         # sound
@@ -102,7 +103,7 @@ packages_list() {
             # gedit spell check
             aspell hunspell hunspell-en nuspell
             # network
-            networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn network-manager-applet networkmanager-initrd-generator
+            network-manager-applet
         )
     fi
 
@@ -148,6 +149,8 @@ packages_list() {
             mate-panel mate-control-center mate-tweak mate-utils mate-common mate-media
             mate-settings-daemon mate-notification-daemon
             mate-terminal mate-system-monitor mate-power-manager mate-calc
+            # network
+            
             # mate theme
             mate-themes mate-icon-theme
             # mate applet
@@ -895,6 +898,9 @@ EOF
     rc-update add udev-trigger default
     rc-update add udev-postmount default
 
+    rc-update add networkmanager default
+    rc-update add networkmanager-dispatcher default
+
     rc-update add bluealsa default
     rc-update add bluetooth default
     rc-update add fwupd
@@ -905,8 +911,6 @@ EOF
 
     if grep -q gnome /root/list; then
         rc-update add gdm default
-        rc-update add networkmanager default
-        rc-update add networkmanager-dispatcher default
     fi
 
     if grep -q kde /root/list; then
