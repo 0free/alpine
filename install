@@ -140,15 +140,18 @@ packages_list() {
             # display manager
             lightdm lightdm-openrc lightdm-bash-completion
             # mate desktop
-            mate-desktop mate-desktop-environment mate-session-manager
+            mate-desktop mate-desktop-environment
+            mate-session-manager
             mate-polkit
-            mate-control-center mate-tweak mate-utils mate-menus mate-common mate-media
+            mate-panel mate-control-center mate-tweak mate-utils mate-common mate-media
             mate-settings-daemon mate-notification-daemon
-            mate-panel
             mate-terminal mate-system-monitor mate-power-manager mate-calc
-            mate-themes mate-icon-theme
+            # mate theme
+            mate-themes #mate-icon-theme
+            # mate applet
             mate-applets mate-sensors-applet mate-indicator-applet
-            mozo
+            # mate menu
+            mate-menus mozo
             # file manager
             caja caja-extensions
             # text editor
@@ -693,6 +696,11 @@ setup_linux() {
 }
 
 install_linux() {
+
+    if [[ -f /mnt/lib/apk/db/lock ]]; then
+        rm /mnt/lib/apk/db/lock
+        apk fix --root=/mnt
+    fi
 
     list='amd-ucode intel-ucode linux-pam'
     if grep -q zfs /root/list; then
