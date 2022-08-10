@@ -446,7 +446,7 @@ setup_drive() {
     filesystems=(zfs btrfs xfs ext4 exfat ntfs)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
-    computers=(base workstation miner server)
+    computers=(minimal workstation miner server)
     menu 'select a computer' computer ${computers[@]}
 
     desktops=(gnome kde mate)
@@ -552,6 +552,36 @@ create_zfs() {
 
 }
 
+set_zfs() {
+
+    echo ">>> setting ZFS pool as rootfs"
+    zpool set bootfs=$pool $pool
+    echo ">>> setting ZFS cache"
+    mkdir -p /mnt/etc/zfs
+    cp /etc/zfs/zpool.cache /mnt/etc/zfs/zpool.cache
+    echo ">>> adding ZFS options"
+    mkdir -p /mnt/etc/modprobe.d/
+    echo "options zfs l2arc_noprefetch=0" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs l2arc_write_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs l2arc_write_boost=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs l2arc_headroom=12" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_arc_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_arc_min=268435456" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_prefetch_disable=0" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_top_maxinflight=320" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_txg_timeout=15" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_scheduler=deadline" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_async_read_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_async_read_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_async_write_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_async_write_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_sync_write_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_sync_write_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_sync_read_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_vdev_sync_read_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
+
+}
+
 mount_root() {
 
     if grep -q zfs /root/list; then
@@ -586,36 +616,6 @@ mount_boot() {
 
 }
 
-set_zfs() {
-
-    echo ">>> setting ZFS pool as rootfs"
-    zpool set bootfs=$pool $pool
-    echo ">>> setting ZFS cache"
-    mkdir -p /mnt/etc/zfs
-    cp /etc/zfs/zpool.cache /mnt/etc/zfs/zpool.cache
-    echo ">>> adding ZFS options"
-    mkdir -p /mnt/etc/modprobe.d/
-    echo "options zfs l2arc_noprefetch=0" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs l2arc_write_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs l2arc_write_boost=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs l2arc_headroom=12" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_arc_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_arc_min=268435456" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_prefetch_disable=0" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_top_maxinflight=320" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_txg_timeout=15" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_scheduler=deadline" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_async_read_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_async_read_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_async_write_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_async_write_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_sync_write_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_sync_write_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_sync_read_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_sync_read_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
-
-}
-
 install_base() {
 
     echo ">>> updating packages"
@@ -631,7 +631,7 @@ install_base() {
     echo ">>> copying repositories"
     cp /etc/apk/repositories /mnt/etc/apk/repositories
 
-    cp /root/list /mnt/root/list
+    echo ">>> creating /dev/null"
     rm /mnt/dev/null
     cp /dev/null /mnt/dev/null
     chmod 0666 /mnt/dev/null
@@ -760,7 +760,8 @@ change_root() {
     echo ">>> loading modules"
     /sbin/modprobe efivars
     echo ">>> copying install script"
-    cp install /mnt/root/install
+    cp /root/list /mnt/root/list
+    cp /root/install /mnt/root/install
     echo ">>> changing root"
     echo '' > /mnt/root/chroot
     mount --bind /proc /mnt/proc
