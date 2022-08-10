@@ -33,7 +33,7 @@ packages_list() {
         # efi boot
         efibootmgr
         # base
-        sudo bash bash-completion build-base fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-login util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less micro curl wget coreutils gawk diffutils autoconf
+        sudo bash bash-completion build-base fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-login util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
         # utilities
         openssl ncurses-dev
         # git
