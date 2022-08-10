@@ -999,29 +999,26 @@ add_commands() {
         echo "eval $(starship init bash)" >> /home/$user/.bashrc
     fi
 
-    if grep -q gnome /root/list; then
-        editor=gedit
-    elif grep -q kde /root/list; then
-        editor=kate
-    elif grep -q mate /root/list; then
-        edito=pluma
-    fi
-
     cat >> /home/$user/.bashrc << EOF
-
 alias search='sudo apk search'
 alias install='sudo apk add'
 alias update='sudo apk update && sudo apk upgrade'
 alias remove='sudo apk del'
 alias c='clear'
-alias edit='SUDO_EDITOR=$editor sudoedit'
 alias service='sudo rc-service'
-
 alias fwupd='fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update'
-
 alias youtube='yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 00:00:00\"'
-
 EOF
+
+    if grep -q gnome /root/list; then
+        editor=gedit
+    elif grep -q kde /root/list; then
+        editor=kate
+    elif grep -q mate /root/list; then
+        editor=pluma
+    fi
+
+    echo "alias edit='SUDO_EDITOR=$editor sudoedit'" >> /home/$user/.bashrc
 
 }
 
