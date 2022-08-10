@@ -460,7 +460,7 @@ setup_drive() {
     bootloaders=(grub syslinux)
     menu 'select a desktop' bootloader ${bootloaders[@]}
 
-    echo -e "\n\n"
+    echo -e "\n"
 
     echo ">>> adding options"
     echo "drive=$drive" > /root/list
@@ -967,8 +967,7 @@ EOF
 
     echo ">>> configuring firewall"
     ufw enable
-    ufw allow 80
-    ufw allow 443
+    ufw allow 80,443
     ufw default allow outgoing
     ufw default deny incoming
 
