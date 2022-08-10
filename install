@@ -141,7 +141,7 @@ packages_list() {
     if grep -q mate /root/list; then
         PACKAGES+=(
             # display manager
-            lightdm lightdm-openrc lightdm-bash-completion
+            lightdm lightdm-openrc lightdm-bash-completion lightdm-gtk-greeter
             # mate desktop
             mate-desktop mate-common mate-polkit
             mate-session-manager
@@ -992,9 +992,8 @@ configure_lightdm() {
     sed -i "s|#autologin-user=.*|autologin-user=$user|" /etc/lightdm/lightdm.conf
     sed -i 's|#autologin-user-timeout=.*|autologin-user-timeout=0|' /etc/lightdm/lightdm.conf
     sed -i 's|#autologin-in-background=.*|autologin-in-background=false|' /etc/lightdm/lightdm.conf
-    sed -i 's|||' /etc/lightdm/lightdm.conf
     sed -i 's|user-session=.*|user-session=default|' /etc/lightdm/lightdm.conf
-    sed -i 's|#greeter-session=.*|greeter-session=lightdm-webkit2-greeter|' /etc/lightdm/lightdm.conf
+    sed -i 's|#greeter-session=.*|greeter-session=lightdm-gtk-greeter|' /etc/lightdm/lightdm.conf
 
 }
 
@@ -1007,6 +1006,14 @@ add_commands() {
         echo "eval $(starship init bash)" >> /home/$user/.bashrc
     fi
 
+    if grep -q gnome /root/list; then
+        editor=gedit
+    elif grep -q kde /root/list; then
+        editor=kate
+    elif grep -q mate /root/list; then
+        edito=pluma
+    fi
+
     cat >> /home/$user/.bashrc << EOF
 
 alias search='sudo apk search'
@@ -1014,7 +1021,7 @@ alias install='sudo apk add'
 alias update='sudo apk update && sudo apk upgrade'
 alias remove='sudo apk del'
 alias c='clear'
-alias edit='SUDO_EDITOR=gedit sudoedit'
+alias edit='SUDO_EDITOR=$editor sudoedit'
 alias service='sudo rc-service'
 
 alias fwupd='fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update'
