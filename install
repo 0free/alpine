@@ -147,7 +147,7 @@ packages_list() {
             mate-settings-daemon mate-notification-daemon
             mate-terminal mate-system-monitor mate-power-manager mate-calc
             # mate theme
-            mate-themes #mate-icon-theme
+            mate-themes mate-icon-theme
             # mate applet
             mate-applets mate-sensors-applet mate-indicator-applet
             # mate menu
