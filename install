@@ -60,6 +60,9 @@ packages_list() {
         xf86-input-synaptics xf86-input-mtrack
         # browser
         chromium-chromedriver
+        # fonts
+        terminus-font font-noto font-arabic-misc font-noto-arabic font-noto-kufi-arabic font-noto-naskh-arabic font-inter font-opensans font-roboto font-roboto-mono font-roboto-flex font-xfree86-type1
+        ttf-dejavu ttf-font-awesome ttf-freefont ttf-droid
         # mesa
         mesa mesa-dri-gallium mesa-vulkan-layers
         # intel GPU
@@ -242,9 +245,6 @@ packages_list() {
             abuild alpine-sdk apk-tools alpine-conf mkinitfs xorriso squashfs-tools
             # fonts tools
             font-manager font-viewer
-            # fonts
-            terminus-font font-noto font-arabic-misc font-noto-arabic font-noto-kufi-arabic font-noto-naskh-arabic ttf-droid-nonlatin font-inter font-opensans font-roboto font-roboto-mono font-roboto-flex font-xfree86-type1
-            ttf-dejavu ttf-font-awesome ttf-freefont ttf-droid
             # office
             libreoffice-base libreoffice-common libreoffice-writer libreoffice-math libreoffice-calc libreoffice-draw libreoffice-lang-en_us libreoffice-lang-ar
             # vulkan
