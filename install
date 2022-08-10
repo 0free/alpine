@@ -143,16 +143,13 @@ packages_list() {
             # display manager
             lightdm lightdm-openrc lightdm-bash-completion
             # mate desktop
-            mate-desktop mate-desktop-environment
+            mate-desktop mate-common mate-polkit
             mate-session-manager
-            mate-polkit
-            mate-panel mate-control-center mate-tweak mate-utils mate-common mate-media
+            mate-panel mate-control-center mate-tweak mate-utils mate-media
             mate-settings-daemon mate-notification-daemon
             mate-terminal mate-system-monitor mate-power-manager mate-calc
-            # network
-            
             # mate theme
-            mate-themes mate-icon-theme
+            mate-themes mate-icon-theme hicolor-icon-theme
             # mate applet
             mate-applets mate-sensors-applet mate-indicator-applet
             # mate menu
