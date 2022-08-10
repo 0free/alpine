@@ -968,7 +968,8 @@ EOF
 
     echo ">>> configuring firewall"
     ufw enable
-    ufw allow 80,443
+    ufw allow 80/tcp
+    ufw allow 443/tcp
     ufw default allow outgoing
     ufw default deny incoming
 
