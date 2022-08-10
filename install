@@ -455,6 +455,8 @@ setup_drive() {
     bootloaders=(grub syslinux)
     menu 'select a desktop' bootloader ${bootloaders[@]}
 
+    echo -e "\n\n"
+
     echo ">>> adding options"
     echo "drive=$drive" > /root/list
     echo "filesystem=$filesystem" >> /root/list
