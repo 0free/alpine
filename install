@@ -238,12 +238,12 @@ packages_list() {
             # fonts tools
             font-manager font-viewer
             # fonts
-            font-arabic-misc terminus-font font-noto font-arabic-misc font-noto-arabic ttf-droid-nonlatin font-inter font-opensans font-roboto font-roboto-mono font-roboto-flex font-xfree86-type1
+            terminus-font font-noto font-arabic-misc font-noto-arabic font-noto-kufi-arabic font-noto-naskh-arabic ttf-droid-nonlatin font-inter font-opensans font-roboto font-roboto-mono font-roboto-flex font-xfree86-type1
             ttf-dejavu ttf-font-awesome ttf-freefont ttf-droid
             # office
             libreoffice-base libreoffice-common libreoffice-writer libreoffice-math libreoffice-calc libreoffice-draw libreoffice-lang-en_us libreoffice-lang-ar
             # vulkan
-            vulkan-headers vulkan-loader vulkan-validation-layers vulkan-tools
+            vulkan-validation-layers
             # google
             google-authenticator
             # mail
@@ -814,6 +814,9 @@ setup_desktop() {
 
     enable_services
     configure_alpine
+    if grep -q lightdm /root/list; then
+        configure_lightdm
+    fi
     add_commands
     install_mkinitfs
     if grep -q syslinux /root/list; then
@@ -961,6 +964,20 @@ EOF
     ufw allow 443
     ufw default allow outgoing
     ufw default deny incoming
+
+}
+
+configure_lightdm() {
+
+    echo ">>> configuring lightdm"
+    sed -i 's|#allow-guest=.*|allow-guest=false|' /etc/lightdm/lightdm.conf
+    sed -i 's|#autologin-guest=.*|autologin-guest=false|' /etc/lightdm/lightdm.conf
+    sed -i "s|#autologin-user=.*|autologin-user=$user|" /etc/lightdm/lightdm.conf
+    sed -i 's|#autologin-user-timeout=.*|autologin-user-timeout=0|' /etc/lightdm/lightdm.conf
+    sed -i 's|#autologin-in-background=.*|autologin-in-background=false|' /etc/lightdm/lightdm.conf
+    sed -i 's|||' /etc/lightdm/lightdm.conf
+    sed -i 's|user-session=.*|user-session=default|' /etc/lightdm/lightdm.conf
+    sed -i 's|#greeter-session=.*|greeter-session=lightdm-webkit2-greeter|' /etc/lightdm/lightdm.conf
 
 }
 
