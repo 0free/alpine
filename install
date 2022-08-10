@@ -903,8 +903,8 @@ EOF
 
     rc-update add bluealsa default
     rc-update add bluetooth default
-    rc-update add fwupd
-    rc-update add ufw
+    rc-update add fwupd default
+    rc-update add ufw default
 
     rc-update add iwd default
     rc-update add swap default
@@ -979,6 +979,7 @@ EOF
     update-desktop-database
 
     echo ">>> configuring firewall"
+    ufw enable
     ufw allow 80
     ufw allow 443
     ufw default allow outgoing
