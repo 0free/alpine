@@ -965,13 +965,10 @@ EOF
         mv windows-11-icons/ /usr/share/icons/
     fi
 
-    gtk-update-icon-cache -f /usr/share/icons/hicolor/
-    gtk-update-icon-cache -f /usr/share/icons/windows-11-icons/
-    update-desktop-database
-
     echo ">>> configuring firewall"
     ufw enable
-    ufw allow 80,443
+    ufw allow 80
+    ufw allow 443
     ufw default allow outgoing
     ufw default deny incoming
 
