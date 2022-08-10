@@ -82,7 +82,7 @@ packages_list() {
     if grep -q gnome /root/list; then
         PACKAGES+=(
             # gnome session
-            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-colors-common gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome gvfs gst-plugin-pipewire
+            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-colors-common gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome gst-plugin-pipewire
             # connector
             chrome-gnome-shell gnome-browser-connector
             # theme
@@ -935,7 +935,8 @@ configure_alpine() {
 
     echo ">>> configuring alpine"
 
-    cat > /etc/NetworkManager/NetworkManager.conf << EOF
+    if [[ -d /etc/NetworkManager/ ]]; then
+        cat > /etc/NetworkManager/NetworkManager.conf << EOF
 [main]
 dhcp=internal
 plugins=ifupdown,keyfile
@@ -944,6 +945,7 @@ managed=true
 [device]
 wifi.backend=iwd
 EOF
+    fi
 
     echo ">>> configuring pipewire"
     cat >> /etc/security/limits.conf << EOF
