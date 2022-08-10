@@ -810,8 +810,7 @@ create_user() {
 
     echo "%$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
     chmod 0400 /etc/sudoers.d/$user
-    adduser -h /home/$user -s /bin/bash -g $user $user
-    echo "$user:$password" | chpasswd
+    echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -g $user $user
     adduser $user video
     adduser $user audio
     adduser $user input
