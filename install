@@ -132,7 +132,7 @@ packages_list() {
             # audio
             plasma-pa
             # kde
-            kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit kinfocenter kmix konsole
+            kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit kinfocenter kmix konsole
             # file manager
             dolphin dolphin-plugins
         )
@@ -794,6 +794,7 @@ configure() {
 disable_root() {
 
     usermod -s /bin/bash root
+    echo "root:$password" | chpasswd
     echo ">>> disabling root login"
     passwd -l root
 
@@ -809,7 +810,8 @@ create_user() {
 
     echo "%$user ALL=(ALL) ALL" > /etc/sudoers.d/$user
     chmod 0400 /etc/sudoers.d/$user
-    adduser -h /home/$user -s /bin/bash -g wheel $user
+    adduser -h /home/$user -s /bin/bash -g $user $user
+    echo "$user:$password" | chpasswd
     adduser $user video
     adduser $user audio
     adduser $user input
@@ -1135,7 +1137,7 @@ finish() {
     echo ">>> installation is completed"
     rm -r /root/*
     echo '' > /root/reboot
-    chroot / bash install
+    chroot / bash /root/install
 
 }
 
