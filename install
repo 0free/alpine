@@ -1149,17 +1149,20 @@ reboot_system() {
 
 set -e
 
-if [[ -f /root/list ]]; then
-    drive=$(. /root/list; echo $drive)
-    boot_drive=$(. /root/list; echo $boot_drive)
-    swap_drive=$(. /root/list; echo $swap_drive)
-    root_drive=$(. /root/list; echo $root_drive)
-fi
-
 if [[ -f /mnt/root/chroot ]]; then
+
     cp /root/install /mnt/root/install
     chroot /mnt /bin/bash /root/install
+
 else
+        
+    if [[ -f /root/list ]]; then
+        drive=$(. /root/list; echo $drive)
+        boot_drive=$(. /root/list; echo $boot_drive)
+        swap_drive=$(. /root/list; echo $swap_drive)
+        root_drive=$(. /root/list; echo $root_drive)
+    fi
+
     if [[ -f /root/chroot ]]; then
         if [ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]; then
             USER=$(ls /home)
@@ -1183,6 +1186,7 @@ else
             setup_drive
         fi
     fi
+
 fi
 
 #end
