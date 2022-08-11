@@ -21,7 +21,7 @@ packages_list() {
         udev-init-scripts udev-init-scripts-openrc
         eudev eudev-openrc eudev-libs
         musl-locales openrc-bash-completion dconf dconf-bash-completion
-        xorg-server xf86-input-libinput
+        xorg-server mesa-dri-gallium xf86-input-libinput
         polkit polkit-openrc polkit-elogind polkit-common polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
         # hardware
@@ -64,15 +64,13 @@ packages_list() {
         terminus-font font-noto font-arabic-misc font-noto-arabic font-noto-kufi-arabic font-noto-naskh-arabic font-inter font-opensans font-roboto font-roboto-mono font-roboto-flex font-xfree86-type1
         ttf-dejavu ttf-font-awesome ttf-freefont ttf-droid
         # mesa
-        mesa mesa-dri-gallium mesa-vulkan-layers
+        mesa mesa-vulkan-layers
         # intel GPU
-        xf86-video-intel mesa-vulkan-intel intel-media-driver
+        mesa-vulkan-intel intel-media-driver
         # vulkan
         vulkan-loader vulkan-tools vulkan-validation-layers
         # nvidia GPU
         nvidia-src
-        # amd GPU
-        xf86-video-amdgpu
         # keyboard
         setxkbmap
         # timezone
@@ -270,7 +268,7 @@ packages_list() {
             # JavaScript
             npm npm-bash-completion nodejs esbuild reason
             # code
-            code-oss code-oss-bash-completion lapce codeblocks geany
+            code-oss code-oss-bash-completion lapce codeblocks
             # code format
             prettier tidyhtml
             # html/css to pdf
