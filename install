@@ -1157,6 +1157,7 @@ if [[ -f /root/list ]]; then
 fi
 
 if [[ -f /mnt/root/chroot ]]; then
+    cp /root/install /mnt/root/install
     chroot /mnt /bin/bash /root/install
 else
     if [[ -f /root/chroot ]]; then
