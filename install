@@ -67,6 +67,8 @@ packages_list() {
         mesa mesa-dri-gallium mesa-vulkan-layers
         # intel GPU
         xf86-video-intel mesa-vulkan-intel intel-media-driver
+        # vulkan
+        vulkan-loader vulkan-tools vulkan-validation-layers
         # nvidia GPU
         nvidia-src
         # amd GPU
@@ -247,8 +249,6 @@ packages_list() {
             font-manager font-viewer
             # office
             libreoffice-base libreoffice-common libreoffice-writer libreoffice-math libreoffice-calc libreoffice-draw libreoffice-lang-en_us libreoffice-lang-ar
-            # vulkan
-            vulkan-validation-layers
             # google
             google-authenticator
             # mail
