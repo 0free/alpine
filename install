@@ -792,7 +792,7 @@ disable_root() {
 
     usermod -s /bin/bash root
     echo ">>> changing root password"
-    echo -en "$password/n$password" | passwd root
+    echo -en "$password\n$password" | passwd root
     echo ">>> disabling root login"
     passwd -l root
 
