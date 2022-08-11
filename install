@@ -701,11 +701,7 @@ install_linux() {
     fi
 
     list='amd-ucode intel-ucode linux-pam'
-    if grep -q zfs /root/list; then
-        list+=' linux-lts zfs zfs-openrc zfs-libs'
-    else
-        list+=' linux-edge'
-    fi
+    list+=' linux-lts zfs zfs-openrc zfs-libs'
     list+=' linux-firmware-intel linux-firmware-i915'
     list+=' linux-firmware-amd linux-firmware-amd-ucode'
     list+=' linux-firmware-nvidia'
@@ -713,6 +709,7 @@ install_linux() {
     list+=' linux-firmware-other'
     list+=' linux-firmware-brcm linux-firmware-qca'
     list+=' linux-firmware-rtlwifi linux-firmware-rtl_bt linux-firmware-rtl_nic'
+
     echo ">>> installing linux"
     apk add --root=/mnt $list
 
@@ -966,6 +963,9 @@ EOF
     ufw enable
     ufw default allow outgoing
     ufw default reject incoming
+
+    echo ">>> enabling swap"
+    swapon $swap_drive
 
 }
 
