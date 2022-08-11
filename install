@@ -61,7 +61,7 @@ packages_list() {
         # browser
         chromium-chromedriver
         # fonts
-        terminus-font font-noto font-arabic-misc font-noto-arabic font-noto-kufi-arabic font-noto-naskh-arabic font-inter font-opensans font-roboto font-roboto-mono font-roboto-flex font-xfree86-type1
+        terminus-font font-noto font-arabic-misc font-noto-arabic font-noto-kufi-arabic font-noto-naskh-arabic font-inter font-opensans font-roboto font-xfree86-type1
         ttf-dejavu ttf-font-awesome ttf-freefont ttf-droid
         # mesa
         mesa mesa-vulkan-layers
