@@ -573,7 +573,7 @@ set_zfs() {
     echo "options zfs l2arc_write_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs l2arc_write_boost=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs l2arc_headroom=12" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_arc_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_arc_max=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs zfs_arc_min=268435456" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs zfs_prefetch_disable=0" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs zfs_top_maxinflight=320" >> /mnt/etc/modprobe.d/zfs.conf
@@ -611,6 +611,7 @@ mount_root() {
     if [[ ! -d /mnt/boot ]]; then
         mkdir -p /mnt/boot
     fi
+
     if [[ ! -d /mnt/boot/EFI ]]; then
         mkdir -p /mnt/boot/EFI
     fi
@@ -672,17 +673,12 @@ set_fstab() {
     if grep -q zfs /root/list; then
         echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" > /mnt/etc/fstab
     else
-        uuid="$(lsblk -dno UUID $root_drive)"
-        echo "UUID=$uuid / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 0" > /mnt/etc/fstab
+        echo "UUID=$(lsblk -dno UUID $root_drive) / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 0" > /mnt/etc/fstab
     fi
 
-    uuid="$(lsblk -dno UUID $boot_drive)"
+    echo "UUID=$(lsblk -dno UUID $boot_drive) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
 
-    echo "UUID=$uuid /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
-
-    uuid="$(lsblk -dno UUID $swap_drive)"
-
-    echo "UUID=$uuid none swap sw 0 0" >> /mnt/etc/fstab
+    echo "UUID=$(lsblk -dno UUID $swap_drive) none swap sw 0 0" >> /mnt/etc/fstab
 
 }
 
@@ -725,6 +721,7 @@ install_linux() {
 install_packages() {
 
     echo ">>> packages list"
+    PACKAGES=''
     packages_list
 
     list=''
@@ -821,7 +818,7 @@ setup_desktop() {
 
     enable_services
     configure_alpine
-    if grep -q lightdm /root/list; then
+    if grep -q mate /root/list; then
         configure_lightdm
     fi
     add_commands
@@ -1026,19 +1023,19 @@ install_mkinitfs() {
     modules+=(amdgpu)
     modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 
-    if grep -q btrfs /etc/fstab; then
+    if grep -q btrfs /root/list; then
         modules+=(btrfs)
     fi
 
-    if grep -q zfs /etc/fstab; then
+    if grep -q zfs /root/list; then
         modules+=(zfs)
     fi
 
-    if grep -q xfs /etc/fstab; then
+    if grep -q xfs /root/list; then
         modules+=(xfs)
     fi
 
-    if grep -q ext4 /etc/fstab; then
+    if grep -q ext4 /root/list; then
         modules+=(ext4)
     fi
 
@@ -1101,15 +1098,15 @@ EOF
 
     list='usb usb_keyboard msdospart part_gpt part_msdos part_apple chain ntfs'
 
-    if grep -q btrfs /etc/fstab; then
+    if grep -q btrfs /root/list; then
         list+=' btrfs'
     fi
 
-    if grep -q xfs /etc/fstab; then
+    if grep -q xfs /root/list; then
         list+=' xfs'
     fi
 
-    if grep -q zfs /etc/fstab; then
+    if grep -q zfs /root/list; then
         echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
         source /etc/profile.d/zpool_vdev_name_path.sh
         echo "Defaults env_keep += \"ZPOOL_VDEV_NAME_PATH\"" >> /etc/sudoer
@@ -1124,8 +1121,8 @@ EOF
 
     echo ">>> checking grub-probe"
     grub-probe /
-    grub-probe -t fs -d $(. /root/list; echo $root_drive)
-    grub-probe -t fs_label -d $(. /root/list; echo $root_drive)
+    grub-probe -t fs -d $root_drive
+    grub-probe -t fs_label -d $root_drive
 
 }
 
@@ -1155,14 +1152,11 @@ set -e
 if [[ -f /root/list ]]; then
     drive=$(. /root/list; echo $drive)
     boot_drive=$(. /root/list; echo $boot_drive)
-    root_drive=$(. /root/list; echo $root_drive)
     swap_drive=$(. /root/list; echo $swap_drive)
+    root_drive=$(. /root/list; echo $root_drive)
 fi
 
 if [[ -f /mnt/root/chroot ]]; then
-    if [[ -f install ]]; then
-        mv install /mnt/root/install
-    fi
     chroot /mnt /bin/bash /root/install
 else
     if [[ -f /root/chroot ]]; then
