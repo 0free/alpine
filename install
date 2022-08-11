@@ -449,10 +449,10 @@ setup_drive() {
         fi
     fi
 
-    filesystems=(zfs btrfs xfs ext4 exfat ntfs)
+    filesystems=(btrfs zfs xfs ext4 exfat ntfs)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
-    computers=(minimal workstation miner server)
+    computers=(minimal workstation server)
     menu 'select a computer' computer ${computers[@]}
 
     desktops=(gnome kde mate)
