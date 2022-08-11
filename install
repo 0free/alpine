@@ -1018,7 +1018,7 @@ install_mkinitfs() {
 
     echo ">>> installing mkinitfs"
 
-    modules=(base ata ide nvme scsi usb lvm ext4 kms mmc raid keymap virtio)
+    modules=(base nvme ata ide scsi usb lvm ext4 kms mmc keymap)
     modules+=(i915 intel_agp)
     modules+=(amdgpu)
     modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
