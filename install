@@ -963,8 +963,6 @@ EOF
     sed -i 's|IPV6=yes|IPV6=no|' /etc/default/ufw
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
-    /sbin/modprobe xt_state
-    ufw reset
     ufw enable
     ufw default allow outgoing
     ufw default reject incoming
