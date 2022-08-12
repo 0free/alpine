@@ -1,7 +1,6 @@
 #!/bin/bash
 
 bootSize='199MiB'
-swapSize='4096MiB' # '0' to disable
 timezone='Asia/Muscat'
 mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
@@ -489,13 +488,6 @@ setup_drive() {
         boot_drive=$drive"1"
         echo "boot_drive=$boot_drive" >> /root/list
 
-        if [[ $swapSize != '0' ]]; then
-            echo ">>> creating swap partition"
-            sgdisk -n 0:0:+$swapSize -c 0:swap -t 0:8200 $drive
-            swap_drive=$drive"2"
-            echo "swap_drive=$swap_drive" >> /root/list
-        fi
-
         echo ">>> creating root partition"
         if grep -q zfs /root/list; then
             sgdisk -n 0:0:0 -c 0:$pool -t 0:bf00 $drive
@@ -509,11 +501,6 @@ setup_drive() {
         mdev -s
         echo ">>> creating boot filesystem"
         mkfs.vfat -F32 -n BOOT $boot_drive
-
-        if [[ $swap_drive ]]; then
-            echo ">>> creating swap filesystem"
-            mkswap $swap_drive
-        fi
 
     fi
 
@@ -677,8 +664,6 @@ set_fstab() {
     fi
 
     echo "$(blkid $boot_drive -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
-
-    echo "$(blkid $swap_drive -o export | grep ^UUID=) none swap sw 0 0" >> /mnt/etc/fstab
 
 }
 
@@ -893,7 +878,6 @@ EOF
     rc-update add ufw default
 
     rc-update add iwd default
-    rc-update add swap default
 
     if grep -q gnome /root/list; then
         rc-update add gdm default
@@ -967,9 +951,6 @@ EOF
     ufw enable
     ufw default allow outgoing
     ufw default reject incoming
-
-    echo ">>> enabling swap"
-    swapon $swap_drive
 
 }
 
@@ -1163,7 +1144,6 @@ else
     if [[ -f /root/list ]]; then
         drive=$(. /root/list; echo $drive)
         boot_drive=$(. /root/list; echo $boot_drive)
-        swap_drive=$(. /root/list; echo $swap_drive)
         root_drive=$(. /root/list; echo $root_drive)
     fi
 
