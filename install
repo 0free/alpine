@@ -962,6 +962,7 @@ EOF
     echo ">>> configuring firewall"
     sed -i 's|IPV6=yes|IPV6=no|' /etc/default/ufw
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
+    sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
     ufw reset
     ufw enable
     ufw default allow outgoing
