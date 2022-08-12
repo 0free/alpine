@@ -494,7 +494,7 @@ setup_drive() {
         else
             sgdisk -n 0:0:0 -c 0:linux -t 0:8300 $drive
         fi
-        root_drive=$drive"3"
+        root_drive=$drive"2"
         echo "root_drive=$root_drive" >> /root/list
 
         echo ">>> reading partition tables"
