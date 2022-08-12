@@ -43,7 +43,7 @@ packages_list() {
         # disks
         e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk udisks2 mmc-utils jfsutils
         # firewall
-        gufw ufw ufw-openrc ufw-bash-completion
+        gufw ufw ufw-openrc ufw-bash-completion iptables iptables-openrc
         # network
         ethtool ethtool-bash-completion rsync rsync-openrc
         networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn networkmanager-initrd-generator
@@ -963,6 +963,7 @@ EOF
     sed -i 's|IPV6=yes|IPV6=no|' /etc/default/ufw
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
+    /sbin/modprobe xt_state
     ufw reset
     ufw enable
     ufw default allow outgoing
