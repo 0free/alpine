@@ -427,7 +427,7 @@ setup_drive() {
 
     echo '# created by Saif AlSubhi'
     printf -- '-%.0s' {1..100}; echo ''
-    lsblk -o name,size,fstype,mountpoint,label,model
+    lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
     drives=($(ls /dev/ | grep '^nvme.\{3\}$\|^sd.\{1\}$'))
@@ -673,12 +673,12 @@ set_fstab() {
     if grep -q zfs /root/list; then
         echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" > /mnt/etc/fstab
     else
-        echo "UUID=$(lsblk -dno UUID $root_drive) / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 0" > /mnt/etc/fstab
+        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 0" > /mnt/etc/fstab
     fi
 
-    echo "UUID=$(lsblk -dno UUID $boot_drive) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
+    echo "$(blkid $boot_drive -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
 
-    echo "UUID=$(lsblk -dno UUID $swap_drive) none swap sw 0 0" >> /mnt/etc/fstab
+    echo "$(blkid $swap_drive -o export | grep ^UUID=) none swap sw 0 0" >> /mnt/etc/fstab
 
 }
 
