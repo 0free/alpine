@@ -701,7 +701,8 @@ install_linux() {
     fi
 
     list='amd-ucode intel-ucode linux-pam'
-    list+=' linux-lts zfs zfs-openrc zfs-libs'
+    list+=' linux-lts  linux-edge'
+    list+=' zfs zfs-openrc zfs-libs'
     list+=' linux-firmware-intel linux-firmware-i915'
     list+=' linux-firmware-amd linux-firmware-amd-ucode'
     list+=' linux-firmware-nvidia'
