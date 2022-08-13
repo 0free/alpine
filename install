@@ -38,7 +38,7 @@ packages_list() {
         # git
         git git-bash-completion
         # compression
-        brotli zstd zlib libzip zip lz4 lzo unzip
+        brotli zstd zlib libzip zip lz4 lzo unzip xz
         # disks
         e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk udisks2 mmc-utils jfsutils
         # firewall
@@ -120,6 +120,8 @@ packages_list() {
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
             plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-pass
+            # kwallet
+            kwallet kwallet-pam kwalletmanager
             # theme
             breeze breeze-gtk breeze-icons kholidays
             # bluetooth
@@ -685,8 +687,13 @@ install_linux() {
         apk fix --root=/mnt
     fi
 
-    list='amd-ucode intel-ucode linux-pam'
-    list+=' linux-lts  linux-edge'
+    if grep -q zfs /root/list; then
+        list='linux-lts'
+    else
+        list='linux-edge'
+    fi
+
+    list+='amd-ucode intel-ucode linux-pam'
     list+=' zfs zfs-openrc zfs-libs'
     list+=' linux-firmware-intel linux-firmware-i915'
     list+=' linux-firmware-amd linux-firmware-amd-ucode'
