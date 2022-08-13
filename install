@@ -1140,6 +1140,7 @@ reboot_system() {
 }
 
 set -e
+sleep 1
 
 if [[ -f /mnt/root/chroot ]]; then
 
