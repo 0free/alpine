@@ -66,6 +66,7 @@ packages_list() {
         font-noto font-noto-arabic font-noto-kufi-arabic font-noto-naskh-arabic
         font-inter font-opensans font-roboto font-xfree86-type1
         ttf-dejavu ttf-font-awesome ttf-freefont ttf-droid
+        font-awesome font-awesome-free font-awesome-brands
         # mesa
         mesa mesa-vulkan-layers
         # intel GPU
@@ -117,16 +118,18 @@ packages_list() {
         PACKAGES+=(
             # desktop
             polkit-kde-agent-1
+            # hardware
+            solid
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
-            plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-pass
+            plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-pass plasma-vault
             # system
             ksysguard
             # kwallet
-            kwallet kwallet-pam kwalletmanager
+            kwallet kwallet-pam kwalletmanager kio-kwallet
             # theme
-            breeze breeze-gtk breeze-icons kholidays
+            kiconthemes breeze breeze-gtk breeze-icons breeze-grub kholidays
             # bluetooth
             bluedevil
             # power
@@ -136,13 +139,13 @@ packages_list() {
             # system
             systemsettings kde-gtk-config
             # network
-            plasma-nm
+            plasma-nm networkmanager-qt
             # firewall
             iproute2 net-tools
             # audio
             plasma-pa kmix
             # kde
-            kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit kinfocenter konsole
+            ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit kinfocenter konsole kde-gtk-config kio-fuse
             # file manager
             dolphin dolphin-plugins index kfind
         )
@@ -198,7 +201,7 @@ packages_list() {
                 # tools
                 karchive ark
                 # flatpak
-                xdg-desktop-portal xdg-desktop-portal-gnome xdg-desktop-portal-gtk
+                xdg-desktop-portal xdg-desktop-portal-gnome xdg-desktop-portal-gtk xdg-user-dirs
             )
         fi
 
@@ -207,7 +210,7 @@ packages_list() {
                 # plasma
                 plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
                 # kde
-                shelf knetattach kmail kiconthemes ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble okteta haruna clip buho vvave index communicator qrca kdesdk-thumbnailers knotes falkon sweeper step kmousetool kclock krename kcolorchooser
+                shelf knetattach kmail kiconthemes ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble haruna clip buho vvave index communicator qrca kdesdk-thumbnailers knotes falkon sweeper step kmousetool kclock krename kcolorchooser kunitconversion
                 # theme
                 materia-kde materia-kde-plasma materia-kde-kvantum
                 # disks
@@ -232,6 +235,8 @@ packages_list() {
                 discover discover-backend-apk discover-backend-flatpak discover-backend-fwupd
                 # editor
                 kwrite kate kilen ktexteditor nota kompare
+                # spelling
+                sonnet
                 # office
                 kcalc okular skanlite
                 # input
@@ -243,7 +248,9 @@ packages_list() {
                 # music
                 minuet
                 # flatpak
-                xdg-desktop-portal xdg-desktop-portal-kde
+                xdg-desktop-portal xdg-desktop-portal-kde xdg-user-dirs
+                # hex
+                okteta
             )
         fi
 
@@ -269,7 +276,7 @@ packages_list() {
             # audio
             ardour tenacity calf calf-jack calf-lv2
             # video edit
-            shotcut  pitivi x265
+            shotcut pitivi x265
             # video subtitle
             gaupol
             # book
@@ -1073,7 +1080,7 @@ install_mkinitfs() {
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
     echo ">>> building initial ramdisk"
-    mkinitfs -b / -f /etc/fstab
+    mkinitfs -b / -f /etc/fstab -C lz4
 
 }
 
@@ -1134,7 +1141,7 @@ EOF
         echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
         source /etc/profile.d/zpool_vdev_name_path.sh
         echo "Defaults env_keep += \"ZPOOL_VDEV_NAME_PATH\"" >> /etc/sudoer
-        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="real_root=ZFS=$pool"|' /etc/default/grub
+        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX=""|' /etc/default/grub
         list+=' zfs zfscrypt zfsinfo'
     fi
 
