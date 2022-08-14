@@ -139,7 +139,7 @@ packages_list() {
             # system
             systemsettings kde-gtk-config
             # network
-            plasma-nm networkmanager-qt
+            plasma-nm
             # firewall
             iproute2 net-tools
             # audio
@@ -726,7 +726,7 @@ install_linux() {
         list='linux-edge'
     fi
 
-    list+='amd-ucode intel-ucode linux-pam'
+    list+=' amd-ucode intel-ucode linux-pam'
     list+=' zfs zfs-openrc zfs-libs'
     list+=' linux-firmware-intel linux-firmware-i915'
     list+=' linux-firmware-amd linux-firmware-amd-ucode'
