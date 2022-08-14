@@ -144,7 +144,7 @@ packages_list() {
             # kde
             kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit kinfocenter konsole
             # file manager
-            dolphin dolphin-plugins kfind
+            dolphin dolphin-plugins index kfind
         )
     fi
 
@@ -207,9 +207,11 @@ packages_list() {
                 # plasma
                 plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
                 # kde
-                shelf knetattach kmail kiconthemes ktexteditor ktorrent kdeconnect  partitionmanager akregator kphotoalbum kmymoney cantor kdeedu-data kdevelop kalk rocs calligra skanlite kalgebra marble elisa okteta haruna clip nota buho vvave index communicator isoimagewriter qrca nota kdesdk-thumbnailers knotes kompare falkon sweeper step kmousetool k3b kclock krename
+                shelf knetattach kmail kiconthemes ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble okteta haruna clip buho vvave index communicator qrca kdesdk-thumbnailers knotes falkon sweeper step kmousetool kclock krename kcolorchooser
                 # theme
                 materia-kde materia-kde-plasma materia-kde-kvantum
+                # disks
+                partitionmanager isoimagewriter
                 # print
                 print-manager
                 # mobile
@@ -219,7 +221,7 @@ packages_list() {
                 # image
                 gwenview
                 # audio
-                audiocd-kio juk kwave minuet
+                audiocd-kio juk kwave k3b elisa
                 # video
                 kmediaplayer kdenlive dragon
                 # YouTube
@@ -227,15 +229,19 @@ packages_list() {
                 # camera
                 kamera kamoso
                 # software
-                discover
+                discover discover-backend-apk discover-backend-flatpak discover-backend-fwupd
                 # editor
-                kwrite kate kilen nota
+                kwrite kate kilen ktexteditor nota kompare
                 # office
-                kcalc okular
+                kcalc okular skanlite
                 # input
                 plasma-remotecontrollers
                 # draw
                 kolourpaint
+                # math
+                cantor kalgebra kig kmplot
+                # music
+                minuet
                 # flatpak
                 xdg-desktop-portal xdg-desktop-portal-kde
             )
@@ -851,6 +857,12 @@ enable_services() {
     rc-update add dmesg sysinit
     rc-update add mdev sysinit
     rc-update add hwdrivers sysinit
+
+    rc-update add udev sysinit
+
+    rc-update add localmount boot
+    rc-update add lvm boot
+    rc-update add swap boot
 
     rc-update add hwclock boot
     rc-update add modules boot
