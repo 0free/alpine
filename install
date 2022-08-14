@@ -1,6 +1,7 @@
 #!/bin/bash
 
 bootSize='199MiB'
+swapSize='4096MiB' # '0' to disable
 timezone='Asia/Muscat'
 mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
@@ -120,6 +121,8 @@ packages_list() {
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
             plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-pass
+            # system
+            ksysguard
             # kwallet
             kwallet kwallet-pam kwalletmanager
             # theme
@@ -137,11 +140,11 @@ packages_list() {
             # firewall
             iproute2 net-tools
             # audio
-            plasma-pa
+            plasma-pa kmix
             # kde
-            kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit kinfocenter kmix konsole
+            kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit kinfocenter konsole
             # file manager
-            dolphin dolphin-plugins
+            dolphin dolphin-plugins kfind
         )
     fi
 
@@ -204,7 +207,7 @@ packages_list() {
                 # plasma
                 plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
                 # kde
-                shelf knetattach kfind kmail kiconthemes ktexteditor ktorrent kdeconnect  partitionmanager akregator kphotoalbum kmymoney cantor kdeedu-data kdevelop kalk rocs calligra skanlite kalgebra marble elisa okteta haruna clip nota buho vvave index communicator isoimagewriter qrca nota kdesdk-thumbnailers knotes kompare falkon sweeper step kmousetool k3b kclock
+                shelf knetattach kmail kiconthemes ktexteditor ktorrent kdeconnect  partitionmanager akregator kphotoalbum kmymoney cantor kdeedu-data kdevelop kalk rocs calligra skanlite kalgebra marble elisa okteta haruna clip nota buho vvave index communicator isoimagewriter qrca nota kdesdk-thumbnailers knotes kompare falkon sweeper step kmousetool k3b kclock krename
                 # theme
                 materia-kde materia-kde-plasma materia-kde-kvantum
                 # print
@@ -226,9 +229,9 @@ packages_list() {
                 # software
                 discover
                 # editor
-                kate kile
+                kwrite kate kilen nota
                 # office
-                kwrite kcalc okular
+                kcalc okular
                 # input
                 plasma-remotecontrollers
                 # draw
@@ -370,7 +373,7 @@ packages_list() {
             rsyslog rsyslog-openrc rsyslog-mysql rsyslog-tls rsyslog-http
             # SSL/TLS
             certbot
-            # php 8.1.7
+            # php
             php81 php81-bcmath php81-brotli php81-bz2 php81-cgi php81-curl php81-common php81-phpdbg php81-dom php81-exif php81-fileinfo php81-fpm php81-gd php81-gettext php81-iconv php81-intl php81-litespeed php81-mbstring php81-memcache php81-memcached php81-mysqli php81-mysqlnd php81-opcache php81-openssl php81-phar php81-pear php81-redis php81-session php81-snmp php81-soap php81-xml php81-zip php81-pecl-imagick
             # php admin
             phpmyadmin
@@ -456,7 +459,7 @@ setup_drive() {
     computers=(minimal workstation server)
     menu 'select a computer' computer ${computers[@]}
 
-    desktops=(gnome kde mate)
+    desktops=(gnome kde mate none)
     menu 'select a desktop' desktop ${desktops[@]}
 
     bootloaders=(grub syslinux)
@@ -490,19 +493,34 @@ setup_drive() {
         boot_drive=$drive"1"
         echo "boot_drive=$boot_drive" >> /root/list
 
+        if [[ $swapSize != '0' ]]; then
+            echo ">>> creating swap partition"
+            sgdisk -n 0:0:+$swapSize -c 0:swap -t 0:8200 $drive
+            swap_drive=$drive"2"
+            echo "swap_drive=$swap_drive" >> /root/list
+        fi
+
         echo ">>> creating root partition"
+
         if grep -q zfs /root/list; then
             sgdisk -n 0:0:0 -c 0:$pool -t 0:bf00 $drive
         else
             sgdisk -n 0:0:0 -c 0:linux -t 0:8300 $drive
         fi
-        root_drive=$drive"2"
+
+        root_drive=$drive"3"
         echo "root_drive=$root_drive" >> /root/list
 
         echo ">>> reading partition tables"
         mdev -s
+
         echo ">>> creating boot filesystem"
         mkfs.vfat -F32 -n BOOT $boot_drive
+
+        if [[ $swap_drive ]]; then
+            echo ">>> creating swap filesystem"
+            mkswap $swap_drive
+        fi
 
     fi
 
@@ -666,6 +684,8 @@ set_fstab() {
     fi
 
     echo "$(blkid $boot_drive -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
+
+    echo "$(blkid $swap_drive -o export | grep ^UUID=) none swap sw 0 0" >> /mnt/etc/fstab
 
 }
 
@@ -1148,10 +1168,11 @@ if [[ -f /mnt/root/chroot ]]; then
     chroot /mnt /bin/bash /root/install
 
 else
-        
+
     if [[ -f /root/list ]]; then
         drive=$(. /root/list; echo $drive)
         boot_drive=$(. /root/list; echo $boot_drive)
+        swap_drive=$(. /root/list; echo $swap_drive)
         root_drive=$(. /root/list; echo $root_drive)
     fi
 
