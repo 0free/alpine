@@ -1097,7 +1097,8 @@ install_syslinux() {
 install_grub() {
 
     echo ">>> installing grub bootloader"
-    apk add grub-efi
+    apk fix
+    apk add grub grub-efi
     grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine" --no-floppy
 
     if [[ ! -d /boot/grub/themes/ ]]; then
