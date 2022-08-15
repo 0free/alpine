@@ -468,7 +468,7 @@ setup_drive() {
         fi
     fi
 
-    filesystems=(zfs btrfs zfs xfs ext4 exfat ntfs)
+    filesystems=(btrfs zfs xfs ext4 exfat ntfs)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
     computers=(minimal workstation server)
