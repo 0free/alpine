@@ -1028,7 +1028,7 @@ alias install='sudo apk add'
 alias update='sudo apk update && sudo apk upgrade'
 alias remove='sudo apk del'
 alias c='clear'
-alias service='sudo rc-service'
+
 alias fwupd='fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update'
 alias youtube='yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 00:00:00\"'
 EOF
@@ -1163,7 +1163,7 @@ finish() {
     echo ">>> installation is completed"
     rm -r /root/*
     echo '' > /root/reboot
-    chroot / bash /root/install
+    eval $(exit && chroot / bash /root/install)
 
 }
 
@@ -1180,7 +1180,6 @@ reboot_system() {
 }
 
 set -e
-sleep 1
 
 if [[ -f /mnt/root/chroot ]]; then
 
