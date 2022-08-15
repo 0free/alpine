@@ -915,6 +915,7 @@ EOF
     rc-update add udev-trigger default
     rc-update add udev-postmount default
 
+    rc-update add rsyncd default
     rc-update add networkmanager default
     rc-update add networkmanager-dispatcher default
 
