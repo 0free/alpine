@@ -1,7 +1,7 @@
 #!/bin/bash
 
 bootSize='199MiB'
-swapSize='4096MiB' # '0' to disable
+swapSize='4096MiB'
 timezone='Asia/Muscat'
 mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
@@ -14,7 +14,7 @@ password='0000'
 
 packages_list() {
 
-    PACKAGES+=(
+    packages+=(
         # desktop
         dbus dbus-openrc dbus-x11 iio-sensor-proxy
         ibus ibus-bash-completion
@@ -29,7 +29,9 @@ packages_list() {
         # wayland
         xwayland weston-xwayland
         # hardware
-        bolt pciutils lm-sensors tpm2-tools tpm2-tools-bash-completion
+        bolt pciutils
+        tpm2-tools tpm2-tools-bash-completion
+        lm-sensors lm-sensors-libs lm-sensors-sensord lm-sensors-sensord-openrc
         # efi boot
         efibootmgr
         # base
@@ -84,13 +86,13 @@ packages_list() {
     )
 
     if grep -q btrfs /root/list; then
-        PACKAGES+=(
+        packages+=(
             btrfs-progs btrfs-progs-extra btrfs-progs-libs btrfs-progs-bash-completion
         )
     fi
 
     if grep -q gnome /root/list; then
-        PACKAGES+=(
+        packages+=(
             # gnome session
             gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-colors-common gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome gst-plugin-pipewire
             # connector
@@ -115,7 +117,7 @@ packages_list() {
     fi
 
     if grep -q kde /root/list; then
-        PACKAGES+=(
+        packages+=(
             # desktop
             polkit-kde-agent-1
             # hardware
@@ -152,7 +154,7 @@ packages_list() {
     fi
 
     if grep -q mate /root/list; then
-        PACKAGES+=(
+        packages+=(
             # display manager
             lightdm lightdm-openrc lightdm-bash-completion slick-greeter
             # mate desktop
@@ -254,7 +256,7 @@ packages_list() {
             )
         fi
 
-        PACKAGES+=(
+        packages+=(
             # shell
             starship
             # wine
@@ -372,7 +374,7 @@ packages_list() {
         )
 
         if grep -q gnome /root/list; then
-            PACKAGES+=(
+            packages+=(
                 libreoffice-gnome
             )
         fi
@@ -381,7 +383,7 @@ packages_list() {
 
     if grep -q server /root/list; then
 
-        PACKAGES+=(
+        packages+=(
             # system
             rsyslog rsyslog-openrc rsyslog-mysql rsyslog-tls rsyslog-http
             # SSL/TLS
@@ -466,7 +468,7 @@ setup_drive() {
         fi
     fi
 
-    filesystems=(btrfs zfs xfs ext4 exfat ntfs)
+    filesystems=(zfs btrfs zfs xfs ext4 exfat ntfs)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
     computers=(minimal workstation server)
@@ -476,7 +478,7 @@ setup_drive() {
     menu 'select a desktop' desktop ${desktops[@]}
 
     bootloaders=(grub syslinux)
-    menu 'select a desktop' bootloader ${bootloaders[@]}
+    menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     echo -e "\n"
 
@@ -744,13 +746,13 @@ install_linux() {
 install_packages() {
 
     echo ">>> packages list"
-    PACKAGES=''
+    packages=''
     packages_list
 
     list=''
-    for i in ${!PACKAGES[@]}; do
+    for i in ${!packages[@]}; do
         list+=' '
-        list+=${PACKAGES[$i]}
+        list+=${packages[$i]}
     done
     echo ">>> installing packages"
     apk add --root=/mnt $list
@@ -926,6 +928,9 @@ EOF
 
     rc-update add iwd default
 
+    rc-update add fancontrol default
+    rc-update add sensord default
+
     if grep -q gnome /root/list; then
         rc-update add gdm default
     fi
@@ -998,6 +1003,13 @@ EOF
     ufw enable
     ufw default allow outgoing
     ufw default reject incoming
+
+    echo ">>> configuring lm-sensors"
+    echo i2c-dev >> /etc/modules-load.d/i2c.conf
+    modprobe i2c-dev
+    apk add lm-sensors-detect perl
+    echo "yes" | sensors-detect
+    apk del lm-sensors-detect perl
 
 }
 
