@@ -125,7 +125,7 @@ packages_list() {
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
-            plasma-desktop plasma-workspace plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-pass plasma-vault
+            plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-pass plasma-vault
             # system
             ksysguard
             # kwallet
@@ -1125,7 +1125,6 @@ install_grub() {
     if [[ ! -d /boot/grub/themes/grub-theme/ ]]; then
         echo ">>> cloning grub-theme"
         git clone https://github.com/0free/grub-theme.git
-        mv grub-theme/icons/ /boot/grub/themes/
         mv grub-theme/ /boot/grub/themes/
     fi
 
@@ -1159,7 +1158,6 @@ EOF
         echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
         source /etc/profile.d/zpool_vdev_name_path.sh
         echo "Defaults env_keep += \"ZPOOL_VDEV_NAME_PATH\"" >> /etc/sudoer
-        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX=""|' /etc/default/grub
         list+=' zfs zfscrypt zfsinfo'
     fi
 
