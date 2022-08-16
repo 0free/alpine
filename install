@@ -1036,6 +1036,10 @@ add_commands() {
     fi
 
     cat >> /home/$user/.bashrc << EOF
+export QT_IM_MODULE=ibus
+export GTK_IM_MODULE=ibus
+export XMODIFIERS=@im=ibus
+
 alias search='sudo apk search'
 alias install='sudo apk add'
 alias update='sudo apk update && sudo apk upgrade'
