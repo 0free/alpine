@@ -1011,6 +1011,15 @@ EOF
     echo "yes" | sensors-detect
     apk del lm-sensors-detect perl
 
+    if grep -q kde /root/list; then
+        if [[ ! -d kde/ ]]; then
+            echo ">>> configuring kde"
+            git clone https://github.com/0free/kde.git
+            mv /kde/.config/ /home/$user/
+            rm -r kde/
+        fi
+    fi
+
 }
 
 configure_lightdm() {
