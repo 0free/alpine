@@ -226,7 +226,7 @@ packages_list() {
                 # image
                 gwenview
                 # audio
-                audiocd-kio juk kwave k3b elisa
+                audiocd-kio juk kwave elisa
                 # video
                 kmediaplayer kdenlive dragon
                 # YouTube
@@ -236,7 +236,7 @@ packages_list() {
                 # software
                 discover discover-backend-apk discover-backend-flatpak discover-backend-fwupd
                 # editor
-                kwrite kate kilen ktexteditor nota kompare
+                kwrite kate kile ktexteditor nota kompare
                 # spelling
                 sonnet
                 # office
