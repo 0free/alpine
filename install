@@ -31,7 +31,6 @@ packages_list() {
         # hardware
         bolt pciutils
         tpm2-tools tpm2-tools-bash-completion
-        lm-sensors lm-sensors-libs lm-sensors-sensord lm-sensors-sensord-openrc
         # efi boot
         efibootmgr
         # base
@@ -1002,13 +1001,6 @@ EOF
     sed -i 's|IPV6=yes|IPV6=no|' /etc/default/ufw
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
-
-    echo ">>> configuring lm-sensors"
-    echo i2c-dev >> /etc/modules-load.d/i2c.conf
-    modprobe i2c-dev
-    apk add lm-sensors-detect perl
-    echo "yes" | sensors-detect
-    apk del lm-sensors-detect perl
 
     if grep -q kde /root/list; then
         if [[ ! -d kde/ ]]; then
