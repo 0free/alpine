@@ -938,9 +938,6 @@ EOF
 
     rc-update add iwd default
 
-    rc-update add fancontrol default
-    rc-update add sensord default
-
     if grep -q gnome /root/list; then
         rc-update add gdm default
     fi
