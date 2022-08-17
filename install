@@ -733,9 +733,9 @@ install_linux() {
         fi
         list+=' zfs zfs-openrc zfs-libs'
     elif grep -q virtual /root/list; then
-        list='linux-virt'
+        list+='linux-virt'
     else
-        list='linux-edge'
+        list+='linux-edge'
     fi
 
     if ! grep -q virtual /root/list; then
