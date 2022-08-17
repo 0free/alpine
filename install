@@ -1002,9 +1002,6 @@ EOF
     sed -i 's|IPV6=yes|IPV6=no|' /etc/default/ufw
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
-    ufw enable
-    ufw default allow outgoing
-    ufw default reject incoming
 
     echo ">>> configuring lm-sensors"
     echo i2c-dev >> /etc/modules-load.d/i2c.conf
