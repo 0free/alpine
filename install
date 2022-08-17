@@ -60,7 +60,7 @@ packages_list() {
         # trackpad
         xf86-input-synaptics xf86-input-mtrack
         # browser
-        chromium-chromedriver
+        chromium chromium-chromedriver chromium-swiftshader
         # fonts
         font-hack font-adobe-source-code-pro
         font-arabic-misc
