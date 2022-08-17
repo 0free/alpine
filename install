@@ -20,7 +20,7 @@ packages_list() {
         ibus ibus-bash-completion
         udev-init-scripts udev-init-scripts-openrc
         eudev eudev-openrc eudev-libs
-        musl-locales openrc-bash-completion dconf dconf-bash-completion
+        musl-locales openrc-bash-completion
         xorg-server mesa-dri-gallium xf86-input-libinput
         polkit polkit-openrc polkit-elogind polkit-common polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
@@ -186,6 +186,8 @@ packages_list() {
             packages+=(
                 # gnome apps
                 gnome-software gnome-software-plugin-apk gnome-software-plugin-flatpak gnome-photos gnome-music gnome-clocks gnome-contacts gnome-calculator gnome-maps gnome-logs gnome-remote-desktop gnome-screenshot gnome-boxes gnome-calendar gnome-sound-recorder gnome-font-viewer gnome-colors gnome-bluetooth gnome-podcasts gnome-characters gnome-builder gnome-shortwave getting-things-gnome sushi simple-scan
+                # config
+                dconf dconf-bash-completion dconf-editor dconf-editor-bash-completion
                 # web
                 epiphany
                 # documents
