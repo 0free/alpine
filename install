@@ -185,7 +185,7 @@ packages_list() {
         if grep -q gnome /root/list; then
             packages+=(
                 # gnome apps
-                gnome-software gnome-software-plugin-apk gnome-software-plugin-flatpak gnome-photos gnome-music gnome-clocks gnome-contacts gnome-calculator gnome-maps gnome-logs gnome-remote-desktop gnome-screenshot gnome-boxes gnome-calendar gnome-sound-recorder gnome-font-viewer gnome-colors gnome-bluetooth gnome-podcasts gnome-characters gnome-builder gnome-shortwave getting-things-gnome sushi
+                gnome-software gnome-software-plugin-apk gnome-software-plugin-flatpak gnome-photos gnome-music gnome-clocks gnome-contacts gnome-calculator gnome-maps gnome-logs gnome-remote-desktop gnome-screenshot gnome-boxes gnome-calendar gnome-sound-recorder gnome-font-viewer gnome-colors gnome-bluetooth gnome-podcasts gnome-characters gnome-builder gnome-shortwave getting-things-gnome sushi simple-scan
                 # web
                 epiphany
                 # documents
