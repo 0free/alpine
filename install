@@ -857,7 +857,7 @@ setup_desktop() {
         configure_lightdm
     fi
     add_commands
-    install_mkinitfs
+    make_initramfs
     if grep -q syslinux /root/list; then
         install_syslinux
     fi
@@ -1068,7 +1068,7 @@ EOF
 
 }
 
-install_mkinitfs() {
+make_initramfs() {
 
     echo ">>> installing mkinitfs"
 
@@ -1103,7 +1103,7 @@ install_mkinitfs() {
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
     echo ">>> building initial ramdisk"
-    mkinitfs -b / -f /etc/fstab -C lz4
+    mkinitfs -f /etc/fstab -C lz4
 
 }
 
