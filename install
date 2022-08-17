@@ -472,7 +472,7 @@ setup_drive() {
     filesystems=(btrfs zfs xfs ext4 exfat ntfs)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
-    computers=(minimal workstation server)
+    computers=(minimal workstation server virtual-machine)
     menu 'select a computer' computer ${computers[@]}
 
     desktops=(gnome kde mate none)
@@ -723,21 +723,30 @@ install_linux() {
         apk fix --root=/mnt
     fi
 
+    list+='amd-ucode intel-ucode linux-pam'
+
     if grep -q zfs /root/list; then
-        list='linux-lts'
+        if grep -q virtual /root/list; then
+            list+=' linux-virt zfs-virt'
+        else
+            list+=' linux-lts zfs-lts'
+        fi
+        list+=' zfs zfs-openrc zfs-libs'
+    elif grep -q virtual /root/list; then
+        list='linux-virt'
     else
         list='linux-edge'
     fi
 
-    list+=' amd-ucode intel-ucode linux-pam'
-    list+=' zfs zfs-openrc zfs-libs'
-    list+=' linux-firmware-intel linux-firmware-i915'
-    list+=' linux-firmware-amd linux-firmware-amd-ucode'
-    list+=' linux-firmware-nvidia'
-    list+=' linux-firmware-amdgpu'
-    list+=' linux-firmware-other'
-    list+=' linux-firmware-brcm linux-firmware-qca'
-    list+=' linux-firmware-rtlwifi linux-firmware-rtl_bt linux-firmware-rtl_nic'
+    if ! grep -q virtual /root/list; then
+        list+=' linux-firmware-intel linux-firmware-i915'
+        list+=' linux-firmware-amd linux-firmware-amd-ucode'
+        list+=' linux-firmware-nvidia'
+        list+=' linux-firmware-amdgpu'
+        list+=' linux-firmware-other'
+        list+=' linux-firmware-brcm linux-firmware-qca'
+        list+=' linux-firmware-rtlwifi linux-firmware-rtl_bt linux-firmware-rtl_nic'
+    fi
 
     echo ">>> installing linux"
     apk add --root=/mnt $list
