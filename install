@@ -1201,7 +1201,8 @@ reboot_system() {
     echo ">>> un-mounting /mnt"
     umount -Rfl /mnt
     if grep -q zfs /root/list; then
-        zfs umount -a && zpool export $pool
+        zfs umount -a
+        zpool export $pool
     fi
     read -p ">>> press enter to reboot"
     reboot
