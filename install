@@ -55,8 +55,6 @@ packages_list() {
         pipewire pipewire-media-session pipewire-alsa pipewire-libs pipewire-pulse pipewire-tools
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
-        # firmware
-        fwupd fwupd-openrc fwup-bash-completion fwupd-efi fwupd-plugin-bios fwupd-plugin-cpu fwupd-plugin-tpm fwupd-plugin-nvme fwupd-plugin-ata
         # trackpad
         xf86-input-synaptics xf86-input-mtrack
         # browser
@@ -86,8 +84,14 @@ packages_list() {
 
     if grep -q btrfs /root/list; then
         packages+=(
+            # btrfs
             btrfs-progs btrfs-progs-extra btrfs-progs-libs btrfs-progs-bash-completion
         )
+    fi
+
+    if ! grep -q virtual /root/list; then
+        # firmware
+        fwupd fwupd-openrc fwup-bash-completion fwupd-efi fwupd-plugin-bios fwupd-plugin-cpu fwupd-plugin-tpm fwupd-plugin-nvme fwupd-plugin-ata
     fi
 
     if grep -q gnome /root/list; then
@@ -940,10 +944,13 @@ EOF
 
     rc-update add bluealsa default
     rc-update add bluetooth default
-    rc-update add fwupd default
     rc-update add ufw default
 
     rc-update add iwd default
+
+    if ! grep -q virtual /root/list; then
+        rc-update add fwupd default
+    fi
 
     if grep -q gnome /root/list; then
         rc-update add gdm default
