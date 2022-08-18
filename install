@@ -86,12 +86,14 @@ packages_list() {
         )
     fi
 
-    if ! grep -q virtual /root/list; then
+    if ! grep -q VirtualBox /root/list; then
         # hardware
         bolt pciutils
         tpm2-tools tpm2-tools-bash-completion
         # firmware
         fwupd fwupd-openrc fwup-bash-completion fwupd-efi fwupd-plugin-bios fwupd-plugin-cpu fwupd-plugin-tpm fwupd-plugin-nvme fwupd-plugin-ata
+    else
+        virtualbox-guest-additions-x11
     fi
 
     if grep -q gnome /root/list; then
@@ -476,7 +478,7 @@ setup_drive() {
     filesystems=(btrfs zfs xfs ext4 exfat ntfs)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
-    computers=(minimal workstation server virtual-machine)
+    computers=(minimal workstation server VirtualBoxBox)
     menu 'select a computer' computer ${computers[@]}
 
     desktops=(gnome kde mate none)
@@ -730,19 +732,19 @@ install_linux() {
     list+='amd-ucode intel-ucode linux-pam'
 
     if grep -q zfs /root/list; then
-        if grep -q virtual /root/list; then
+        if grep -q VirtualBox /root/list; then
             list+=' linux-virt zfs-virt'
         else
             list+=' linux-lts zfs-lts'
         fi
         list+=' zfs zfs-openrc zfs-libs'
-    elif grep -q virtual /root/list; then
+    elif grep -q VirtualBox /root/list; then
         list+='linux-virt'
     else
         list+='linux-edge'
     fi
 
-    if ! grep -q virtual /root/list; then
+    if ! grep -q VirtualBox /root/list; then
         list+=' linux-firmware-intel linux-firmware-i915'
         list+=' linux-firmware-amd linux-firmware-amd-ucode'
         list+=' linux-firmware-nvidia'
@@ -948,7 +950,10 @@ EOF
 
     rc-update add iwd default
 
-    if ! grep -q virtual /root/list; then
+    if grep -q VirtualBox /root/list; then
+        rc-update add virtualbox-guest-additions default
+        rc-update add virtualbox-drm-client default
+    else
         rc-update add fwupd default
     fi
 
@@ -1095,7 +1100,7 @@ make_initramfs() {
 
     modules=(base nvme ata ide scsi usb lvm kms mmc keymap virtio)
 
-    if ! grep -q virtual /root/list; then
+    if ! grep -q VirtualBox /root/list; then
         modules+=(i915 intel_agp)
         modules+=(amdgpu)
         modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
