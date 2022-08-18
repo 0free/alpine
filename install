@@ -1102,6 +1102,9 @@ make_initramfs() {
         list+=' '
     done
 
+    echo ">>> create /lib/modules/5.15.59-0-lts/"
+    mkdir /lib/modules/5.15.59-0-lts/
+
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
@@ -1189,7 +1192,7 @@ finish() {
     echo ">>> installation is completed"
     rm -r /root/*
     echo '' > /root/reboot
-    eval $(exit && chroot / bash /root/install)
+    chroot / exit && bash /root/install
 
 }
 
