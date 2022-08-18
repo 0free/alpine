@@ -28,9 +28,6 @@ packages_list() {
         hwids hwids-net hwids-pci hwids-usb hwids-udev
         # wayland
         xwayland weston-xwayland
-        # hardware
-        bolt pciutils
-        tpm2-tools tpm2-tools-bash-completion
         # efi boot
         efibootmgr
         # base
@@ -40,7 +37,7 @@ packages_list() {
         # git
         git git-bash-completion
         # compression
-        brotli zstd zlib libzip zip lz4 lzo unzip xz
+        brotli zstd zlib zip lz4 lzo unzip xz
         # disks
         e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk udisks2 mmc-utils jfsutils
         # firewall
@@ -90,6 +87,9 @@ packages_list() {
     fi
 
     if ! grep -q virtual /root/list; then
+        # hardware
+        bolt pciutils
+        tpm2-tools tpm2-tools-bash-completion
         # firmware
         fwupd fwupd-openrc fwup-bash-completion fwupd-efi fwupd-plugin-bios fwupd-plugin-cpu fwupd-plugin-tpm fwupd-plugin-nvme fwupd-plugin-ata
     fi
@@ -1158,6 +1158,7 @@ install_grub() {
     if [[ ! -d /boot/grub/themes/grub-theme/ ]]; then
         echo ">>> cloning grub-theme"
         git clone https://github.com/0free/grub-theme.git
+        rm -r grub-theme/.git
         mv grub-theme/ /boot/grub/themes/
     fi
 
