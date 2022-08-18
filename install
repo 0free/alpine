@@ -895,6 +895,9 @@ enable_services() {
     rc-update add killprocs shutdown
     rc-update add savecache shutdown
 
+    rc-update add sd-mod boot
+    rc-update add usb-storage boot
+
     if grep -q zfs /root/list; then
         rc-update add zfs-import boot
         rc-update add zfs-mount boot
@@ -916,6 +919,10 @@ start() {
 EOF
         chmod +x /etc/init.d/btrfs-scan
         rc-update add btrfs-scan boot
+    fi
+
+    if grep -q ext4 /root/list; then
+        rc-update add ext4 boot
     fi
 
     rc-update add dbus default
