@@ -93,7 +93,7 @@ packages_list() {
         # firmware
         fwupd fwupd-openrc fwup-bash-completion fwupd-efi fwupd-plugin-bios fwupd-plugin-cpu fwupd-plugin-tpm fwupd-plugin-nvme fwupd-plugin-ata
     else
-        virtualbox-guest-additions-x11
+        virtualbox-guest-additions virtualbox-guest-additions-openrc virtualbox-guest-additions-x11
     fi
 
     if grep -q gnome /root/list; then
