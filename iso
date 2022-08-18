@@ -11,11 +11,11 @@ sudo apk add mtools dosfstools grub grub-efi
 
 USER=$(whoami)
 
-if ! sudo groups | grep -q abuild; then
+if ! groups | grep -q abuild; then
    sudo addgroup abuild
 fi
 
-if ! sudo groups $USER | grep -q abuild; then
+if ! groups $USER | grep -q abuild; then
    sudo usermod -a -G abuild $USER
 fi
 
@@ -32,7 +32,7 @@ else
 fi
 
 cd ~/aports/scripts/
-#curl -LO raw.githubusercontent.com/0free/AlpineLinux/1/apkovl.sh
+curl -LO raw.githubusercontent.com/0free/AlpineLinux/1/apkovl.sh
 cd ~
 
 cat << EOF > ~/aports/scripts/mkimg.linux.sh
