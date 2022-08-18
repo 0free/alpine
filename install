@@ -1072,10 +1072,13 @@ make_initramfs() {
 
     echo ">>> installing mkinitfs"
 
-    modules=(base nvme ata ide scsi usb lvm ext4 kms mmc keymap virtio)
-    modules+=(i915 intel_agp)
-    modules+=(amdgpu)
-    modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+    modules=(base nvme ata ide scsi usb lvm kms mmc keymap virtio)
+
+    if ! grep -q virtual /root/list; then
+        modules+=(i915 intel_agp)
+        modules+=(amdgpu)
+        modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+    fi
 
     if grep -q btrfs /root/list; then
         modules+=(btrfs)
