@@ -977,6 +977,13 @@ configure_alpine() {
 
     echo ">>> configuring alpine"
 
+    cat > /etc/default/locale << EOF
+LANG=en_US.UTF-8
+LANG=ar_OM.UTF-8
+LANGUAGE="en_US:en"
+LANGUAGE="ar_OM:ar"
+EOF
+
     if [[ -d /etc/NetworkManager/ ]]; then
         cat > /etc/NetworkManager/NetworkManager.conf << EOF
 [main]
