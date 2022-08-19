@@ -917,9 +917,6 @@ enable_services() {
     rc-update add killprocs shutdown
     rc-update add savecache shutdown
 
-    rc-update add sd-mod boot
-    rc-update add usb-storage boot
-
     if grep -q zfs /root/list; then
         rc-update add zfs-import boot
         rc-update add zfs-mount boot
