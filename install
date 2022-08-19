@@ -1230,11 +1230,8 @@ finish() {
     echo ">>> installation is completed"
     rm -r /root/*
     echo '' > /root/reboot
-    echo ">>> changing root"
-    umount /mnt/proc
-    umount /mnt/dev
-    umount /mnt/sys
-    chroot / bash /root/install
+    $(basename $0) && exit
+    #exec $(exit && bash install)
 
 }
 
