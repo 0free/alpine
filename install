@@ -1039,6 +1039,7 @@ EOF
     if [[ ! -d /usr/share/icons/windows-11-icons/ ]]; then
         echo ">>> cloning Windows-11-icons"
         git clone https://github.com/0free/windows-11-icons.git
+        rm -r windows-11-icons/.git
         mv windows-11-icons/ /usr/share/icons/
     fi
 
@@ -1111,7 +1112,7 @@ make_initramfs() {
 
     echo ">>> installing mkinitfs"
 
-    modules=(base nvme ata ide scsi usb lvm keymap virtio network dhcp kms mmc)
+    modules=(base nvme ata ide scsi usb lvm keymap virtio kms mmc)
 
     if ! grep -q VirtualBox /root/list; then
         modules+=(i915 intel_agp)
@@ -1202,7 +1203,7 @@ EOF
     list+=' usb usbms usb_keyboard at_keyboard'
     list+=' linux'
     list+=' chain'
-    list+=' btrfs xfs ext4 fat exfat ntfs'
+    list+=' btrfs xfs fat exfat ntfs'
 
     if grep -q zfs /root/list; then
         echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
