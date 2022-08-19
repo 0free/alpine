@@ -1189,24 +1189,21 @@ install_grub() {
 loglevel=0
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=1
-GRUB_SAVEDEFAULT=TRUE
-GRUB_DISABLE_RECOVERY=TRUE
+GRUB_SAVEDEFAULT=true
+GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
 GRUB_DISABLE_OS_PROBER=FALSE
-GRUB_DISABLE_SUBMENU=TRUE
+GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
 EOF
 
-    list='usb usb_keyboard msdospart part_gpt part_msdos part_apple chain ntfs'
-
-    if grep -q btrfs /root/list; then
-        list+=' btrfs'
-    fi
-
-    if grep -q xfs /root/list; then
-        list+=' xfs'
-    fi
+    list='msdospart part_msdos part_gpt part_apple'
+    list+=' usb usbms usb_keyboard at_keyboard'
+    list+=' acpi ahci ehci ohci uhci'
+    list+=' linux'
+    list+=' chain ntfscomp'
+    list+=' btrfs xfs ext4 fat exfat ntfs'
 
     if grep -q zfs /root/list; then
         echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
