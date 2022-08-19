@@ -1233,7 +1233,7 @@ finish() {
     echo ">>> installation is completed"
     rm -r /root/*
     echo '' > /root/reboot
-    chroot / exit && bash /root/install
+    chroot / bash /root/install
 
 }
 
