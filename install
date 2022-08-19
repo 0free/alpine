@@ -58,10 +58,9 @@ packages_list() {
         chromium chromium-chromedriver chromium-swiftshader
         # fonts
         font-hack font-adobe-source-code-pro
-        font-arabic-misc
-        font-noto font-noto-arabic font-noto-kufi-arabic font-noto-naskh-arabic
+        font-arabic-misc font-noto-arabic
         font-inter font-opensans font-roboto font-xfree86-type1
-        ttf-dejavu ttf-font-awesome ttf-freefont ttf-droid
+        ttf-font-awesome ttf-dejavu ttf-freefont ttf-droid
         font-awesome font-awesome-free font-awesome-brands
         # mesa
         mesa mesa-vulkan-layers
