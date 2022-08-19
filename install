@@ -1200,9 +1200,8 @@ EOF
 
     list='msdospart part_msdos part_gpt part_apple'
     list+=' usb usbms usb_keyboard at_keyboard'
-    list+=' acpi ahci ehci ohci uhci'
     list+=' linux'
-    list+=' chain ntfscomp'
+    list+=' chain'
     list+=' btrfs xfs ext4 fat exfat ntfs'
 
     if grep -q zfs /root/list; then
