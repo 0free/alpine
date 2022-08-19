@@ -1178,7 +1178,7 @@ install_grub() {
     if [[ ! -d /boot/grub/themes/grub-theme/ ]]; then
         echo ">>> cloning grub-theme"
         git clone https://github.com/0free/grub-theme.git
-        rm -r grub-theme/.git
+        rm -r grub-theme/.git/
         mv grub-theme/ /boot/grub/themes/
     fi
 
