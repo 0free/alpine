@@ -861,8 +861,8 @@ create_user() {
     if id $user &>/dev/null; then
         userdel $user
     fi
-    echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/wheel
-    chmod 0400 /etc/sudoers.d/$user
+    echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/v
+    chmod 0400 /etc/sudoers.d/wheel
     echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user $user
     adduser $user video
     adduser $user audio
