@@ -27,7 +27,7 @@ packages_list() {
         # hardware
         hwids hwids-net hwids-pci hwids-usb hwids-udev
         # wayland
-        xwayland weston-xwayland
+        xwayland
         # efi boot
         efibootmgr
         # base
@@ -37,7 +37,7 @@ packages_list() {
         # git
         git git-bash-completion
         # compression
-        brotli zstd zlib zip lz4 lzo unzip xz
+        brotli zstd zlib zip lz4 lzo unzip xz bzip2
         # disks
         e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk udisks2 mmc-utils jfsutils
         # firewall
@@ -45,8 +45,6 @@ packages_list() {
         # network
         ethtool ethtool-bash-completion rsync rsync-openrc
         networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn networkmanager-initrd-generator
-        # wireless
-        wireless-regdb wireless-tools iwd iwd-openrc
         # sound
         alsa-plugins-pulse alsa-lib
         pipewire pipewire-media-session pipewire-alsa pipewire-libs pipewire-pulse pipewire-tools
@@ -62,14 +60,6 @@ packages_list() {
         font-inter font-opensans font-roboto font-xfree86-type1
         ttf-font-awesome ttf-dejavu ttf-freefont ttf-droid
         font-awesome font-awesome-free font-awesome-brands
-        # mesa
-        mesa mesa-vulkan-layers
-        # intel GPU
-        mesa-vulkan-intel intel-media-driver
-        # vulkan
-        vulkan-loader vulkan-tools vulkan-validation-layers
-        # nvidia GPU
-        nvidia-src
         # keyboard
         setxkbmap
         # timezone
@@ -92,6 +82,16 @@ packages_list() {
             tpm2-tools tpm2-tools-bash-completion
             # firmware
             fwupd fwupd-openrc fwup-bash-completion fwupd-efi fwupd-plugin-bios fwupd-plugin-cpu fwupd-plugin-tpm fwupd-plugin-nvme fwupd-plugin-ata
+            # mesa
+            mesa mesa-vulkan-layers
+            # intel GPU
+            mesa-vulkan-intel intel-media-driver
+            # vulkan
+            vulkan-loader vulkan-tools vulkan-validation-layers
+            # nvidia GPU
+            nvidia-src
+            # wireless
+            wireless-regdb wireless-tools iwd iwd-openrc
         )
     else
         packages+=(
@@ -1193,7 +1193,7 @@ GRUB_TIMEOUT=1
 GRUB_SAVEDEFAULT=true
 GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
-GRUB_DISABLE_OS_PROBER=FALSE
+GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
