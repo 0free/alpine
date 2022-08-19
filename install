@@ -690,6 +690,9 @@ install_base() {
     cp /dev/null /mnt/dev/null
     chmod 0666 /mnt/dev/null
 
+    echo ">>> loading modules"
+    /sbin/modprobe efivars
+
     set_network
     set_fstab
     setup_linux
@@ -823,8 +826,6 @@ set_host() {
 
 change_root() {
 
-    echo ">>> loading modules"
-    /sbin/modprobe efivars
     echo ">>> copying install script"
     cp /root/list /mnt/root/list
     cp /root/install /mnt/root/install
@@ -1230,6 +1231,10 @@ finish() {
     echo ">>> installation is completed"
     rm -r /root/*
     echo '' > /root/reboot
+    echo ">>> changing root"
+    umount /mnt/proc
+    umount /mnt/dev
+    umount /mnt/sys
     chroot / bash /root/install
 
 }
