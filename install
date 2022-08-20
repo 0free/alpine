@@ -1230,8 +1230,7 @@ finish() {
     echo ">>> installation is completed"
     rm -r /root/*
     echo '' > /root/reboot
-    $(basename $0) && exit
-    #exec $(exit && bash install)
+    exec $(exit && bash install)
 
 }
 
@@ -1243,7 +1242,6 @@ reboot_system() {
         zfs umount -a
         zpool export $pool
     fi
-    read -p ">>> press enter to reboot"
     reboot
 
 }
