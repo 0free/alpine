@@ -835,7 +835,7 @@ change_root() {
     mount --bind /proc /mnt/proc
     mount --bind /dev /mnt/dev
     mount --bind /sys /mnt/sys
-    chroot /mnt bash /root/install
+    chroot /mnt /bin/bash /root/install
 
 }
 
@@ -1079,10 +1079,6 @@ add_commands() {
     echo ">>> adding bashrc"
     echo "" > /home/$user/.bashrc
 
-    if grep -q workstation /root/list; then
-        echo "eval $(starship init bash)" >> /home/$user/.bashrc
-    fi
-
     cat >> /home/$user/.bashrc << EOF
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
@@ -1232,7 +1228,7 @@ finish() {
     echo ">>> installation is completed"
     rm -r /root/*
     echo '' > /root/reboot
-    exec $(exit && bash install)
+    exec $(exit && /bin/bash /root/install)
 
 }
 
