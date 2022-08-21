@@ -40,11 +40,10 @@ packages_list() {
         brotli zstd zlib zip lz4 lzo unzip xz bzip2
         # disks
         e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk udisks2 mmc-utils jfsutils
+        # network
+        networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind
         # firewall
         gufw ufw ufw-openrc ufw-bash-completion iptables iptables-openrc
-        # network
-        ethtool ethtool-bash-completion rsync rsync-openrc
-        networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn networkmanager-initrd-generator
         # sound
         alsa-plugins-pulse alsa-lib
         pipewire pipewire-media-session pipewire-alsa pipewire-libs pipewire-pulse pipewire-tools
@@ -92,6 +91,9 @@ packages_list() {
             nvidia-src
             # wireless
             wireless-regdb wireless-tools iwd iwd-openrc
+            # network
+            ethtool ethtool-bash-completion rsync rsync-openrc
+            networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn networkmanager-initrd-generator
         )
     else
         packages+=(
