@@ -16,11 +16,11 @@ packages_list() {
 
     packages+=(
         # desktop
+        busybox musl musl-locales openrc openrc-bash-completion
         dbus dbus-openrc dbus-x11 iio-sensor-proxy
         ibus ibus-bash-completion
         udev-init-scripts udev-init-scripts-openrc
         eudev eudev-openrc eudev-libs
-        musl-locales openrc-bash-completion
         xorg-server mesa-dri-gallium xf86-input-libinput
         polkit polkit-openrc polkit-elogind polkit-common polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
@@ -735,7 +735,6 @@ setup_linux() {
 
     install_linux
     install_packages
-    set_locale
     set_timezone
     set_host
     change_root
@@ -793,13 +792,6 @@ install_packages() {
     echo ">>> installing packages"
     apk add --root=/mnt $list
     apk fix --root=/mnt
-
-}
-
-set_locale() {
-
-    echo ">>> setting locale"
-    sed -i 's|#unicode="NO"|unicode="YES"|' /mnt/etc/rc.conf
 
 }
 
@@ -1004,6 +996,14 @@ configure_alpine() {
 
     echo ">>> configuring alpine"
 
+    sed -i 's|#unicode="NO"|unicode="YES"|' /etc/rc.conf
+    sed -i 's|#rc_parallel="NO"|rc_parallel="YES"|' /etc/rc.conf
+    sed -i 's|#rc_depend_strict="YES"|rc_depend_strict="NO"|' /etc/rc.conf
+    sed -i 's|#rc_logger="NO"|rc_logger="YES"|' /etc/rc.conf
+    sed -i 's|#rc_sighup="NO"|rc_sighup="YES"|' /etc/rc.conf
+    sed -i 's|#rc_timeout_stopsec="90"|rc_timeout_Stopsec="0"|' /etc/rc.conf
+    sed -i 's|#rc_send_sigkill="YES"|rc_send_sigkill="YES"|' /etc/rc.conf
+
     cat > /etc/default/locale << EOF
 LANG=en_US.UTF-8
 LANG=ar_OM.UTF-8
@@ -1093,16 +1093,6 @@ alias c='clear'
 alias fwupd='fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update'
 alias youtube='yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 00:00:00\"'
 EOF
-
-    if grep -q gnome /root/list; then
-        editor=gedit
-    elif grep -q kde /root/list; then
-        editor=kate
-    elif grep -q mate /root/list; then
-        editor=pluma
-    fi
-
-    echo "alias edit='SUDO_EDITOR=$editor sudoedit'" >> /home/$user/.bashrc
 
 }
 
