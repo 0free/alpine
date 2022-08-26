@@ -128,28 +128,26 @@ packages_list() {
 
     if grep -q kde /root/list; then
         packages+=(
-            # desktop
-            polkit-kde-agent-1
             # hardware
             solid
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
             plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-pass plasma-vault
+            # required
+            polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools kio-fuse kconfig kconfigwidgets
             # system
-            ksysguard
+            systemsettings ksysguard
             # kwallet
             kwallet kwallet-pam kwalletmanager kio-kwallet
             # theme
-            kiconthemes breeze breeze-gtk breeze-icons breeze-grub kholidays
+            kiconthemes breeze breeze-gtk breeze-icons
             # bluetooth
             bluedevil
             # power
             powerdevil
             # wayland
             plasma-wayland-protocols kwayland kwayland-integration
-            # system
-            systemsettings kde-gtk-config
             # network
             plasma-nm
             # firewall
@@ -157,9 +155,13 @@ packages_list() {
             # audio
             plasma-pa kmix
             # kde
-            ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit kinfocenter konsole kde-gtk-config kio-fuse
+            ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit konsole kde-gtk-config
             # file manager
-            dolphin dolphin-plugins index kfind
+            dolphin dolphin-plugins kfind
+            # archive
+            ark
+            # software
+            discover discover-backend-apk discover-backend-flatpak discover-backend-fwupd
         )
     fi
 
@@ -212,8 +214,6 @@ packages_list() {
                 glade ghex baobab confy
                 # bluetooth
                 blueman
-                # tools
-                karchive ark
                 # flatpak
                 xdg-desktop-portal xdg-desktop-portal-gnome xdg-desktop-portal-gtk xdg-user-dirs
             )
@@ -222,11 +222,9 @@ packages_list() {
         if grep -q kde /root/list; then
             packages+=(
                 # plasma
-                plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
+                plasma-bigscreen plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
                 # kde
-                shelf knetattach kmail kiconthemes ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble haruna clip buho vvave index communicator qrca kdesdk-thumbnailers knotes falkon sweeper step kmousetool kclock krename kcolorchooser kunitconversion
-                # theme
-                materia-kde materia-kde-plasma materia-kde-kvantum
+                shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool kclock krename kcolorchooser kunitconversion
                 # disks
                 partitionmanager isoimagewriter
                 # print
@@ -234,21 +232,17 @@ packages_list() {
                 # mobile
                 koko angelfish calindori
                 # screen
-                spectacle kscreenlocker plasma-bigscreen kruler
+                spectacle kscreenlocker kruler
                 # image
                 gwenview
                 # audio
-                audiocd-kio juk kwave elisa
+                juk kwave elisa
                 # video
-                kmediaplayer kdenlive dragon
+                kmediaplayer kdenlive dragon haruna
                 # YouTube
                 plasmatube audiotube
                 # camera
                 kamera kamoso
-                # software
-                discover discover-backend-apk discover-backend-flatpak discover-backend-fwupd
-                # editor
-                kwrite kate kile ktexteditor nota kompare
                 # spelling
                 sonnet
                 # office
