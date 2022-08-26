@@ -71,6 +71,7 @@ packages_list() {
         packages+=(
             # btrfs
             btrfs-progs btrfs-progs-extra btrfs-progs-libs btrfs-progs-bash-completion
+            snapper snapper-bash-completion
         )
     fi
 
@@ -165,33 +166,6 @@ packages_list() {
         )
     fi
 
-    if grep -q mate /root/list; then
-        packages+=(
-            # display manager
-            lightdm lightdm-openrc lightdm-bash-completion slick-greeter
-            # mate desktop
-            mate-desktop mate-common mate-polkit
-            mate-session-manager
-            mate-panel mate-control-center mate-tweak mate-utils mate-media
-            mate-settings-daemon mate-notification-daemon
-            mate-terminal mate-system-monitor mate-power-manager mate-calc
-            # mate theme
-            mate-icon-theme hicolor-icon-theme mint-y-icons
-            # mate applet
-            mate-applets mate-sensors-applet mate-indicator-applet
-            # mate menu
-            mate-menus mozo
-            # file manager
-            caja caja-extensions
-            # text editor
-            pluma
-            # view
-            atril eom
-            # archieve
-            engrampa
-        )
-    fi
-
     if grep -q workstation /root/list; then
 
         if grep -q gnome /root/list; then
@@ -222,7 +196,7 @@ packages_list() {
         if grep -q kde /root/list; then
             packages+=(
                 # plasma
-                plasma-bigscreen plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
+                plasma-nano plasma-bigscreen plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
                 # kde
                 shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool kclock krename kcolorchooser kunitconversion
                 # disks
@@ -480,7 +454,7 @@ setup_drive() {
     computers=(minimal workstation server VirtualBoxBox)
     menu 'select a computer' computer ${computers[@]}
 
-    desktops=(gnome kde mate none)
+    desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
     bootloaders=(grub syslinux)
@@ -863,9 +837,6 @@ setup_desktop() {
 
     enable_services
     configure_alpine
-    if grep -q mate /root/list; then
-        configure_lightdm
-    fi
     add_commands
     make_initramfs
     if grep -q syslinux /root/list; then
@@ -966,10 +937,6 @@ EOF
         rc-update add sddm default
     fi
 
-    if grep -q mate /root/list; then
-        rc-update add lightdm default
-    fi
-
     if grep -q workstation /root/list; then
         rc-update add cupsd default
     fi
@@ -1048,7 +1015,7 @@ EOF
         if [[ ! -d kde/ ]]; then
             echo ">>> configuring kde"
             git clone https://github.com/0free/kde.git
-            mv /kde/.config/ /home/$user/
+            mv /kde/config/* /home/$user/.config/
             rm -r kde/
         fi
     fi
@@ -1151,7 +1118,7 @@ install_grub() {
 
     echo ">>> installing grub bootloader"
     apk fix
-    apk add grub grub-efi
+    apk add grub grub-efi grub-bash-completion
     grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine" --no-floppy
 
     if [[ ! -d /boot/grub/themes/ ]]; then
