@@ -134,7 +134,7 @@ packages_list() {
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
-            plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-pass plasma-vault
+            plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings
             # required
             polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools kio-fuse kconfig kconfigwidgets
             # system
@@ -1025,6 +1025,7 @@ EOF
         fi
     fi
 
+    echo ">>> setting ~/.config"
     chown -R $user:wheel /home/$user/
     chmod -R 770 /home/$user/
 
@@ -1192,7 +1193,7 @@ finish() {
     apk del *-doc
     echo ">>> installation is completed"
     echo '' > /root/reboot
-    exec $(exit; bash install)
+    exec $(exit && bash install)
 
 }
 
@@ -1210,36 +1211,38 @@ reboot_system() {
 
 set -e
 
-if [[ -f /mnt/root/chroot ]]; then
-    change_root
+if [[ -f /mnt/root/reboot ]]; then
+    reboot_system
 else
-    if [[ -f /root/list ]]; then
-        drive=$(. /root/list; echo $drive)
-        boot_drive=$(. /root/list; echo $boot_drive)
-        swap_drive=$(. /root/list; echo $swap_drive)
-        root_drive=$(. /root/list; echo $root_drive)
-    fi
-    if [[ -f /root/chroot ]]; then
-        if [ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]; then
-            USER=$(ls /home)
-            setup_desktop
-        else
-            configure
-        fi
+    if [[ -f /mnt/root/chroot ]]; then
+        change_root
     else
-        if mountpoint -q /mnt; then
-            if [[ -f /mnt/root/reboot ]]; then
-                reboot_system
-            elif [[ -f /mnt/boot/initramfs-* ]]; then
-                install_packages
-            elif [[ -d /mnt/root/ ]]; then
-                setup_linux
+        if [[ -f /root/list ]]; then
+            drive=$(. /root/list; echo $drive)
+            boot_drive=$(. /root/list; echo $boot_drive)
+            swap_drive=$(. /root/list; echo $swap_drive)
+            root_drive=$(. /root/list; echo $root_drive)
+        fi
+        if [[ -f /root/chroot ]]; then
+            if [ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]; then
+                USER=$(ls /home)
+                setup_desktop
             else
-                install_base
+                configure
             fi
         else
-            clear
-            setup_drive
+            if mountpoint -q /mnt; then
+                if [[ -f /mnt/boot/initramfs-* ]]; then
+                    install_packages
+                elif [[ -d /mnt/root/ ]]; then
+                    setup_linux
+                else
+                    install_base
+                fi
+            else
+                clear
+                setup_drive
+            fi
         fi
     fi
 fi
