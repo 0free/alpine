@@ -716,20 +716,20 @@ install_linux() {
         apk fix --root=/mnt
     fi
 
-    list+='amd-ucode intel-ucode linux-pam'
+    list='amd-ucode intel-ucode'
+    list+=' linux-pam'
 
-    if grep -q zfs /root/list; then
-        if grep -q VirtualBox /root/list; then
-            list+=' linux-virt zfs-virt'
-        else
-            list+=' linux-lts zfs-lts'
-        fi
-        list+=' zfs zfs-openrc zfs-libs'
-    elif grep -q VirtualBox /root/list; then
+    if grep -q VirtualBox /root/list; then
         list+=' linux-virt'
+        if grep -q zfs /root/list; then
+            list+=' zfs-virt'   
+        fi
     else
-        list+=' linux-edge'
+        list+=' linux-lts zfs-lts'
     fi
+
+    list+=' zfs zfs-openrc zfs-libs'
+    list+=' linux-edge'
 
     if ! grep -q VirtualBox /root/list; then
         list+=' linux-firmware-intel linux-firmware-i915'
@@ -1101,7 +1101,7 @@ make_initramfs() {
         list+=' '
     done
 
-    if [[ ! -d /lib/modules/5.15.59-0-lts/ ]]; then
+    if [[ ! -d /lib/modules/5.15.62-2-lts/ ]]; then
         echo ">>> create /lib/modules/5.15.62-2-lts/"
         mkdir /lib/modules/5.15.62-2-lts/
     fi
@@ -1187,9 +1187,8 @@ finish() {
     echo ">>> cleaning apks"
     apk del *-doc
     echo ">>> installation is completed"
-    rm -r /root/*
     echo '' > /root/reboot
-    exec $(exit && /bin/bash /root/install)
+    exec $(exit; bash install)
 
 }
 
