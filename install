@@ -720,16 +720,19 @@ install_linux() {
     list+=' linux-pam'
 
     if grep -q VirtualBox /root/list; then
-        list+=' linux-virt'
         if grep -q zfs /root/list; then
-            list+=' zfs-virt'   
+            list+=' linux-virt zfs-virt'
+        else
+            list+=' linux-virt'
         fi
-    else
-        list+=' linux-lts zfs-lts'
     fi
 
-    list+=' zfs zfs-openrc zfs-libs'
-    list+=' linux-edge'
+    if grep -q zfs /root/list; then
+        list+=' linux-lts zfs-lts'
+        list+=' zfs zfs-openrc zfs-libs'
+    else
+        list+=' linux-edge'
+    fi
 
     if ! grep -q VirtualBox /root/list; then
         list+=' linux-firmware-intel linux-firmware-i915'
