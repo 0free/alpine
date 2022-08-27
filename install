@@ -1113,7 +1113,7 @@ make_initramfs() {
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
     echo ">>> building initial ramdisk"
-    mkinitfs -b / -f /etc/fstab -C lz4
+    mkinitfs -b / -f /etc/fstab
 
 }
 
