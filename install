@@ -1025,6 +1025,9 @@ EOF
         fi
     fi
 
+    chown -R $user:wheel /home/$user/
+    chmod -R 770 /home/$user/
+
 }
 
 configure_lightdm() {
