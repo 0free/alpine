@@ -1163,13 +1163,11 @@ EOF
 
     list='msdospart part_msdos part_gpt part_apple'
     list+=' usb usbms usb_keyboard at_keyboard'
-    list+=' linux'
-    list+=' chain'
-    list+=' btrfs xfs fat exfat ntfs'
+    list+=' linux chain btrfs xfs fat exfat ntfs'
 
     if grep -q zfs /root/list; then
-        echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
-        source /etc/profile.d/zpool_vdev_name_path.sh
+        #echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
+        #source /etc/profile.d/zpool_vdev_name_path.sh
         list+=' zfs zfscrypt zfsinfo'
     fi
 
