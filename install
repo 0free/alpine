@@ -1016,6 +1016,7 @@ EOF
         if [[ ! -d kde/ ]]; then
             echo ">>> configuring kde"
             git clone https://github.com/0free/kde.git
+            mkdir /home/$user/.config/
             mv /kde/config/* /home/$user/.config/
             rm -r kde/
         fi
