@@ -453,7 +453,7 @@ setup_drive() {
     filesystems=(btrfs zfs xfs ext4 exfat ntfs)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
-    computers=(minimal workstation server VirtualBoxBox)
+    computers=(minimal workstation server VirtualBox)
     menu 'select a computer' computer ${computers[@]}
 
     desktops=(gnome kde none)
