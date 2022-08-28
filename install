@@ -1038,7 +1038,9 @@ EOF
         if [[ ! -d kde/ ]]; then
             echo ">>> configuring kde"
             git clone https://github.com/0free/kde.git
-            mkdir /home/$user/.config/
+            if [[ ! -d /home/$user/.config/ ]]; then
+                mkdir /home/$user/.config/
+            fi
             mv /kde/config/* /home/$user/.config/
             rm -r kde/
         fi
@@ -1154,6 +1156,7 @@ install_refind() {
 
     echo ">>> installing rEFInd bootloader"
     apk add refind
+    refind-install --alldrivers $boot_drive
 
     pwd=$(pwd)
     cd /boot/refind/drivers_x64
@@ -1162,8 +1165,7 @@ install_refind() {
     curl -LO github.com/pbatard/efifs/releases/download/v1.8/ntfs_x64.efi
     cd $pwd
 
-    refind-install --alldrivers $boot_drive
-    mkrlconf
+    #mkrlconf
     sed -i 's|||' /boot/refind_linux.conf
 
     if grep -q zfs /root/list; then
