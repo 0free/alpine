@@ -1119,9 +1119,9 @@ make_initramfs() {
         list+=' '
     done
 
-    if [[ ! -d /lib/modules/5.15.62-2-lts/ ]]; then
-        echo ">>> create /lib/modules/5.15.62-2-lts/"
-        mkdir /lib/modules/5.15.62-2-lts/
+    if [[ ! -d /lib/modules/5.15.63-0-lts/ ]]; then
+        echo ">>> create /lib/modules/5.15.63-0-lts/"
+        mkdir /lib/modules/5.15.63-0-lts/
     fi
 
     echo ">>> configuring mkinitfs"
