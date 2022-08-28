@@ -134,9 +134,9 @@ packages_list() {
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
-            plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings
+            plasma-nano plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-browser-integration plasma-thunderbolt plasma-disks
             # required
-            polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools kio-fuse kconfig kconfigwidgets
+            polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools kio-fuse kconfig
             # system
             systemsettings ksysguard
             # kwallet
@@ -159,6 +159,8 @@ packages_list() {
             ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit konsole kde-gtk-config
             # file manager
             dolphin dolphin-plugins kfind
+            # text
+            kate
             # archive
             ark
             # software
@@ -196,11 +198,13 @@ packages_list() {
         if grep -q kde /root/list; then
             packages+=(
                 # plasma
-                plasma-nano plasma-bigscreen plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook plasma-browser-integration plasma-thunderbolt plasma-disks
+                plasma-bigscreen plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook
                 # kde
                 shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool kclock krename kcolorchooser kunitconversion
                 # disks
                 partitionmanager isoimagewriter
+                # widgets
+                kconfigwidgets
                 # print
                 print-manager
                 # mobile
@@ -362,7 +366,6 @@ packages_list() {
     fi
 
     if grep -q server /root/list; then
-
         packages+=(
             # system
             rsyslog rsyslog-openrc rsyslog-mysql rsyslog-tls rsyslog-http
@@ -388,7 +391,6 @@ packages_list() {
             # cab
             cabextract
         )
-
     fi
 
 }
@@ -457,8 +459,14 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    bootloaders=(grub syslinux)
-    menu 'select a bootloader' bootloader ${bootloaders[@]}
+    if [[ ! $boot_drive ]]; then
+        if grep -q zfs /root/list; then
+            bootloader=grub
+        else
+            bootloaders=(grub refind syslinux)
+            menu 'select a bootloader' bootloader ${bootloaders[@]}
+        fi
+    fi
 
     echo -e "\n"
 
@@ -504,13 +512,11 @@ setup_drive() {
         fi
 
         echo ">>> creating root partition"
-
         if grep -q zfs /root/list; then
             sgdisk -n 0:0:0 -c 0:$pool -t 0:bf00 $drive
         else
             sgdisk -n 0:0:0 -c 0:linux -t 0:8300 $drive
         fi
-
         if ls $drive | grep nvme; then
             root_drive=$drive"p3"
         else
@@ -537,6 +543,8 @@ setup_drive() {
         set_zfs
     elif grep -q btrfs /root/list; then
         mkfs.btrfs -f -L btrfs $root_drive
+        modprobe btrfs
+        btrfs subvolume create $boot_drive
     elif grep -q ext4 /root/list; then
         mkfs.ext4 -f -L ext4 $root_drive
     elif grep -q exfat /root/list; then
@@ -615,7 +623,7 @@ mount_root() {
         mount -t zfs $pool /mnt
     else
         echo ">>> mounting root drive"
-        mount $root_drive /mnt
+        mount -o compress=lz4 $root_drive /mnt
     fi
 
     if ! mountpoint -q /mnt; then
@@ -671,6 +679,7 @@ install_base() {
 set_network() {
 
     echo ">>> adding name resolution"
+    echo 'nameserver 10.0.254.3' >> /mnt/etc/resolv.conf
     echo 'nameserver 1.0.0.1' >> /mnt/etc/resolv.conf
     echo 'nameserver 8.8.8.8' >> /mnt/etc/resolv.conf
 
@@ -689,8 +698,10 @@ set_fstab() {
 
     if grep -q zfs /root/list; then
         echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" > /mnt/etc/fstab
+    elif grep -q btrfs /root/list; then
+        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem subvol=@,ssd,nofail,rw,discard,noatime,compress=lz4 0 0" > /mnt/etc/fstab
     else
-        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime,commit=64,autodefrag,compress=zstd:10 0 0" > /mnt/etc/fstab
+        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime,compress=lz4 0 0" > /mnt/etc/fstab
     fi
 
     echo "$(blkid $boot_drive -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
@@ -1025,7 +1036,7 @@ EOF
         fi
     fi
 
-    echo ">>> setting ~/.config"
+    echo ">>> setting ~/"
     chown -R $user:wheel /home/$user/
     chmod -R 770 /home/$user/
 
@@ -1170,8 +1181,6 @@ EOF
     list+=' linux chain btrfs xfs fat exfat ntfs'
 
     if grep -q zfs /root/list; then
-        #echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
-        #source /etc/profile.d/zpool_vdev_name_path.sh
         list+=' zfs zfscrypt zfsinfo'
     fi
 
