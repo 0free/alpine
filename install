@@ -1251,6 +1251,7 @@ reboot_system() {
         zfs umount -a
         zpool export $pool
     fi
+    rm /mnt/root/reboot
     reboot
 
 }
