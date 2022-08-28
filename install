@@ -459,14 +459,8 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    if [[ ! $boot_drive ]]; then
-        if grep -q zfs /root/list; then
-            bootloader=grub
-        else
-            bootloaders=(grub refind syslinux)
-            menu 'select a bootloader' bootloader ${bootloaders[@]}
-        fi
-    fi
+    bootloaders=(grub refind clover syslinux)
+    menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     echo -e "\n"
 
@@ -742,7 +736,7 @@ install_linux() {
         list+=' linux-lts zfs-lts'
         list+=' zfs zfs-openrc zfs-libs'
     else
-        list+=' linux-edge'
+        list+=' linux-lts linux-edge'
     fi
 
     if ! grep -q VirtualBox /root/list; then
@@ -855,6 +849,9 @@ setup_desktop() {
     make_initramfs
     if grep -q syslinux /root/list; then
         install_syslinux
+    fi
+    if grep -q refind /root/list; then
+        install_refind
     fi
     if grep -q grub /root/list; then
         install_grub
@@ -980,11 +977,22 @@ configure_alpine() {
     sed -i 's|#rc_timeout_stopsec="90"|rc_timeout_Stopsec="0"|' /etc/rc.conf
     sed -i 's|#rc_send_sigkill="YES"|rc_send_sigkill="YES"|' /etc/rc.conf
 
+    cat >> /etc/rc.conf << EOF
+KEYMAP="us"
+TIMEZONE="$timezone"
+HARDWARECLOCK="UTC"
+EOF
+
     cat > /etc/default/locale << EOF
 LANG=en_US.UTF-8
 LANG=ar_OM.UTF-8
 LANGUAGE="en_US:en"
 LANGUAGE="ar_OM:ar"
+EOF
+
+    cat >> /etc/default/libc-locales << EOF
+en_US.UTF-8 UTF-8
+en_US ISO-8859-1
 EOF
 
     if [[ -d /etc/NetworkManager/ ]]; then
@@ -1134,13 +1142,36 @@ make_initramfs() {
 
 install_syslinux() {
 
-    echo ">>> installing syslinux"
+    echo ">>> installing syslinux bootloader"
     apk add syslinux
     dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/gptmbr.bin of=$drive
     mkdir -p /boot/extlinux/
     extlinux --install /boot/extlinux/
 
 }
+
+install_refind() {
+
+    echo ">>> installing rEFInd bootloader"
+    apk add refind
+
+    pwd=$(pwd)
+    cd /boot/refind/drivers_x64
+    curl -LO github.com/pbatard/efifs/releases/download/v1.8/xfs_x64.efi
+    curl -LO github.com/pbatard/efifs/releases/download/v1.8/zfs_x64.efi
+    curl -LO github.com/pbatard/efifs/releases/download/v1.8/ntfs_x64.efi
+    cd $pwd
+
+    refind-install --alldrivers $boot_drive
+    mkrlconf
+    sed -i 's|||' /boot/refind_linux.conf
+
+    if grep -q zfs /root/list; then
+        #sed -i "s|root=.*|root=zfs=$pool|" /boot/refind_linux.conf
+    fi
+
+}
+
 
 install_grub() {
 
