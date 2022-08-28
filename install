@@ -1170,9 +1170,6 @@ install_refind() {
     curl -LO github.com/pbatard/efifs/releases/download/v1.8/ntfs_x64.efi
     cd $pwd
 
-    #mkrlconf
-    sed -i 's|||' /boot/EFI/refind/refind.conf
-
     if grep -q zfs /root/list; then
         sed -i "s|root=.*|root=zfs=$pool|" /boot/EFI/refind/refind.conf
     fi
