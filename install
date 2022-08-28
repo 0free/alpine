@@ -1170,10 +1170,10 @@ install_refind() {
     cd $pwd
 
     #mkrlconf
-    sed -i 's|||' /boot/refind_linux.conf
+    sed -i 's|||' /boot/EFI/refind/refind.conf
 
     if grep -q zfs /root/list; then
-        #sed -i "s|root=.*|root=zfs=$pool|" /boot/refind_linux.conf
+        sed -i "s|root=.*|root=zfs=$pool|" /boot/EFI/refind/refind.conf
     fi
 
 }
