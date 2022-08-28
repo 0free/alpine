@@ -1157,12 +1157,13 @@ install_refind() {
     echo ">>> installing rEFInd bootloader"
     apk add refind
 
-    if [[ ! -f /boot/EFI/refind/refind.conf ]]; then
+    if [[ ! -f /boot/EFI/refind/refind_linux.conf ]]; then
         refind-install  --root /
         mkrlconf
     fi
 
     pwd=$(pwd)
+    mkdir /boot/EFI/refind/drivers_x64/
     cd /boot/EFI/refind/drivers_x64/
     curl -LO github.com/pbatard/efifs/releases/download/v1.8/xfs_x64.efi
     curl -LO github.com/pbatard/efifs/releases/download/v1.8/zfs_x64.efi
@@ -1170,10 +1171,10 @@ install_refind() {
     cd $pwd
 
     #mkrlconf
-    sed -i 's|||' /boot/EFI/refind/refind.conf
+    sed -i 's|||' /boot/EFI/refind/refind_linux.conf
 
     if grep -q zfs /root/list; then
-        sed -i "s|root=.*|root=zfs=$pool|" /boot/EFI/refind/refind.conf
+        sed -i "s|root=.*|root=zfs=$pool|" /boot/EFI/refind/refind_linux.conf
     fi
 
 }
