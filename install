@@ -129,12 +129,10 @@ packages_list() {
 
     if grep -q kde /root/list; then
         packages+=(
-            # hardware
-            solid
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
-            plasma-nano plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-browser-integration plasma-thunderbolt plasma-disks
+            plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-browser-integration plasma-thunderbolt plasma-disks
             # required
             polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools kio-fuse kconfig
             # system
@@ -198,17 +196,13 @@ packages_list() {
         if grep -q kde /root/list; then
             packages+=(
                 # plasma
-                plasma-bigscreen plasma-camera plasma-dialer plasma-videoplayer plasma-phonebook
+                plasma-camera plasma-videoplayer plasma-phonebook
                 # kde
                 shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool kclock krename kcolorchooser kunitconversion
-                # disks
-                partitionmanager isoimagewriter
                 # widgets
                 kconfigwidgets
                 # print
                 print-manager
-                # mobile
-                koko angelfish calindori
                 # screen
                 spectacle kscreenlocker kruler
                 # image
@@ -292,7 +286,7 @@ packages_list() {
             # printer
             cups cups-openrc cups-pdf bluez-cups
             # driver
-            xinput gkraken ccid solaar razercfg razercfg-gui razergenie openrazer piper
+            xinput ccid solaar piper
             # math
             mathjax2
             # finance
@@ -976,19 +970,7 @@ configure_alpine() {
     sed -i 's|#rc_sighup="NO"|rc_sighup="YES"|' /etc/rc.conf
     sed -i 's|#rc_timeout_stopsec="90"|rc_timeout_Stopsec="0"|' /etc/rc.conf
     sed -i 's|#rc_send_sigkill="YES"|rc_send_sigkill="YES"|' /etc/rc.conf
-
-    cat >> /etc/rc.conf << EOF
-KEYMAP="us"
-TIMEZONE="$timezone"
-HARDWARECLOCK="UTC"
-EOF
-
-    cat > /etc/default/locale << EOF
-LANG=en_US.UTF-8
-LANG=ar_OM.UTF-8
-LANGUAGE="en_US:en"
-LANGUAGE="ar_OM:ar"
-EOF
+    sed -i 's|#rc_tty_number=.*|rc_tty_number=24|' /etc/rc.conf
 
     cat >> /etc/default/libc-locales << EOF
 en_US.UTF-8 UTF-8
@@ -1006,13 +988,6 @@ managed=true
 wifi.backend=iwd
 EOF
     fi
-
-    echo ">>> configuring pipewire"
-    cat >> /etc/security/limits.conf << EOF
-@audio - rtprio 88
-@audio - memlock 256
-@audio - nice -11
-EOF
 
     if [ ! -d /etc/pipewire ]; then
         mkdir /etc/pipewire
@@ -1038,9 +1013,7 @@ EOF
         if [[ ! -d kde/ ]]; then
             echo ">>> configuring kde"
             git clone https://github.com/0free/kde.git
-            if [[ ! -d /home/$user/.config/ ]]; then
-                mkdir /home/$user/.config/
-            fi
+            mkdir /home/$user/.config/
             mv /kde/config/* /home/$user/.config/
             rm -r kde/
         fi
@@ -1157,23 +1130,19 @@ install_refind() {
     echo ">>> installing rEFInd bootloader"
     apk add refind
 
-    if [[ ! -f /boot/EFI/refind/refind.conf ]]; then
-        refind-install  --root /
-        mkrlconf
-    fi
+    pwd=$(pwd)
+    cd /boot/refind/drivers_x64
+    curl -LO github.com/pbatard/efifs/releases/download/v1.8/xfs_x64.efi
+    curl -LO github.com/pbatard/efifs/releases/download/v1.8/zfs_x64.efi
+    curl -LO github.com/pbatard/efifs/releases/download/v1.8/ntfs_x64.efi
+    cd $pwd
 
-    if [[ ! -d /boot/EFI/refind/drivers_x64/ ]]; then
-        pwd=$(pwd)
-        mkdir /boot/EFI/refind/drivers_x64/
-        cd /boot/EFI/refind/drivers_x64/
-        curl -LO github.com/pbatard/efifs/releases/download/v1.8/xfs_x64.efi
-        curl -LO github.com/pbatard/efifs/releases/download/v1.8/zfs_x64.efi
-        curl -LO github.com/pbatard/efifs/releases/download/v1.8/ntfs_x64.efi
-        cd $pwd
-    fi
+    refind-install --alldrivers $boot_drive
+    mkrlconf
+    sed -i 's|||' /boot/refind_linux.conf
 
     if grep -q zfs /root/list; then
-        sed -i "s|root=.*|root=zfs=$pool|" /boot/EFI/refind/refind.conf
+        #sed -i "s|root=.*|root=zfs=$pool|" /boot/refind_linux.conf
     fi
 
 }
