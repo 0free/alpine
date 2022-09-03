@@ -1217,7 +1217,10 @@ finish() {
     apk del *-doc
     echo ">>> installation is completed ... re-run to reboot"
     echo '' > /root/reboot
-    exit && chroot / /bin/bash install
+
+    while :; do
+        break
+    done
 
 }
 
