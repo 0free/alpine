@@ -1197,10 +1197,9 @@ GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
 GRUB_GFXMODE=1280x720,1920x1080,auto
-GRUB_EARLY_INITRD_LINUX_CUSTOM="ucode.cpio"
 EOF
 
-    list='cpio search search_fs_uuid'
+    list='search search_fs_uuid'
     list+=' msdospart part_msdos part_gpt part_apple'
     list+=' usb usb_keyboard'
     list+=' linux chain btrfs xfs fat exfat ntfs'
