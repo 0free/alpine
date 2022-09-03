@@ -537,7 +537,7 @@ setup_drive() {
     elif [[ $filesystem == btrfs ]]; then
         mkfs.btrfs -f -L btrfs $root_drive
     elif [[ $filesystem == ext4 ]]; then
-        mkfs.ext4 -f -L ext4 $root_drive
+        mkfs.ext4 -L ext4 $root_drive
     elif [[ $filesystem == exfat ]]; then
         mkfs.exfat -f -L exfat $root_drive
     elif [[ $filesystem == ntfs ]]; then
