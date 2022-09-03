@@ -1196,9 +1196,12 @@ GRUB_GFXMODE=1280x720,1920x1080,auto
 GRUB_EARLY_INITRD_LINUX_CUSTOM="ucode.cpio"
 EOF
 
-    list='msdospart part_msdos part_gpt part_apple'
+    list='cpio search search_fs_uuid'
+    list+=' msdospart part_msdos part_gpt part_apple'
     list+=' usb usbms usb_keyboard at_keyboard'
     list+=' linux chain btrfs xfs fat exfat ntfs'
+    list+=' gzio zstd'
+    list+=' ata uhci tpm'
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
