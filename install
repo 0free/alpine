@@ -471,13 +471,6 @@ setup_drive() {
     echo ">>> reading partition tables"
     mdev -s
 
-    echo ">>> adding options"
-    echo "drive=$drive" > /root/list
-    echo "filesystem=$filesystem" >> /root/list
-    echo "computer=$computer" >> /root/list
-    echo "desktop=$desktop" >> /root/list
-    echo "bootloader=$bootloader" >> /root/list
-
     if ! test sgdisk; then
         echo ">>> installing sgdisk"
         apk add sgdisk
@@ -555,6 +548,13 @@ setup_drive() {
     elif grep -q xfs /root/list; then
         mkfs.xfs -f -L xfs $root_drive
     fi
+
+    echo ">>> adding options"
+    echo "drive=$drive" > /root/list
+    echo "filesystem=$filesystem" >> /root/list
+    echo "computer=$computer" >> /root/list
+    echo "desktop=$desktop" >> /root/list
+    echo "bootloader=$bootloader" >> /root/list
 
     mount_root
     mount_boot
