@@ -1245,7 +1245,7 @@ else
             root_drive=$(. /root/list; echo $root_drive)
         fi
         if [ -f /root/chroot ]; then
-            if [ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]; then
+            if [[ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]]; then
                 user=$(ls /home)
                 setup_desktop
             else
