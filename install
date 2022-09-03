@@ -69,6 +69,8 @@ packages_list() {
         tzdata
         # gvfs
         gvfs gvfs-afc gvfs-archive gvfs-dev gvfs-fuse gvfs-mtp gvfs-nfs gvfs-smb
+        # colord
+        colord colord-bash-completion colord-gtk
     )
 
     if grep -q btrfs /root/list; then
