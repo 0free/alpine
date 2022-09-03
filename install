@@ -430,7 +430,9 @@ menu() {
 
 setup_drive() {
 
-    rm -r /root/*
+    if [ -f /root/list ]; then
+        rm -r /root/list
+    fi
 
     echo '# created by Saif AlSubhi'
     printf -- '-%.0s' {1..100}; echo ''
