@@ -725,8 +725,7 @@ install_linux() {
         apk fix --root=/mnt
     fi
 
-    list='amd-ucode intel-ucode'
-    list+=' linux-pam'
+    list='linux-pam'
 
     if grep -q VirtualBox /root/list; then
         if grep -q zfs /root/list; then
@@ -741,6 +740,7 @@ install_linux() {
         else
             list+=' linux-lts linux-edge'
         fi
+        list+=' amd-ucode intel-ucode'
         list+=' linux-firmware-intel linux-firmware-i915'
         list+=' linux-firmware-amd linux-firmware-amd-ucode'
         list+=' linux-firmware-nvidia'
