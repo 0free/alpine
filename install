@@ -668,9 +668,6 @@ install_base() {
     cp /dev/null /mnt/dev/null
     chmod 0666 /mnt/dev/null
 
-    echo ">>> loading modules"
-    /sbin/modprobe efivars
-
     set_network
     set_fstab
     setup_linux
@@ -1244,7 +1241,9 @@ else
     if [ -f /mnt/root/chroot ]; then
         if [ -f /mnt/root/list ]; then
             cp /mnt/root/list /root/list
-        fi
+        fi  
+        echo ">>> loading modules"
+        /sbin/modprobe efivars
         change_root
     else
         if [ -f /root/list ]; then
