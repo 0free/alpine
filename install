@@ -484,10 +484,10 @@ setup_drive() {
         echo ">>> deleting partitions"
         sgdisk -Z $drive
         echo ">>> creating GPT"
-        sgdisk -U $drive
+        sgdisk -g -U $drive
 
         echo ">>> creating boot partition"
-        sgdisk -n 0:0:+$bootSize -c 1:efi -t 1:ef00 $drive
+        sgdisk -n 0:0:+$bootSize -c 0:efi -t 0:ef00 $drive
         if ls $drive | grep nvme; then
             boot_drive=$drive"p1"
         else
