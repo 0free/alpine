@@ -1146,7 +1146,7 @@ install_refind() {
     sed -i 's|||' /boot/refind_linux.conf
 
     if grep -q zfs /root/list; then
-        #sed -i "s|root=.*|root=zfs=$pool|" /boot/refind_linux.conf
+        sed -i "s|root=.*|root=zfs=$pool|" /boot/refind_linux.conf
     fi
 
 }
