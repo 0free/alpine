@@ -503,7 +503,7 @@ setup_drive() {
         fi
 
         echo ">>> creating root partition"
-        if grep -q zfs /root/list; then
+        if [[ $filesystem == zfs ]]; then
             sgdisk -n 0:0:0 -c 0:$pool -t 0:bf00 $drive
         else
             sgdisk -n 0:0:0 -c 0:$filesystem -t 0:8300 $drive
