@@ -1188,6 +1188,7 @@ GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
 GRUB_EARLY_INITRD_LINUX_CUSTOM="ucode.cpio"
+GRUB_GFXMODE=1280x720,1920x1080,1024x768,auto
 EOF
 
     list='msdospart part_msdos part_gpt part_apple'
