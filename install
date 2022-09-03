@@ -1234,42 +1234,46 @@ reboot_system() {
 
 set -e
 
+if [ -f /root/reboot ]; then
+    exit
+fi
+
 if [ -f /mnt/root/reboot ]; then
     rm /mnt/root/reboot
     reboot_system
+fi
+
+if [ -f /mnt/root/chroot ]; then
+    if [ -f /mnt/root/list ]; then
+        cp /mnt/root/list /root/list
+    fi
+    change_root
 else
-    if [ -f /mnt/root/chroot ]; then
-        if [ -f /mnt/root/list ]; then
-            cp /mnt/root/list /root/list
+    if [ -f /root/list ]; then
+        drive=$(. /root/list; echo $drive)
+        boot_drive=$(. /root/list; echo $boot_drive)
+        swap_drive=$(. /root/list; echo $swap_drive)
+        root_drive=$(. /root/list; echo $root_drive)
+    fi
+    if [ -f /root/chroot ]; then
+        if [[ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]]; then
+            user=$(ls /home)
+            setup_desktop
+        else
+            configure
         fi
-        change_root
     else
-        if [ -f /root/list ]; then
-            drive=$(. /root/list; echo $drive)
-            boot_drive=$(. /root/list; echo $boot_drive)
-            swap_drive=$(. /root/list; echo $swap_drive)
-            root_drive=$(. /root/list; echo $root_drive)
-        fi
-        if [ -f /root/chroot ]; then
-            if [[ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]]; then
-                user=$(ls /home)
-                setup_desktop
+        if mountpoint -q /mnt; then
+            if [ -f /mnt/boot/initramfs-* ]; then
+                install_packages
+            elif [ -d /mnt/root/ ]; then
+                setup_linux
             else
-                configure
+                install_base
             fi
         else
-            if mountpoint -q /mnt; then
-                if [ -f /mnt/boot/initramfs-* ]; then
-                    install_packages
-                elif [ -d /mnt/root/ ]; then
-                    setup_linux
-                else
-                    install_base
-                fi
-            else
-                clear
-                setup_drive
-            fi
+            clear
+            setup_drive
         fi
     fi
 fi
