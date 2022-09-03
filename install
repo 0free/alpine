@@ -835,7 +835,7 @@ create_user() {
     fi
     echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/wheel
     chmod 0400 /etc/sudoers.d/wheel
-    echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user
+    echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user $user
     usermod -aG input,audio,video,netdev,usb,disk,lp,adm $user
 
 }
@@ -1107,9 +1107,9 @@ make_initramfs() {
         list+=' '
     done
 
-    if [ ! -d /lib/modules/5.15.63-0-lts/ ]; then
-        echo ">>> create /lib/modules/5.15.63-0-lts/"
-        mkdir /lib/modules/5.15.63-0-lts/
+    if [ ! -d /lib/modules/5.15.64-0-lts/ ]; then
+        echo ">>> create /lib/modules/5.15.64-0-lts/"
+        mkdir /lib/modules/5.15.64-0-lts/
     fi
 
     echo ">>> configuring mkinitfs"
