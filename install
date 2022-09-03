@@ -698,7 +698,7 @@ set_fstab() {
     if grep -q zfs /root/list; then
         echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" > /mnt/etc/fstab
     elif grep -q btrfs /root/list; then
-        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem subvol=@,ssd,nofail,rw,discard,noatime,compress=lz4 0 0" > /mnt/etc/fstab
+        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime 0 0" > /mnt/etc/fstab
     else
         echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime,compress=lz4 0 0" > /mnt/etc/fstab
     fi
