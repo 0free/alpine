@@ -921,7 +921,6 @@ EOF
     rc-update add udev-trigger default
     rc-update add udev-postmount default
 
-    rc-update add rsyncd default
     rc-update add networkmanager default
     rc-update add networkmanager-dispatcher default
 
@@ -935,6 +934,7 @@ EOF
         rc-update add virtualbox-guest-additions default
         rc-update add virtualbox-drm-client default
     else
+        rc-update add rsyncd default
         rc-update add fwupd default
     fi
 
