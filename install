@@ -87,7 +87,8 @@ packages_list() {
             # firmware
             fwupd fwupd-openrc fwup-bash-completion fwupd-efi fwupd-plugin-bios fwupd-plugin-cpu fwupd-plugin-tpm fwupd-plugin-nvme fwupd-plugin-ata
             # mesa
-            mesa mesa-vulkan-layers
+            mesa-dri-gallium mesa-va-gallium mesa-vdpau-gallium mesa-gl mesa-glapi mesa-egl mesa-gles mesa-gbm
+            mesa-vulkan-layers
             # intel GPU
             mesa-vulkan-intel intel-media-driver
             # vulkan
