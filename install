@@ -468,6 +468,9 @@ setup_drive() {
 
     echo -e "\n"
 
+    echo ">>> reading partition tables"
+    mdev -s
+
     echo ">>> adding options"
     echo "drive=$drive" > /root/list
     echo "filesystem=$filesystem" >> /root/list
