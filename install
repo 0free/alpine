@@ -470,9 +470,6 @@ setup_drive() {
 
     echo -e "\n"
 
-    echo ">>> reading partition tables"
-    mdev -s
-
     if ! test sgdisk; then
         echo ">>> installing sgdisk"
         apk add sgdisk
@@ -494,7 +491,6 @@ setup_drive() {
         else
             boot_drive=$drive"1"
         fi
-        echo "boot_drive=$boot_drive" >> /root/list
 
         if [[ $swapSize != '0' ]]; then
             echo ">>> creating swap partition"
@@ -504,7 +500,6 @@ setup_drive() {
             else
                 swap_drive=$drive"2"
             fi
-            echo "swap_drive=$swap_drive" >> /root/list
         fi
 
         echo ">>> creating root partition"
@@ -518,7 +513,6 @@ setup_drive() {
         else
             root_drive=$drive"3"
         fi
-        echo "root_drive=$root_drive" >> /root/list
 
         echo ">>> reading partition tables"
         mdev -s
@@ -553,6 +547,9 @@ setup_drive() {
 
     echo ">>> adding options"
     echo "drive=$drive" > /root/list
+    echo "boot_drive=$boot_drive" >> /root/list
+    echo "swap_drive=$swap_drive" >> /root/list
+    echo "root_drive=$root_drive" >> /root/list
     echo "filesystem=$filesystem" >> /root/list
     echo "computer=$computer" >> /root/list
     echo "desktop=$desktop" >> /root/list
