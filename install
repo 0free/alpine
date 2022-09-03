@@ -419,7 +419,7 @@ menu() {
             i=$(($i-1))
         elif [[ $key == $(echo -en "\e[B") ]] && [[ $i -lt ${#options[@]} ]]; then
             i=$(($i+1))
-        elif [ -z $key ]; then
+        elif [[ -z $key ]]; then
             break
         fi
         echo -en "\e[${#options[@]}A"
@@ -480,7 +480,7 @@ setup_drive() {
         apk add sgdisk
     fi
 
-    if [ ! $root_drive ]; then
+    if [[ ! $root_drive ]]; then
 
         echo ">>> wiping filesystm"
         wipefs -a -f $drive
@@ -528,7 +528,7 @@ setup_drive() {
         echo ">>> creating boot filesystem"
         mkfs.vfat -F32 -n BOOT $boot_drive
 
-        if [ $swap_drive ]; then
+        if [[ $swap_drive ]]; then
             echo ">>> creating swap filesystem"
             mkswap $swap_drive
         fi
