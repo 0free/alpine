@@ -1107,9 +1107,11 @@ make_initramfs() {
         list+=' '
     done
 
-    if [ ! -d "/lib/modules/$(uname -r)/" ]; then
-        echo ">>> create /lib/modules/$(uname -r)/"
-        mkdir "/lib/modules/$(uname -r)/"
+    kernel=$(uname -r)
+
+    if [ ! -d "/lib/modules/$kernel/" ]; then
+        echo ">>> create /lib/modules/$kernel/"
+        mkdir "/lib/modules/$kernel/"
     fi
 
     echo ">>> configuring mkinitfs"
