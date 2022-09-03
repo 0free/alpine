@@ -976,7 +976,7 @@ configure_alpine() {
     sed -i 's|#rc_sighup="NO"|rc_sighup="YES"|' /etc/rc.conf
     sed -i 's|#rc_timeout_stopsec="90"|rc_timeout_Stopsec="0"|' /etc/rc.conf
     sed -i 's|#rc_send_sigkill="YES"|rc_send_sigkill="YES"|' /etc/rc.conf
-    sed -i 's|#rc_tty_number=12|rc_tty_number=24|' /etc/rc.conf
+    sed -i 's|#rc_tty_number=12|rc_tty_number=0|' /etc/rc.conf
 
     echo ">>> setting locales"
     echo 'LANG=en_US.UTF-8' > /etc/locale.conf
