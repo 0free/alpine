@@ -1230,7 +1230,7 @@ finish() {
     echo '' > /root/reboot
 
     while :; do
-        bash install
+        /bin/bash /root/install
         break
     done
 
