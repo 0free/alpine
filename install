@@ -622,7 +622,7 @@ mount_root() {
         mount -t zfs $pool /mnt
     else
         echo ">>> mounting root drive"
-        mount -o compress=lz4 $root_drive /mnt
+        mount $root_drive /mnt
     fi
 
     if ! mountpoint -q /mnt; then
