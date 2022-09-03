@@ -745,13 +745,16 @@ install_linux() {
             list+=' linux-lts linux-edge'
         fi
         list+=' amd-ucode intel-ucode'
-        list+=' linux-firmware-intel linux-firmware-i915'
-        list+=' linux-firmware-amd linux-firmware-amd-ucode'
-        list+=' linux-firmware-nvidia'
+        list+=' linux-firmware-intel'
+        list+=' linux-firmware-i915'
+        list+=' linux-firmware-amd'
+        list+=' linux-firmware-amd-ucode'
         list+=' linux-firmware-amdgpu'
+        list+=' linux-firmware-nvidia'
         list+=' linux-firmware-other'
-        list+=' linux-firmware-brcm linux-firmware-qca'
-        list+=' linux-firmware-rtlwifi linux-firmware-rtl_bt linux-firmware-rtl_nic'
+        list+=' linux-firmware-rtlwifi'
+        list+=' linux-firmware-rtl_bt'
+        list+=' linux-firmware-rtl_nic'
     fi
 
     echo ">>> installing linux"
