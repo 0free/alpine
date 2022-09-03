@@ -900,21 +900,6 @@ enable_services() {
         rc-update add zfs-load-key boot
     fi
 
-    if grep -q btrfs /root/list; then
-        cat > /etc/init.d/btrfs-scan << EOF
-#!/sbin/openrc-run
-name="btrfs-scan"
-depend() {
-  before localmount
-}
-start() {
-  /sbin/btrfs device scan
-}
-EOF
-        chmod +x /etc/init.d/btrfs-scan
-        rc-update add btrfs-scan boot
-    fi
-
     if grep -q ext4 /root/list; then
         rc-update add ext4 boot
     fi
