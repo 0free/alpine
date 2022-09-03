@@ -1235,7 +1235,7 @@ reboot_system() {
 set -e
 
 if [ -f /mnt/root/reboot ]; then
-    rm /root/reboot
+    rm /mnt/root/reboot
     reboot_system
 else
     if [ -f /mnt/root/chroot ]; then
