@@ -430,6 +430,8 @@ menu() {
 
 setup_drive() {
 
+    rm -r /root/*
+
     echo '# created by Saif AlSubhi'
     printf -- '-%.0s' {1..100}; echo ''
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
