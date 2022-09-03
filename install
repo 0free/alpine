@@ -699,7 +699,7 @@ set_fstab() {
     elif grep -q btrfs /root/list; then
         echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime 0 0" > /mnt/etc/fstab
     else
-        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime,compress=lz4 0 0" > /mnt/etc/fstab
+        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime 0 0" > /mnt/etc/fstab
     fi
 
     echo "$(blkid $boot_drive -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
@@ -1188,6 +1188,7 @@ GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
 GRUB_GFXMODE=1280x720,1920x1080,1024x768,auto
+GRUB_EARLY_INITRD_LINUX_CUSTOM="ucode.cpio"
 EOF
 
     list='msdospart part_msdos part_gpt part_apple'
