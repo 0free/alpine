@@ -1016,12 +1016,15 @@ EOF
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
 
+    if [ ! -d /home/$user/.config/ ]; then
+        mkdir /home/$user/.config/
+    fi
+
     if grep -q kde /root/list; then
         if [[ ! -d kde/ ]]; then
             echo ">>> configuring kde"
             git clone https://github.com/0free/kde.git
-            mkdir /home/$user/.config/
-            mv /kde/config/* /home/$user/.config/
+            rlf /kde/config/* /home/$user/.config/
             rm -r kde/
         fi
     fi
