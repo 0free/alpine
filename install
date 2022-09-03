@@ -1118,7 +1118,7 @@ make_initramfs() {
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
     echo ">>> building initial ramdisk"
-    mkinitfs -b / -f /etc/fstab
+    mkinitfs -b / -f /etc/fstab -C lz4
 
 }
 
@@ -1215,7 +1215,7 @@ finish() {
 
     echo ">>> cleaning apks"
     apk del *-doc
-    echo ">>> installation is completed ... re-run to reboot"
+    echo ">>> installation is completed"
     echo '' > /root/reboot
 
     while :; do
