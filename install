@@ -1165,7 +1165,7 @@ install_grub() {
     echo ">>> installing grub bootloader"
     apk fix
     apk add grub grub-efi grub-bash-completion
-    grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine" --no-floppy
+    grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine"
 
     if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
@@ -1192,7 +1192,7 @@ GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
-GRUB_GFXMODE=1280x720,1920x1080,1024x768,auto
+GRUB_GFXMODE=1280x720,1920x1080,auto
 GRUB_EARLY_INITRD_LINUX_CUSTOM="ucode.cpio"
 EOF
 
@@ -1224,6 +1224,7 @@ finish() {
     echo '' > /root/reboot
 
     while :; do
+        bash install
         break
     done
 
