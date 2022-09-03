@@ -928,12 +928,11 @@ EOF
     rc-update add bluetooth default
     rc-update add ufw default
 
-    rc-update add iwd default
-
     if grep -q VirtualBox /root/list; then
         rc-update add virtualbox-guest-additions default
         rc-update add virtualbox-drm-client default
     else
+        rc-update add iwd default
         rc-update add rsyncd default
         rc-update add fwupd default
     fi
