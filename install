@@ -1227,10 +1227,8 @@ finish() {
     echo '' > /root/reboot
 
     while :; do
-        if [ -f /mnt/root/reboot ]; then
-            bash install
-            break
-        fi
+        bash install
+        break
     done
 
 }
