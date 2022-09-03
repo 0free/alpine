@@ -487,21 +487,19 @@ setup_drive() {
         sgdisk -U $drive
 
         echo ">>> creating boot partition"
-        sgdisk -n 0:0:+$bootSize -c 0:efi -t 0:ef00 $drive
+        sgdisk -n 0:0:+$bootSize -c 1:efi -t 1:ef00 $drive
         if ls $drive | grep nvme; then
             boot_drive=$drive"p1"
         else
             boot_drive=$drive"1"
         fi
 
-        if [[ $swapSize != '0' ]]; then
-            echo ">>> creating swap partition"
-            sgdisk -n 0:0:+$swapSize -c 0:swap -t 0:8200 $drive
-            if ls $drive | grep nvme; then
-                swap_drive=$drive"p2"
-            else
-                swap_drive=$drive"2"
-            fi
+        echo ">>> creating swap partition"
+        sgdisk -n 0:0:+$swapSize -c 0:swap -t 0:8200 $drive
+        if ls $drive | grep nvme; then
+            swap_drive=$drive"p2"
+        else
+            swap_drive=$drive"2"
         fi
 
         echo ">>> creating root partition"
