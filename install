@@ -1008,7 +1008,8 @@ EOF
         echo ">>> cloning Windows-11-icons"
         git clone https://github.com/0free/windows-11-icons.git
         rm -r windows-11-icons/.git
-        mv windows-11-icons/ /usr/share/icons/
+        cp -rlf windows-11-icons/ /usr/share/icons/
+        rm -r windows-11-icons/
     fi
 
     echo ">>> configuring firewall"
