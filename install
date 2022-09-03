@@ -16,13 +16,16 @@ packages_list() {
 
     packages+=(
         # desktop
-        busybox musl musl-locales openrc openrc-bash-completion
+        busybox
+        musl musl-locales
+        openrc openrc-bash-completion
         dbus dbus-openrc dbus-x11 iio-sensor-proxy
         ibus ibus-bash-completion
         udev-init-scripts udev-init-scripts-openrc
         eudev eudev-openrc eudev-libs
-        xorg-server mesa-dri-gallium xf86-input-libinput
-        polkit polkit-openrc polkit-elogind polkit-common polkit-elogind-libs
+        xorg-server xf86-input-libinput
+        mesa-dri-gallium mesa-va-gallium
+        polkit polkit-openrc polkit-common polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
         # hardware
         hwids hwids-net hwids-pci hwids-usb hwids-udev
@@ -39,20 +42,21 @@ packages_list() {
         # compression
         brotli zstd zlib zip lz4 lzo unzip xz bzip2
         # disks
-        e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk udisks2 mmc-utils jfsutils
+        e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
+        udisks2 udisks2-bash-completion 
         # network
         networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind
         # firewall
-        gufw ufw ufw-openrc ufw-bash-completion iptables iptables-openrc
+        gufw ufw ufw-openrc ufw-bash-completion
+        iptables iptables-openrc
         # sound
         alsa-plugins-pulse alsa-lib
-        pipewire pipewire-media-session pipewire-alsa pipewire-libs pipewire-pulse pipewire-tools
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
         # trackpad
         xf86-input-synaptics xf86-input-mtrack
         # browser
-        chromium chromium-chromedriver chromium-swiftshader
+        chromium
         # fonts
         font-hack font-adobe-source-code-pro
         font-arabic-misc font-noto-arabic
@@ -91,9 +95,10 @@ packages_list() {
             # nvidia GPU
             nvidia-src
             # wireless
-            wireless-regdb wireless-tools iwd iwd-openrc
+            wireless-regdb iwd iwd-openrc
             # network
-            ethtool ethtool-bash-completion rsync rsync-openrc
+            ethtool ethtool-bash-completion
+            rsync rsync-openrc
             networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn networkmanager-initrd-generator
         )
     else
@@ -105,7 +110,12 @@ packages_list() {
     if grep -q gnome /root/list; then
         packages+=(
             # gnome session
-            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus gnome-initial-setup gnome-control-center gnome-control-center-bash-completion gnome-tweaks gnome-colors-common gsettings-desktop-schemas udisks2-bash-completion tracker-bash-completion pinentry-gnome gst-plugin-pipewire
+            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session
+            gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus
+            gnome-control-center gnome-control-center-bash-completion
+            gnome-tweaks gnome-colors-common gsettings-desktop-schemas
+            tracker tracker-bash-completion
+            pinentry-gnome
             # connector
             chrome-gnome-shell gnome-browser-connector
             # theme
@@ -134,9 +144,10 @@ packages_list() {
             # plasma
             plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-browser-integration plasma-thunderbolt plasma-disks
             # required
-            polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools kio-fuse kconfig
+            polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools
+            kconfig kconfigwidgets
             # system
-            systemsettings ksysguard
+            systemsettings kactivities kactivities-stats kactivitymanagerd ksysguard
             # kwallet
             kwallet kwallet-pam kwalletmanager kio-kwallet
             # theme
@@ -154,15 +165,13 @@ packages_list() {
             # audio
             plasma-pa kmix
             # kde
-            ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kactivities kmenuedit konsole kde-gtk-config
+            ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kmenuedit konsole kde-gtk-config
             # file manager
             dolphin dolphin-plugins kfind
             # text
-            kate
+            kate kate-common
             # archive
             ark
-            # software
-            discover discover-backend-apk discover-backend-flatpak discover-backend-fwupd
         )
     fi
 
@@ -173,7 +182,7 @@ packages_list() {
                 # gnome apps
                 gnome-software gnome-software-plugin-apk gnome-software-plugin-flatpak gnome-photos gnome-music gnome-clocks gnome-contacts gnome-calculator gnome-maps gnome-logs gnome-remote-desktop gnome-screenshot gnome-boxes gnome-calendar gnome-sound-recorder gnome-font-viewer gnome-colors gnome-bluetooth gnome-podcasts gnome-characters gnome-builder gnome-shortwave getting-things-gnome sushi simple-scan
                 # config
-                dconf dconf-bash-completion dconf-editor dconf-editor-bash-completion
+                dconf dconf-bash-completion
                 # web
                 epiphany
                 # documents
@@ -183,7 +192,7 @@ packages_list() {
                 # mail
                 geary
                 # sound
-                gnome-metronome lollypop blanket
+                gnome-metronome lollypop
                 # other
                 glade ghex baobab confy
                 # bluetooth
@@ -198,7 +207,7 @@ packages_list() {
                 # plasma
                 plasma-camera plasma-videoplayer plasma-phonebook
                 # kde
-                shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool kclock krename kcolorchooser kunitconversion
+                shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool krename kcolorchooser kunitconversion
                 # widgets
                 kconfigwidgets
                 # print
@@ -286,7 +295,7 @@ packages_list() {
             # printer
             cups cups-openrc cups-pdf bluez-cups
             # driver
-            xinput ccid solaar piper
+            xinput gkraken ccid solaar razercfg razercfg-gui razergenie openrazer piper
             # math
             mathjax2
             # finance
@@ -409,7 +418,7 @@ menu() {
             i=$(($i-1))
         elif [[ $key == $(echo -en "\e[B") ]] && [[ $i -lt ${#options[@]} ]]; then
             i=$(($i+1))
-        elif [[ -z $key ]]; then
+        elif [ -z $key ]; then
             break
         fi
         echo -en "\e[${#options[@]}A"
@@ -470,7 +479,7 @@ setup_drive() {
         apk add sgdisk
     fi
 
-    if [[ ! $root_drive ]]; then
+    if [ ! $root_drive ]; then
 
         echo ">>> wiping filesystm"
         wipefs -a -f $drive
@@ -518,7 +527,7 @@ setup_drive() {
         echo ">>> creating boot filesystem"
         mkfs.vfat -F32 -n BOOT $boot_drive
 
-        if [[ $swap_drive ]]; then
+        if [ $swap_drive ]; then
             echo ">>> creating swap filesystem"
             mkswap $swap_drive
         fi
@@ -583,7 +592,7 @@ set_zfs() {
     echo "options zfs l2arc_write_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs l2arc_write_boost=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs l2arc_headroom=12" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_arc_max=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
+    echo "options zfs zfs_arc_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs zfs_arc_min=268435456" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs zfs_prefetch_disable=0" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs zfs_top_maxinflight=320" >> /mnt/etc/modprobe.d/zfs.conf
@@ -618,11 +627,11 @@ mount_root() {
         exit
     fi
 
-    if [[ ! -d /mnt/boot ]]; then
+    if [ ! -d /mnt/boot ]; then
         mkdir -p /mnt/boot
     fi
 
-    if [[ ! -d /mnt/boot/EFI ]]; then
+    if [ ! -d /mnt/boot/EFI ]; then
         mkdir -p /mnt/boot/EFI
     fi
 
@@ -710,7 +719,7 @@ setup_linux() {
 
 install_linux() {
 
-    if [[ -f /mnt/lib/apk/db/lock ]]; then
+    if [ -f /mnt/lib/apk/db/lock ]; then
         rm /mnt/lib/apk/db/lock
         apk fix --root=/mnt
     fi
@@ -724,16 +733,13 @@ install_linux() {
         else
             list+=' linux-virt'
         fi
-    fi
-
-    if grep -q zfs /root/list; then
-        list+=' linux-lts zfs-lts'
-        list+=' zfs zfs-openrc zfs-libs'
     else
-        list+=' linux-lts linux-edge'
-    fi
-
-    if ! grep -q VirtualBox /root/list; then
+        if grep -q zfs /root/list; then
+            list+=' linux-lts zfs-lts'
+            list+=' zfs zfs-openrc zfs-libs'
+        else
+            list+=' linux-lts linux-edge'
+        fi
         list+=' linux-firmware-intel linux-firmware-i915'
         list+=' linux-firmware-amd linux-firmware-amd-ucode'
         list+=' linux-firmware-nvidia'
@@ -768,7 +774,7 @@ install_packages() {
 set_timezone() {
 
     echo ">>> setting timezone"
-    if [[ -f /mnt/usr/share/zoneinfo/$timezone ]]; then
+    if [ -f /mnt/usr/share/zoneinfo/$timezone ]; then
         install -Dm 0644 /mnt/usr/share/zoneinfo/$timezone /mnt/etc/localtime
         echo $timezone > /mnt/etc/timezone
     else
@@ -797,7 +803,7 @@ change_root() {
     mount --bind /proc /mnt/proc
     mount --bind /dev /mnt/dev
     mount --bind /sys /mnt/sys
-    chroot /mnt /bin/bash /root/install
+    chroot /mnt/ /bin/bash /root/install
 
 }
 
@@ -827,11 +833,8 @@ create_user() {
     fi
     echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/wheel
     chmod 0400 /etc/sudoers.d/wheel
-    echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user $user
-    adduser $user video
-    adduser $user audio
-    adduser $user input
-    adduser $user netdev
+    echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user
+    usermod -aG input,audio,video,netdev,usb,disk,lp,adm $user
 
 }
 
@@ -970,14 +973,18 @@ configure_alpine() {
     sed -i 's|#rc_sighup="NO"|rc_sighup="YES"|' /etc/rc.conf
     sed -i 's|#rc_timeout_stopsec="90"|rc_timeout_Stopsec="0"|' /etc/rc.conf
     sed -i 's|#rc_send_sigkill="YES"|rc_send_sigkill="YES"|' /etc/rc.conf
-    sed -i 's|#rc_tty_number=.*|rc_tty_number=24|' /etc/rc.conf
+    sed -i 's|#rc_tty_number=12|rc_tty_number=24|' /etc/rc.conf
+
+    echo ">>> setting locales"
+    echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+    echo 'LANG=ar_OM.UTF-8' >> /etc/locale.conf
 
     cat >> /etc/default/libc-locales << EOF
 en_US.UTF-8 UTF-8
 en_US ISO-8859-1
 EOF
 
-    if [[ -d /etc/NetworkManager/ ]]; then
+    if [ -d /etc/NetworkManager/ ]; then
         cat > /etc/NetworkManager/NetworkManager.conf << EOF
 [main]
 dhcp=internal
@@ -989,15 +996,11 @@ wifi.backend=iwd
 EOF
     fi
 
-    if [ ! -d /etc/pipewire ]; then
-        mkdir /etc/pipewire
-    fi
-    cp /usr/share/pipewire/pipewire.conf /etc/pipewire/
-    if ! grep -q 'snd_seq' /etc/modules; then
+    if ! grep -q "snd_seq" /etc/modules; then
         echo snd_seq >> /etc/modules
     fi
 
-    if [[ ! -d /usr/share/icons/windows-11-icons/ ]]; then
+    if [ ! -d windows-11-icons/ ]; then
         echo ">>> cloning Windows-11-icons"
         git clone https://github.com/0free/windows-11-icons.git
         rm -r windows-11-icons/.git
@@ -1102,7 +1105,7 @@ make_initramfs() {
         list+=' '
     done
 
-    if [[ ! -d /lib/modules/5.15.63-0-lts/ ]]; then
+    if [ ! -d /lib/modules/5.15.63-0-lts/ ]; then
         echo ">>> create /lib/modules/5.15.63-0-lts/"
         mkdir /lib/modules/5.15.63-0-lts/
     fi
@@ -1155,11 +1158,11 @@ install_grub() {
     apk add grub grub-efi grub-bash-completion
     grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine" --no-floppy
 
-    if [[ ! -d /boot/grub/themes/ ]]; then
+    if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
     fi
 
-    if [[ ! -d /boot/grub/themes/grub-theme/ ]]; then
+    if [ ! -d /boot/grub/themes/grub-theme/ ]; then
         echo ">>> cloning grub-theme"
         git clone https://github.com/0free/grub-theme.git
         rm -r grub-theme/.git/
@@ -1180,6 +1183,7 @@ GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
+GRUB_EARLY_INITRD_LINUX_CUSTOM="ucode.cpio"
 EOF
 
     list='msdospart part_msdos part_gpt part_apple'
@@ -1208,7 +1212,7 @@ finish() {
     apk del *-doc
     echo ">>> installation is completed"
     echo '' > /root/reboot
-    exec $(exit && bash install)
+    chroot / /bin/bash exit && /bin/bash install
 
 }
 
@@ -1226,30 +1230,30 @@ reboot_system() {
 
 set -e
 
-if [[ -f /mnt/root/reboot ]]; then
+if [ -f /mnt/root/reboot ]; then
     reboot_system
 else
-    if [[ -f /mnt/root/chroot ]]; then
+    if [ -f /mnt/root/chroot ]; then
         change_root
     else
-        if [[ -f /root/list ]]; then
+        if [ -f /root/list ]; then
             drive=$(. /root/list; echo $drive)
             boot_drive=$(. /root/list; echo $boot_drive)
             swap_drive=$(. /root/list; echo $swap_drive)
             root_drive=$(. /root/list; echo $root_drive)
         fi
-        if [[ -f /root/chroot ]]; then
+        if [ -f /root/chroot ]; then
             if [ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]; then
-                USER=$(ls /home)
+                user=$(ls /home)
                 setup_desktop
             else
                 configure
             fi
         else
             if mountpoint -q /mnt; then
-                if [[ -f /mnt/boot/initramfs-* ]]; then
+                if [ -f /mnt/boot/initramfs-* ]; then
                     install_packages
-                elif [[ -d /mnt/root/ ]]; then
+                elif [ -d /mnt/root/ ]; then
                     setup_linux
                 else
                     install_base
