@@ -1189,7 +1189,6 @@ GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
-GRUB_EARLY_INITRD_LINUX_CUSTOM="ucode.cpio"
 GRUB_GFXMODE=1280x720,1920x1080,1024x768,auto
 EOF
 
@@ -1217,7 +1216,7 @@ finish() {
 
     echo ">>> cleaning apks"
     apk del *-doc
-    echo ">>> installation is completed"
+    echo ">>> installation is completed ... re-run to reboot"
     echo '' > /root/reboot
     exit && chroot / /bin/bash install
 
