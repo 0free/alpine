@@ -42,7 +42,7 @@ packages_list() {
         # compression
         brotli zstd zlib zip lz4 lzo unzip xz bzip2
         # disks
-        e2fsprogs lvm2 os-prober gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
+        e2fsprogs lvm2 gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
         udisks2 udisks2-bash-completion 
         # network
         networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind
@@ -1166,6 +1166,7 @@ install_refind() {
 install_grub() {
 
     echo ">>> installing grub package"
+    apk fix
     apk add grub grub-efi grub-bash-completion
     echo ">>> installing grub bootloader"
     grub-install --target=x86_64-efi --root-directory=/boot/ --efi-directory=/boot/ --bootloader-id="alpine"
@@ -1191,7 +1192,7 @@ GRUB_TIMEOUT=1
 GRUB_SAVEDEFAULT=true
 GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
-GRUB_DISABLE_OS_PROBER=false
+GRUB_DISABLE_OS_PROBER=true
 GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off ipv6.disable=1 nomodeset"
 GRUB_CMDLINE_LINUX=""
