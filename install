@@ -1212,7 +1212,11 @@ EOF
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
 
     echo ">>> making grub config"
-    grub-mkconfig -o /boot/grub/grub.cfg
+    if grep -q "zfs" /root/list; then
+        ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg
+    else
+        grub-mkconfig -o /boot/grub/grub.cfg
+    fi
 
     echo ">>> checking grub-probe"
     grub-probe /
