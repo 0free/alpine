@@ -1038,26 +1038,23 @@ make_initramfs() {
 
     modules=(base nvme ata ide scsi usb lvm keymap virtio kms mmc)
 
+    if grep -q zfs /root/list; then
+        modules+=(zfs)
+    fi
+    if grep -q btrfs /root/list; then
+        modules+=(btrfs)
+    fi
+    if grep -q xfs /root/list; then
+        modules+=(xfs)
+    fi
+    if grep -q ext4 /root/list; then
+        modules+=(ext4)
+    fi
+
     if ! grep -q VirtualBox /root/list; then
         modules+=(i915 intel_agp)
         modules+=(amdgpu)
         modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
-    fi
-
-    if grep -q zfs /root/list; then
-        modules+=(zfs)
-    fi
-
-    if grep -q btrfs /root/list; then
-        modules+=(btrfs)
-    fi
-
-    if grep -q xfs /root/list; then
-        modules+=(xfs)
-    fi
-
-    if grep -q ext4 /root/list; then
-        modules+=(ext4)
     fi
 
     list=''
@@ -1225,7 +1222,6 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
-        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="root=ZFS=$pool rootfstype=zfs"|' /etc/default/grub
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
