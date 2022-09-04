@@ -1208,8 +1208,8 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
-        sed -i "s|rpool=.*|rpool=$pool|"  /etc/grub.d/10_linux
-        sed -i "s|GRUB_CMDLINE_LINUX=\".*\"|GRUB_CMDLINE_LINUX=\"root=zfs zfs=$pool\"|" /etc/default/grub
+        sed -i "s|rpool=.*|rpool=$pool|" /etc/grub.d/10_linux
+        sed -i "s|GRUB_CMDLINE_LINUX=\".*\"|GRUB_CMDLINE_LINUX=\"root=zfs=$pool\"|" /etc/default/grub
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
