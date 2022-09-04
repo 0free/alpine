@@ -1040,12 +1040,17 @@ make_initramfs() {
         modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
     fi
 
-    if grep -q btrfs /root/list; then
-        modules+=(btrfs)
-    fi
-
     if grep -q zfs /root/list; then
         modules+=(zfs)
+        echo ">>> re-create zpool.cache"
+        rm -f /etc/zfs/zpool.cache
+        touch /etc/zfs/zpool.cache
+        chmod a-w /etc/zfs/zpool.cache
+        chattr +i /etc/zfs/zpool.cache
+    fi
+
+    if grep -q btrfs /root/list; then
+        modules+=(btrfs)
     fi
 
     if grep -q xfs /root/list; then
@@ -1205,11 +1210,6 @@ EOF
         list+=' zfs zfscrypt zfsinfo'
         sed -i "s|rpool=.*|rpool=$pool|"  /etc/grub.d/10_linux
         sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=ZFS=$pool\"|" /etc/default/grub
-        echo ">>> re-create zpool.cache"
-        rm -f /etc/zfs/zpool.cache
-        touch /etc/zfs/zpool.cache
-        chmod a-w /etc/zfs/zpool.cache
-        chattr +i /etc/zfs/zpool.cache
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
