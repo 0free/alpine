@@ -1123,6 +1123,9 @@ setup_bootloader() {
     if grep -q refind /root/list; then
         install_refind
     fi
+    if grep -q clover /root/list; then
+        install_clover
+    fi
     if grep -q grub /root/list; then
         install_grub
     fi
@@ -1145,12 +1148,13 @@ install_refind() {
     echo ">>> installing rEFInd bootloader"
     apk add refind
 
-    pwd=$(pwd)
-    cd /boot/refind/drivers_x64
     curl -LO github.com/pbatard/efifs/releases/download/v1.8/xfs_x64.efi
     curl -LO github.com/pbatard/efifs/releases/download/v1.8/zfs_x64.efi
     curl -LO github.com/pbatard/efifs/releases/download/v1.8/ntfs_x64.efi
-    cd $pwd
+
+    cp xfs_x64.efi /boot/refind/drivers_x64/
+    cp zfs_x64.efi /boot/refind/drivers_x64/
+    cp ntfs_x64.efi /boot/refind/drivers_x64/
 
     refind-install --alldrivers $boot_drive
     mkrlconf
@@ -1162,6 +1166,19 @@ install_refind() {
 
 }
 
+install_clover() {
+
+    echo ">>> installing clover bootloader"
+    if [ ! -d CloverBoorLoader/ ]; then
+        echo ">>> cloning CloverBoorLoader"
+        git clone https://github.com/0free/CloverBoorLoader.git
+        rm -r CloverBoorLoader/.git/
+        cp -rlf CloverBoorLoader/* /boot/
+        rm -r CloverBoorLoader/
+    fi
+
+
+}
 
 install_grub() {
 
