@@ -1166,6 +1166,7 @@ install_refind() {
 install_grub() {
 
     echo ">>> installing grub package"
+    export ZPOOL_VDEV_NAME_PATH=YES
     apk fix
     apk add grub grub-efi grub-bash-completion
     echo ">>> installing grub bootloader"
@@ -1208,6 +1209,7 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
+        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="root=ZFS=$pool rootfstype=zfs"|' /etc/default/grub
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
