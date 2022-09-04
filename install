@@ -1169,7 +1169,7 @@ install_grub() {
     echo ">>> installing grub bootloader"
     apk fix
     apk add grub grub-efi grub-bash-completion
-    ZPOOL_VDEV_NAME_PATH=YES grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine"
+    grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine"
 
     if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
