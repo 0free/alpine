@@ -1168,11 +1168,11 @@ install_refind() {
 
 install_clover() {
 
-    echo ">>> installing clover bootloader"
     if [ ! -d CloverBoorLoader/ ]; then
         echo ">>> cloning CloverBoorLoader"
         git clone https://github.com/0free/CloverBoorLoader.git
         rm -r CloverBoorLoader/.git/
+        echo ">>> copying clover bootloader"
         cp -rlf CloverBoorLoader/* /boot/
         rm -r CloverBoorLoader/
     fi
