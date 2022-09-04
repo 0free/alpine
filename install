@@ -1245,8 +1245,6 @@ finish() {
 
     while :; do
         /bin/bash /root/install
-        exit
-        break
     done
 
 }
