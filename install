@@ -16,7 +16,7 @@ packages_list() {
 
     packages+=(
         # desktop
-        busybox
+        busybox busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
         musl musl-locales
         openrc openrc-bash-completion
         dbus dbus-openrc dbus-x11 iio-sensor-proxy
