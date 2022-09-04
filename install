@@ -685,7 +685,7 @@ set_network() {
     echo 'nameserver 8.8.8.8' >> /mnt/etc/resolv.conf
 
     echo ">>> adding interfaces"
-    cat > /mnt/etc/network/interfaces << EOF
+    cat > /mnt/etc/network/interfaces <<EOF
 auto lo
 iface lo inet loopback
 EOF
@@ -808,9 +808,13 @@ change_root() {
     cp /root/install /mnt/root/install
     echo ">>> changing root"
     echo '' > /mnt/root/chroot
-    mount --bind /proc /mnt/proc
-    mount --bind /dev /mnt/dev
-    mount --bind /sys /mnt/sys
+
+    dir=(proc dev sys)
+
+    for d in ${dir[@]}; do
+        mount --bind /$d/ /mnt/$d/
+    done
+
     chroot /mnt/ /bin/bash /root/install
 
 }
@@ -962,13 +966,13 @@ configure_alpine() {
     echo 'LANG=en_US.UTF-8' > /etc/locale.conf
     echo 'LANG=ar_OM.UTF-8' >> /etc/locale.conf
 
-    cat >> /etc/default/libc-locales << EOF
+    cat >> /etc/default/libc-locales <<EOF
 en_US.UTF-8 UTF-8
 en_US ISO-8859-1
 EOF
 
     if [ -d /etc/NetworkManager/ ]; then
-        cat > /etc/NetworkManager/NetworkManager.conf << EOF
+        cat > /etc/NetworkManager/NetworkManager.conf <<EOF
 [main]
 dhcp=internal
 plugins=ifupdown,keyfile
@@ -1087,7 +1091,7 @@ add_commands() {
     echo ">>> adding bashrc"
     echo "" > /home/$user/.bashrc
 
-    cat >> /home/$user/.bashrc << EOF
+    cat >> /home/$user/.bashrc <<EOF
 
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
@@ -1169,7 +1173,7 @@ install_grub() {
     echo ">>> installing grub bootloader"
     apk fix
     apk add grub grub-efi grub-bash-completion
-    grub-install --target=x86_64-efi --root-directory=/ --efi-directory=/boot/EFI/ --bootloader-id="alpine"
+    grub-install --target=x86_64-efi --root-directory=/ --efi-directory=/boot/ --bootloader-id="alpine"
 
     if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
@@ -1185,7 +1189,7 @@ install_grub() {
     sed -i 's|CLASS=".*"|CLASS="--class $( . /etc/os-release; echo "$ID")"|' /etc/grub.d/10_linux
     sed -i "s|menuentry '\$LABEL'|menuentry '\$LABEL' --class efi|" /etc/grub.d/30_uefi-firmware
 
-    cat > /etc/default/grub << EOF
+    cat > /etc/default/grub <<EOF
 loglevel=0
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=1
