@@ -1203,7 +1203,7 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
-        sed -i 's|LINUX_ROOT_DEVICE="ZFS=${rpool}${bootfs%/}"|LINUX_ROOT_DEVICE="zfs:${rpool}${bootfs%/}"|' /etc/grub.d/10_linux
+        sed -i 's|ZFS=${rpool}${bootfs%/}|zfs:${rpool}${bootfs%/}|' /etc/grub.d/10_linux
         #sed -i 's|||' /etc/grub.d/10_linux
     fi
 
