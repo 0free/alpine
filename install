@@ -489,7 +489,7 @@ setup_drive() {
         sgdisk -U $drive
 
         echo ">>> creating boot partition"
-        sgdisk -n 0:0:+$bootSize -t 0:ef00 $drive
+        sgdisk -n 0:0:+$bootSize -c 0:efi -t 0:ef00 $drive
         if ls $drive | grep nvme; then
             boot_drive=$drive"p1"
         else
@@ -497,7 +497,7 @@ setup_drive() {
         fi
 
         echo ">>> creating swap partition"
-        sgdisk -n 0:0:+$swapSize -t 0:8200 $drive
+        sgdisk -n 0:0:+$swapSize -c 0:swap -t 0:8200 $drive
         if ls $drive | grep nvme; then
             swap_drive=$drive"p2"
         else
@@ -506,9 +506,9 @@ setup_drive() {
 
         echo ">>> creating root partition"
         if [[ $filesystem == zfs ]]; then
-            sgdisk -n 0:0:0 -t 0:bf00 $drive
+            sgdisk -n 0:0:0 -c 0:zfs -t 0:bf00 $drive
         else
-            sgdisk -n 0:0:0 -t 0:8300 $drive
+            sgdisk -n 0:0:0 -c 0:$filesystem -t 0:8300 $drive
         fi
         if ls $drive | grep nvme; then
             root_drive=$drive"p3"
@@ -565,7 +565,7 @@ setup_drive() {
 create_zfs() {
 
     echo ">>> loading ZFS modules"
-    /sbin/modprobe zfs
+    modprobe zfs
     echo ">>> checking ZFS modules"
     if ! lsmod | grep -qi zfs; then
        echo 'ERROR: ZFS modules are missing'
@@ -619,12 +619,12 @@ mount_root() {
         echo ">>> exporting zpool"
         zpool export $pool
         echo ">>> importing zpool"
-        zpool import $pool -d $root_drive -R /mnt
+        zpool import $pool -d $root_drive -R /mnt/
         echo ">>> mounting zfs dataset"
-        mount -t zfs $pool /mnt
+        mount -t zfs $pool /mnt/
     else
         echo ">>> mounting root drive"
-        mount $root_drive /mnt
+        mount $root_drive /mnt/
     fi
 
     if ! mountpoint -q /mnt; then
@@ -644,7 +644,7 @@ mount_root() {
 mount_boot() {
 
     echo ">>> mounting boot drive"
-    mount $boot_drive /mnt/boot
+    mount $boot_drive /mnt/boot/
 
 }
 
@@ -658,7 +658,7 @@ install_base() {
     echo "$mirror/$version/community" >> /etc/apk/repositories
 
     echo ">>> installing alpine-base"
-    apk add --root=/mnt --initdb alpine-base --keys-dir /etc/apk/keys --repositories-file /etc/apk/repositories
+    apk add --root=/mnt/ --initdb alpine-base --keys-dir /etc/apk/keys --repositories-file /etc/apk/repositories
 
     echo ">>> copying repositories"
     cp /etc/apk/repositories /mnt/etc/apk/repositories
@@ -669,7 +669,7 @@ install_base() {
     chmod 0666 /mnt/dev/null
 
     echo ">>> loading modules"
-    /sbin/modprobe efivars
+    modprobe efivars
 
     set_network
     set_fstab
@@ -695,14 +695,13 @@ EOF
 set_fstab() {
 
     echo ">>> setting fstab"
-    echo $filesystem >> /mnt/etc/modules
 
     if grep -q zfs /root/list; then
         echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" > /mnt/etc/fstab
     elif grep -q btrfs /root/list; then
-        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime 0 0" > /mnt/etc/fstab
+        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem rw,ssd,nofail,discard,noatime 0 0" > /mnt/etc/fstab
     else
-        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem ssd,nofail,rw,discard,noatime 0 0" > /mnt/etc/fstab
+        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem rw.ssd,nofail,discard,noatime 0 0" > /mnt/etc/fstab
     fi
 
     echo "$(blkid $boot_drive -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
@@ -728,21 +727,19 @@ install_linux() {
         apk fix --root=/mnt
     fi
 
-    list='linux-pam'
-
     if grep -q VirtualBox /root/list; then
         if grep -q zfs /root/list; then
-            list+=' linux-virt zfs-virt zfs zfs-openrc zfs-libs'
+            list='linux-virt zfs-virt zfs zfs-openrc zfs-libs'
         else
-            list+=' linux-virt'
+            list='linux-virt'
         fi
     else
         if grep -q zfs /root/list; then
-            list+=' linux-lts zfs-lts'
+            list='linux-lts zfs-lts'
             list+=' linux-edge akms zfs-src'
             list+=' zfs zfs-openrc zfs-libs'
         else
-            list+=' linux-lts linux-edge'
+            list='linux-lts linux-edge'
         fi
         list+=' amd-ucode intel-ucode'
         list+=' linux-firmware-intel'
@@ -755,10 +752,11 @@ install_linux() {
         list+=' linux-firmware-rtlwifi'
         list+=' linux-firmware-rtl_bt'
         list+=' linux-firmware-rtl_nic'
+        list+=' linux-pam'
     fi
 
     echo ">>> installing linux"
-    apk add --root=/mnt $list
+    apk add --root=/mnt/ $list
 
 }
 
@@ -770,12 +768,12 @@ install_packages() {
 
     list=''
     for i in ${!packages[@]}; do
-        list+=' '
         list+=${packages[$i]}
+        list+=' '
     done
     echo ">>> installing packages"
-    apk add --root=/mnt $list
-    apk fix --root=/mnt
+    apk add --root=/mnt/ $list
+    apk fix --root=/mnt/
 
 }
 
@@ -806,15 +804,13 @@ change_root() {
     echo ">>> copying install script"
     cp /root/list /mnt/root/list
     cp /root/install /mnt/root/install
+
     echo ">>> changing root"
     echo '' > /mnt/root/chroot
-
     dir=(proc dev sys)
-
     for d in ${dir[@]}; do
         mount --bind /$d/ /mnt/$d/
     done
-
     chroot /mnt/ /bin/bash /root/install
 
 }
@@ -1244,7 +1240,10 @@ finish() {
     echo '' > /root/reboot
 
     while :; do
-        /bin/bash /root/install
+        if [ -f /root/reboot ]; then
+            /bin/bash /root/install
+        fi
+        exit && break
     done
 
 }
