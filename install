@@ -1169,7 +1169,7 @@ install_grub() {
     echo ">>> installing grub bootloader"
     apk fix
     apk add grub grub-efi grub-bash-completion
-    grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine"
+    grub-install --target=x86_64-efi --root-directory=/ --efi-directory=/boot/efi/ --bootloader-id="alpine"
 
     if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
@@ -1209,7 +1209,7 @@ EOF
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
         sed -i "s|rpool=.*|rpool=$pool|" /etc/grub.d/10_linux
-        sed -i "s|GRUB_CMDLINE_LINUX=\".*\"|GRUB_CMDLINE_LINUX=\"root=zfs=$pool\"|" /etc/default/grub
+        sed -i "s|GRUB_CMDLINE_LINUX=\".*\"|GRUB_CMDLINE_LINUX=\"root=ZFS=$pool\"|" /etc/default/grub
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
