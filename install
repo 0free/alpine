@@ -16,9 +16,9 @@ packages_list() {
 
     packages+=(
         # desktop
+        openrc openrc-bash-completion
         busybox busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
         musl musl-locales
-        openrc openrc-bash-completion
         dbus dbus-openrc dbus-x11 iio-sensor-proxy
         ibus ibus-bash-completion
         udev-init-scripts udev-init-scripts-openrc
@@ -1168,7 +1168,7 @@ install_grub() {
     echo ">>> installing grub bootloader"
     apk fix
     apk add grub grub-efi grub-bash-completion
-    grub-install --target=x86_64-efi --root-directory=/ --efi-directory=/boot/ --bootloader-id="alpine"
+    grub-install --target=x86_64-efi --root-directory=/boot/ --efi-directory=/boot/ --bootloader-id="alpine"
 
     if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
