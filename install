@@ -1205,6 +1205,7 @@ EOF
         list+=' zfs zfscrypt zfsinfo'
         sed -i "s|rpool=.*|rpool=$pool|"  /etc/grub.d/10_linux
         sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=ZFS=$pool\"|" /etc/default/grub
+        echo "re-create zpool.cache"
         rm -f /etc/zfs/zpool.cache
         touch /etc/zfs/zpool.cache
         chmod a-w /etc/zfs/zpool.cache
