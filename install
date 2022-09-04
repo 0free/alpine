@@ -1197,9 +1197,8 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
-        echo 'export ZPOOL_VDEV_NAME_PATH=YES' > /etc/profile.d/zpool_vdev_name_path.sh
-        source /etc/profile.d/zpool_vdev_name_path.sh
-        echo 'Defaults env_keep += "ZPOOL_VDEV_NAME_PATH"' >> /etc/sudoer
+        sed -i "s|rpool=.*|rpool=\`zdb -l \${GRUB_DEVICE} \| grep -E '[[:blank:]]name' \| cut -d\\\' -f 2\`|" /etc/grub.d/10_linux
+        sed -i 's|||' /etc/grub.d/10_linux
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
