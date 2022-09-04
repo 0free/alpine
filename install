@@ -850,18 +850,9 @@ setup_desktop() {
 
     enable_services
     configure_alpine
-    add_commands
     make_initramfs
-    if grep -q syslinux /root/list; then
-        install_syslinux
-    fi
-    if grep -q refind /root/list; then
-        install_refind
-    fi
-    if grep -q grub /root/list; then
-        install_grub
-    fi
-    finish
+    add_commands
+    setup_bootloader
 
 }
 
@@ -1037,40 +1028,6 @@ configure_lightdm() {
 
 }
 
-add_commands() {
-
-    echo ">>> adding bashrc"
-    echo "" > /home/$user/.bashrc
-
-    cat >> /home/$user/.bashrc << EOF
-
-export QT_IM_MODULE=ibus
-export GTK_IM_MODULE=ibus
-export XMODIFIERS=@im=ibus
-
-alias search='sudo apk search'
-alias install='sudo apk add'
-alias remove='sudo apk del'
-alias update='
-sudo apk fix
-sudo apk update
-sudo apk upgrade
-'
-alias c='clear'
-
-alias disk='
-lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
-'
-
-alias fwupd='fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update'
-alias youtube='yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 00:00:00\"'
-
-PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$\[\033[0m\]'
-
-EOF
-
-}
-
 make_initramfs() {
 
     echo ">>> installing mkinitfs"
@@ -1117,6 +1074,55 @@ make_initramfs() {
 
     echo ">>> building initial ramdisk"
     mkinitfs -b / -f /etc/fstab -C lz4
+
+}
+
+add_commands() {
+
+    echo ">>> adding bashrc"
+    echo "" > /home/$user/.bashrc
+
+    cat >> /home/$user/.bashrc << EOF
+
+export QT_IM_MODULE=ibus
+export GTK_IM_MODULE=ibus
+export XMODIFIERS=@im=ibus
+
+alias search='sudo apk search'
+alias install='sudo apk add'
+alias remove='sudo apk del'
+alias update='
+sudo apk fix
+sudo apk update
+sudo apk upgrade
+'
+alias c='clear'
+
+alias disk='
+lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
+'
+
+alias fwupd='fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update'
+alias youtube='yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 00:00:00\"'
+
+PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$\[\033[0m\]'
+
+EOF
+
+}
+
+setup_bootloader() {
+
+    if grep -q syslinux /root/list; then
+        install_syslinux
+    fi
+    if grep -q refind /root/list; then
+        install_refind
+    fi
+    if grep -q grub /root/list; then
+        install_grub
+    fi
+    finish
 
 }
 
@@ -1259,7 +1265,9 @@ else
         root_drive=$(. /root/list; echo $root_drive)
     fi
     if [ -f /root/chroot ]; then
-        if [[ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]]; then
+        if grep -q "alias" /home/$user/.bashrc; then
+            setup_bootloader
+        elif [[ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]]; then
             user=$(ls /home)
             setup_desktop
         else
