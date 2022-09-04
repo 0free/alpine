@@ -1155,7 +1155,6 @@ install_refind() {
 
     refind-install --alldrivers $boot_drive
     mkrlconf
-    sed -i 's|||' /boot/refind_linux.conf
 
     if grep -q zfs /root/list; then
         sed -i "s|root=.*|root=zfs=$pool|" /boot/refind_linux.conf
@@ -1196,7 +1195,7 @@ install_grub() {
         mv grub-theme/ /boot/grub/themes/
     fi
 
-    sed -i 's|CLASS=".*"|CLASS="--class $( . /etc/os-release; echo \"$ID\")"|' /etc/grub.d/10_linux
+    sed -i "s|CLASS=\".*\"|CLASS=\"--class $( . /etc/os-release; echo \"$ID\")\"|" /etc/grub.d/10_linux
     sed -i "s|menuentry '\$LABEL'|menuentry '\$LABEL' --class efi|" /etc/grub.d/30_uefi-firmware
 
     cat > /etc/default/grub <<EOF
@@ -1222,6 +1221,7 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
+        sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=ZFS=$pool rootfstype=zfs\"|" /etc/default/grub
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
