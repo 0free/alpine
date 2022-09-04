@@ -1209,7 +1209,7 @@ GRUB_TIMEOUT=1
 GRUB_SAVEDEFAULT=true
 GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
-GRUB_DISABLE_OS_PROBER=true
+GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=y
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off ipv6.disable=1 nomodeset"
 GRUB_CMDLINE_LINUX=""
@@ -1225,7 +1225,7 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
-        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="root=ZFS=$pool rootfstype=zfs"|' /etc/default/grub
+        sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX=""|' /etc/default/grub
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
