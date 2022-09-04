@@ -1203,7 +1203,9 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
-        sed -i 's|ZFS=${rpool}${bootfs%/}|ZFS=${rpool}|' /etc/grub.d/10_linux
+        echo "export ZPOOL_VDEV_NAME_PATH=YES" > /etc/profile.d/zpool_vdev_name_path.sh
+        source /etc/profile.d/zpool_vdev_name_path.sh
+        sed -i 's|ZFS=${rpool}${bootfs%/}|ZFS=${rpool}${bootfs%/}|' /etc/grub.d/10_linux
         #sed -i 's|||' /etc/grub.d/10_linux
     fi
 
