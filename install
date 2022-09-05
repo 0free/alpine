@@ -652,11 +652,11 @@ install_base() {
 
     echo ">>> updating packages"
     cat > /etc/apk/repositories <<EOF
-#echo "$mirror/$branch/main" 
-#echo "$mirror/$branch/community" >> /etc/apk/repositories
-#echo "$mirror/$branch/testing" >> /etc/apk/repositories
-echo "$mirror/$version/main" >> /etc/apk/repositories
-echo "$mirror/$version/community" >> /etc/apk/repositories
+#$mirror/$branch/main
+#$mirror/$branch/community
+#$mirror/$branch/testing
+$mirror/$version/main
+$mirror/$version/community
 EOF
 
     echo ">>> installing alpine-base"
