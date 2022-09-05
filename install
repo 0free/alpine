@@ -15,9 +15,11 @@ password='0000'
 packages_list() {
 
     packages+=(
+        # busybox/openrc
+        busybox openrc openrc-bash-completion
+        # busybox@edge
+        busybox-openrc busybox-mdev-openrc busybox-binsh
         # desktop
-        openrc openrc-bash-completion
-        busybox busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
         musl musl-locales
         dbus dbus-openrc dbus-x11
         ibus ibus-bash-completion
@@ -47,7 +49,7 @@ packages_list() {
         # network
         networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind
         # firewall
-        gufw ufw ufw-openrc ufw-bash-completion
+        ufw ufw-openrc ufw-bash-completion
         iptables iptables-openrc
         # sound
         alsa-plugins-pulse alsa-lib
@@ -60,9 +62,8 @@ packages_list() {
         # fonts
         font-hack font-adobe-source-code-pro
         font-arabic-misc font-noto-arabic
-        font-inter font-opensans font-roboto font-xfree86-type1
+        font-opensans font-xfree86-type1
         ttf-font-awesome ttf-dejavu ttf-freefont ttf-droid
-        font-awesome font-awesome-free font-awesome-brands
         # keyboard
         setxkbmap
         # timezone
@@ -85,7 +86,6 @@ packages_list() {
         packages+=(
             # hardware
             bolt pciutils
-            tpm2-tools tpm2-tools-bash-completion
             # firmware
             fwupd fwupd-openrc fwup-bash-completion fwupd-efi fwupd-plugin-bios fwupd-plugin-cpu fwupd-plugin-tpm fwupd-plugin-nvme fwupd-plugin-ata
             # mesa
@@ -94,7 +94,7 @@ packages_list() {
             # intel GPU
             mesa-vulkan-intel intel-media-driver
             # vulkan
-            vulkan-loader vulkan-tools vulkan-validation-layers
+            vulkan-loader vulkan-tools
             # nvidia GPU
             nvidia-src
             # wireless
@@ -137,6 +137,8 @@ packages_list() {
             aspell hunspell hunspell-en nuspell
             # network
             network-manager-applet
+            # firewall
+            gufw
         )
     fi
 
@@ -652,11 +654,11 @@ install_base() {
 
     echo ">>> updating packages"
     cat > /etc/apk/repositories <<EOF
-#$mirror/$branch/main
-#$mirror/$branch/community
-#$mirror/$branch/testing
-$mirror/$version/main
-$mirror/$version/community
+$mirror/$branch/main
+$mirror/$branch/community
+$mirror/$branch/testing
+#$mirror/$version/main
+#$mirror/$version/community
 EOF
 
     echo ">>> installing alpine-base"
