@@ -651,11 +651,13 @@ mount_boot() {
 install_base() {
 
     echo ">>> updating packages"
-    echo "$mirror/$branch/main" > /etc/apk/repositories
-    echo "$mirror/$branch/community" >> /etc/apk/repositories
-    echo "$mirror/$branch/testing" >> /etc/apk/repositories
-    echo "$mirror/$version/main" >> /etc/apk/repositories
-    echo "$mirror/$version/community" >> /etc/apk/repositories
+    cat > /etc/apk/repositories <<EOF
+#echo "$mirror/$branch/main" 
+#echo "$mirror/$branch/community" >> /etc/apk/repositories
+#echo "$mirror/$branch/testing" >> /etc/apk/repositories
+echo "$mirror/$version/main" >> /etc/apk/repositories
+echo "$mirror/$version/community" >> /etc/apk/repositories
+EOF
 
     echo ">>> installing alpine-base"
     apk add --root=/mnt/ --initdb alpine-base --keys-dir /etc/apk/keys --repositories-file /etc/apk/repositories
