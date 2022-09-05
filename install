@@ -1246,7 +1246,8 @@ finish() {
     echo '' > /root/reboot
 
     while :; do
-        /bin/bash /root/install
+        exit && /bin/bash /root/install
+        break
     done
 
 }
