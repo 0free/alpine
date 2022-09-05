@@ -740,7 +740,7 @@ install_linux() {
     else
         if grep -q zfs /root/list; then
             list='linux-lts zfs-lts'
-            #list+=' linux-edge akms zfs-src'
+            list+=' linux-edge akms zfs-src'
             list+=' zfs zfs-openrc zfs-libs zfs-udev'
         else
             list='linux-lts linux-edge'
