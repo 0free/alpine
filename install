@@ -1225,9 +1225,6 @@ EOF
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
 
-    echo ">>> create Windows loader"
-    efibootmgr --create --label 'Windows' --disk /dev/nvme0n1p2 --part 2 --loader 'Windows/Boot/EFI/bootmgfw.efi'
-
     echo ">>> making grub config"
     grub-mkconfig -o /boot/grub/grub.cfg
 
