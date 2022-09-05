@@ -1,7 +1,7 @@
 #!/bin/bash
 
 bootSize='199MiB'
-swapSize='512MiB'
+swapSize='4096MiB'
 timezone='Asia/Muscat'
 mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
