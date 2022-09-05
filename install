@@ -19,7 +19,7 @@ packages_list() {
         openrc openrc-bash-completion
         busybox busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
         musl musl-locales
-        dbus dbus-openrc dbus-x11 iio-sensor-proxy
+        dbus dbus-openrc dbus-x11
         ibus ibus-bash-completion
         udev-init-scripts udev-init-scripts-openrc
         eudev eudev-openrc eudev-libs
@@ -1242,10 +1242,7 @@ finish() {
     echo '' > /root/reboot
 
     while :; do
-        if [ -f /root/reboot ]; then
-            /bin/bash /root/install
-        fi
-        exit && break
+        /bin/bash /root/install
     done
 
 }
