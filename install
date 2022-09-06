@@ -471,7 +471,7 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    bootloaders=(grub refind clover syslinux)
+    bootloaders=(EFI grub refind clover syslinux)
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     echo -e "\n"
@@ -1126,6 +1126,10 @@ setup_bootloader() {
     if grep -q grub /root/list; then
         install_grub
     fi
+    if grep -q EFI /root/list; then
+        install_efi
+    fi
+
     finish
 
 }
@@ -1182,7 +1186,7 @@ install_grub() {
     apk fix
     apk add grub grub-efi grub-bash-completion
     echo ">>> installing grub bootloader"
-    grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id="alpine" $boot_drive
+    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id="alpine" $boot_drive
 
     if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
@@ -1220,7 +1224,7 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
-        sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=ZFS=$pool\"|" /etc/default/grub
+        sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=zfs=$pool\"|" /etc/default/grub
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
@@ -1235,22 +1239,47 @@ EOF
 
 }
 
+install_efi() {
+
+
+    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows" -l '\EFI\Microsoft\Boot\bootmgfw.efi'
+
+    efibootmgr -c --gpt --unicode -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
+
+    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux LTS" -l '\vmlinux-lts' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts.img"
+
+    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux EDGE" -l '\vmlinux-edge' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge.img"
+
+}
+
 finish() {
 
     echo ">>> cleaning apks"
     apk del *-doc
-    echo ">>> installation is completed"
-    echo '' > /root/reboot
+
+    echo ">>> installation is completed .. un-mount & reboot"
+
+    cat > /root/reboot <<EOF
+#!/bin/bash
+sleep 2
+umount -Rf /mnt
+if grep -q zfs /root/list; then
+    zfs umount -a
+    zpool export -a
+fi
+reboot
+EOF
 
     while :; do
-        exit && sleep 10
+        /bin/bash /root/reboot
+        exit
+        sleep 10
     done
 
 }
 
 reboot_system() {
 
-    echo ">>> un-mounting /mnt"
     umount -Rf /mnt
     if grep -q zfs /root/list; then
         zfs umount -a
