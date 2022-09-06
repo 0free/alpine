@@ -1243,8 +1243,7 @@ finish() {
     echo '' > /root/reboot
 
     while :; do
-        exit && /bin/bash /root/install
-        break
+        exit && sleep 10
     done
 
 }
