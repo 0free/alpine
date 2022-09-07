@@ -1322,7 +1322,7 @@ install_gummiboot() {
 
     echo ">>> installing gummiboot"
     apk add gummiboot
-    gummiboot --path=/boot --esp-path=/efi install
+    gummiboot install --path=/boot
 
     cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/bootx64.efi
 
