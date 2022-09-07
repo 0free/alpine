@@ -1177,10 +1177,10 @@ install_refind() {
     curl -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
 
     mkdir -p /boot/refind/drivers_x64/
-    cp xfs_x64.efi /boot/refind/drivers_x64/
-    cp zfs_x64.efi /boot/refind/drivers_x64/
+    mv xfs_x64.efi /boot/refind/drivers_x64/
+    mv zfs_x64.efi /boot/refind/drivers_x64/
 
-    refind-install --alldrivers $boot_drive
+    refind-install --root /boot/ --alldrivers
     mkrlconf
 
     if grep -q zfs /root/list; then
