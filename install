@@ -1320,7 +1320,9 @@ install_gummiboot() {
 
     echo ">>> installing gummiboot"
     apk add gummiboot
-    bootctl --path=/boot --esp-path=/efi install
+    gummiboot --path=/boot --esp-path=/efi install
+
+    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/bootx64.efi
 
     echo ">>> configuring gummiboot"
     sed -i 's|#timeout 3|timeout 1|' /boot/loader/loader.conf
