@@ -1151,6 +1151,7 @@ find_windows() {
             for partition in ${!partitions[@]}; do
                 mount $partition /windows/
                 if [ -f /EFI/Microsoft/Boot/BCD ]; then
+                    cp -rlf /windows/* /boot/
                     windows_drive=$drive
                     windows_boot=$partition
                     echo "windows_boot=$partition" >> /root/list
