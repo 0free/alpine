@@ -1322,12 +1322,11 @@ install_gummiboot() {
 
     echo ">>> installing gummiboot"
     apk add gummiboot efibootmgr
-    mkdir -p /boot/efi/gummiboot/
-    gummiboot install --path=/boot/efi/gummiboot/
+    gummiboot install --path=/boot/
 
-    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/gummiboot/
+    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/
 
-    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "gummiboot" -l '\efi\gummiboot\gummibootx64.efi'
+    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "gummiboot" -l '\efi\gummibootx64.efi'
 
     echo ">>> configuring gummiboot"
     sed -i 's|#timeout 3|timeout 1|' /boot/loader/loader.conf
