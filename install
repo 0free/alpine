@@ -1211,13 +1211,13 @@ TIMEOUT=1
 PROTOCOL=linux
 KERNEL_PATH=boot:///vmlinuz-edge
 CMDLINE=root=
-MODULE_PATH=boot:///initramfs-edge.img
+MODULE_PATH=boot:///initramfs-edge
 
 :alpine Linux LTS
 PROTOCOL=linux
 KERNEL_PATH=boot:///vmlinuz-lts
 CMDLINE=root=
-MODULE_PATH=boot:///initramfs-lts.img
+MODULE_PATH=boot:///initramfs-lts
 
 EOF
 
@@ -1312,9 +1312,9 @@ install_efibootmgr() {
 
     efibootmgr -c --gpt --unicode -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
 
-    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux LTS" -l '\vmlinux-lts' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts.img"
+    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux LTS" -l '\vmlinux-lts' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts"
 
-    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux EDGE" -l '\vmlinux-edge' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge.img"
+    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux EDGE" -l '\vmlinux-edge' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge"
 
 }
 
@@ -1336,13 +1336,13 @@ title       alpine Linux edge
 linux       /vmlinuz-edge
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
-initrd      /initramfs-edge.img
+initrd      /initramfs-edge
 
 title       alpine Linux LTS
 linux       /vmlinuz-lts
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
-initrd      /initramfs-lts.img
+initrd      /initramfs-lts
 EOF
 
     if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
