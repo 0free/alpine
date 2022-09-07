@@ -469,7 +469,7 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    bootloaders=(gummiboot limine syslinux efibootmgr clover grub)
+    bootloaders=(rEFInd gummiboot limine syslinux efibootmgr clover grub)
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     echo -e "\n"
@@ -1116,24 +1116,22 @@ setup_bootloader() {
         find_windows
     fi
 
-    if grep -q syslinux /root/list; then
+    if grep -q rEFInd /root/list; then
+        install_refind
+    elif grep -q syslinux /root/list; then
         install_syslinux
-    fi
-    if grep -q clover /root/list; then
+    elif grep -q clover /root/list; then
         install_clover
-    fi
-    if grep -q grub /root/list; then
+    elif grep -q grub /root/list; then
         install_grub
-    fi
-    if grep -q efibootmgr /root/list; then
+    elif grep -q efibootmgr /root/list; then
         install_efibootmgr
-    fi
-    if grep -q gummiboot /root/list; then
+    elif grep -q gummiboot /root/list; then
         install_gummiboot
-    fi
-    if grep -q limine /root/list; then
+    elif grep -q limine /root/list; then
         install_limine
     fi
+
     finish
 
 }
@@ -1141,8 +1139,6 @@ setup_bootloader() {
 find_windows() {
 
     drives=($(ls /dev/ | grep '^nvme.\{3\}$\|^sd.\{1\}$'))
-
-    drives_efi=$(sfdisk --list /dev/sdX | grep EFI | grep '^nvme.\{5\}$\|^sd.\{2\}$')
 
     if [ ! -d /windows/ ]; then
         mkdir /windows/
@@ -1166,6 +1162,27 @@ find_windows() {
             done
         fi
     done
+
+}
+
+install_refind() {
+
+    echo ">>> installing rEFInd bootloader"
+    apk add refind
+
+    echo ">>> downloading efifs drivers"
+    curl -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
+    curl -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
+
+    cp xfs_x64.efi /boot/refind/drivers_x64/
+    cp zfs_x64.efi /boot/refind/drivers_x64/
+
+    refind-install --alldrivers $boot_drive
+    mkrlconf
+
+    if grep -q zfs /root/list; then
+        sed -i "s|root=.*|root=zfs=$pool|" /boot/refind_linux.conf
+    fi
 
 }
 
