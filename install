@@ -33,8 +33,6 @@ packages_list() {
         hwids hwids-net hwids-pci hwids-usb hwids-udev
         # wayland
         xwayland
-        # efi boot
-        efibootmgr
         # base
         sudo bash bash-completion build-base fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-login util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
         # utilities
@@ -42,7 +40,7 @@ packages_list() {
         # git
         git git-bash-completion
         # compression
-        brotli zstd zlib zip lz4 lzo unzip xz bzip2
+        brotli-libs zstd zlib zip lz4 lzo unzip xz bzip2
         # disks
         e2fsprogs lvm2 gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
         udisks2 udisks2-bash-completion 
@@ -451,7 +449,7 @@ setup_drive() {
 
     menu 'select a drive' drive ${drives[@]}
 
-    if ls $drive* | grep -q "$drive.\{1\}$"; then
+    if ls $drive* | grep -q "$drive.\{1\}$|$drive.\{2\}$"; then
         partitions=($(ls $drive*))
         menu 'select a root partition or use the complete drive ' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
@@ -471,7 +469,7 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    bootloaders=(EFI grub refind clover syslinux)
+    bootloaders=(gummiboot limine syslinux efibootmgr clover grub)
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     echo -e "\n"
@@ -1114,11 +1112,12 @@ EOF
 
 setup_bootloader() {
 
+    if [[ ! $windows_boot ]]; then
+        find_windows
+    fi
+
     if grep -q syslinux /root/list; then
         install_syslinux
-    fi
-    if grep -q refind /root/list; then
-        install_refind
     fi
     if grep -q clover /root/list; then
         install_clover
@@ -1126,11 +1125,45 @@ setup_bootloader() {
     if grep -q grub /root/list; then
         install_grub
     fi
-    if grep -q EFI /root/list; then
-        install_efi
+    if grep -q efibootmgr /root/list; then
+        install_efibootmgr
+    fi
+    if grep -q gummiboot /root/list; then
+        install_gummiboot
+    fi
+    if grep -q limine /root/list; then
+        install_limine
+    fi
+    finish
+
+}
+
+find_windows() {
+
+    drives=($(ls /dev/ | grep '^nvme.\{3\}$\|^sd.\{1\}$'))
+
+    if [ ! -d /windows/ ]; then
+        mkdir /windows/
     fi
 
-    finish
+    for drive in ${drives[@]}; do
+        drive="/dev/$drive"
+        if ls $drive* | grep -q "$drive.\{1\}$|$drive.\{2\}$"; then
+            partitions=($(ls $drive* | grep -v $drive))
+            for partition in ${!partitions[@]}; do
+                mount $partition /windows/
+                if [ -f /EFI/Microsoft/Boot/BCD ]; then
+                    windows_drive=$drive
+                    windows_boot=$partition
+                    echo "windows_boot=$partition" >> /root/list
+                elif [ -f /windows/Windows/Boot/EFI/bootmgfw.efi ]; then
+                    windows_partition=$partition
+                    echo "windows_partition=$partition" >> /root/list
+                fi
+                umount /windows/
+            done
+        fi
+    done
 
 }
 
@@ -1144,39 +1177,16 @@ install_syslinux() {
 
 }
 
-install_refind() {
-
-    echo ">>> installing rEFInd bootloader"
-    apk add refind
-
-    curl -LO github.com/pbatard/efifs/releases/download/v1.8/xfs_x64.efi
-    curl -LO github.com/pbatard/efifs/releases/download/v1.8/zfs_x64.efi
-    curl -LO github.com/pbatard/efifs/releases/download/v1.8/ntfs_x64.efi
-
-    cp xfs_x64.efi /boot/refind/drivers_x64/
-    cp zfs_x64.efi /boot/refind/drivers_x64/
-    cp ntfs_x64.efi /boot/refind/drivers_x64/
-
-    refind-install --alldrivers $boot_drive
-    mkrlconf
-
-    if grep -q zfs /root/list; then
-        sed -i "s|root=.*|root=zfs=$pool|" /boot/refind_linux.conf
-    fi
-
-}
-
 install_clover() {
 
-    if [ ! -d CloverBoorLoader/ ]; then
-        echo ">>> cloning CloverBoorLoader"
-        git clone https://github.com/0free/CloverBoorLoader.git
+    if [ ! -d CloverBootLoader/ ]; then
+        echo ">>> cloning CloverBootLoader"
+        git clone https://github.com/0free/CloverBootLoader.git
         rm -r CloverBoorLoader/.git/
         echo ">>> copying clover bootloader"
-        cp -rlf CloverBoorLoader/* /boot/
-        rm -r CloverBoorLoader/
+        cp -rlf CloverBootLoader/* /boot/
+        rm -r CloverBootLoader/
     fi
-
 
 }
 
@@ -1184,7 +1194,7 @@ install_grub() {
 
     echo ">>> installing grub package"
     apk fix
-    apk add grub grub-efi grub-bash-completion
+    apk add efibootmgr grub grub-efi grub-bash-completion
     echo ">>> installing grub bootloader"
     grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id="alpine" $boot_drive
 
@@ -1211,7 +1221,7 @@ GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
 GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=y
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off ipv6.disable=1 nomodeset"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
 GRUB_GFXMODE=1280x720,1920x1080,auto
 EOF
@@ -1239,16 +1249,74 @@ EOF
 
 }
 
-install_efi() {
+install_efibootmgr() {
 
+    echo ">>> installing efibootmgr"
+    apk add efibootmgr
 
-    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows" -l '\EFI\Microsoft\Boot\bootmgfw.efi'
+    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
+
+    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
 
     efibootmgr -c --gpt --unicode -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
 
     efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux LTS" -l '\vmlinux-lts' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts.img"
 
     efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux EDGE" -l '\vmlinux-edge' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge.img"
+
+}
+
+install_gummiboot() {
+
+    echo ">>> installing gummiboot"
+    apk add gummiboot
+    bootctl --path=/boot --esp-path=/efi install
+
+    echo ">>> configuring gummiboot"
+    sed -i 's|#timeout 3|timeout 1|' /boot/loader/loader.conf
+    sed -i 's|default .*|default boot-*|' /boot/loader/loader.conf
+
+    echo ">>> adding entries to gummiboot"
+    cat > /boot/loader/entries/linux.conf <<EOF
+title       Windows 11
+initrd      /Windows/Boot/EFI/bootmgfw.efi
+
+title       alpine Linux edge
+linux       /vmlinuz-edge
+initrd      /amd-ucode.img
+initrd      /intel-ucode.img
+initrd      /initramfs-edge.img
+
+title       alpine Linux LTS
+linux       /vmlinuz-lts
+initrd      /amd-ucode.img
+initrd      /intel-ucode.img
+initrd      /initramfs-lts.img
+EOF
+
+    if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
+        echo ">>> adding fwupd to gummiboot"
+        cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/
+        echo "title firmware update" > /boot/loader/entries/fwupd.conf
+        echo "efi /fwupdx64.efi" >> /boot/loader/entries/fwupd.conf
+    fi
+
+    if grep -q zfs /etc/fstab; then
+        output="options zfs=rpool rw"
+    else
+        output="options root=UUID=$(blkid $root_drive -o export | grep ^UUID=) quiet architecture x64 rw"
+    fi
+
+    echo $output >> /boot/loader/entries/linux.conf
+
+}
+
+install_limine() {
+
+    echo ">>> installing limine bootloader"
+    apk add limine limine-64
+
+
 
 }
 
@@ -1261,7 +1329,7 @@ finish() {
 
     cat > /root/reboot <<EOF
 #!/bin/bash
-sleep 2
+sleep 3
 umount -Rf /mnt
 if grep -q zfs /root/list; then
     zfs umount -a
@@ -1273,7 +1341,7 @@ EOF
     while :; do
         /bin/bash /root/reboot
         exit
-        sleep 10
+        break
     done
 
 }
@@ -1307,6 +1375,8 @@ else
         boot_drive=$(. /root/list; echo $boot_drive)
         swap_drive=$(. /root/list; echo $swap_drive)
         root_drive=$(. /root/list; echo $root_drive)
+        windows_boot=$(. /root/list; echo $windows_boot)
+        windows_partition=$(. /root/list; echo $windows_partition)
     fi
     if [ -f /root/chroot ]; then
         if grep -q "alias" /home/$user/.bashrc; then
