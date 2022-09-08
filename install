@@ -1437,6 +1437,7 @@ finish() {
 
     cat > /root/reboot <<EOF
 #!/bin/bash
+ls -aph /root/
 sleep 3
 set -e
 rm /mnt/root/install
