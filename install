@@ -1437,17 +1437,9 @@ finish() {
 
     cat > /root/reboot <<EOF
 #!/bin/bash
-ls -aph /root/
-sleep 3
+sleep 1
 set -e
-rm /mnt/root/install
-rm /mnt/root/reboot
-umount -Rf /mnt
-if grep -q zfs /root/list; then
-    zfs umount -a
-    zpool export -a
-fi
-reboot
+chroot / /bin/bash /root/install
 EOF
 
     /bin/bash /root/reboot
@@ -1457,7 +1449,16 @@ EOF
 
 set -e
 
-if [ -f /mnt/root/chroot ]; then
+if [ -f /mnt/root/reboot ] then
+    rm /mnt/root/install
+    rm /mnt/root/reboot
+    umount -Rf /mnt
+    if grep -q zfs /root/list; then
+        zfs umount -a
+        zpool export -a
+    fi
+    reboot
+elif [ -f /mnt/root/chroot ]; then
     if [ -f /mnt/root/list ]; then
         cp /mnt/root/list /root/list
     fi
