@@ -1360,6 +1360,10 @@ install_refind() {
 
     refind-install --root /boot
 
+    if [ -f /boot/EFI/refind/refind_x64.efi ]; then
+        mv /boot/EFI/refind/refind_x64.efi /boot/EFI/refind/bootx64.efi
+    fi
+
     echo ">>> configuring rEFInd bootloader"
 
     if [[ $windows_drive ]]; then
