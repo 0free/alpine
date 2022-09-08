@@ -1167,60 +1167,6 @@ find_windows() {
 
 }
 
-install_refind() {
-
-    echo ">>> installing rEFInd bootloader"
-    apk add refind
-
-    echo ">>> downloading efifs drivers"
-    curl -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
-    curl -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
-
-    mkdir -p /boot/refind/drivers_x64/
-    mv xfs_x64.efi /boot/EFI/refind/drivers_x64/
-    mv zfs_x64.efi /boot/EFI/refind/drivers_x64/
-
-    echo "Y" | refind-install --root /boot/ --alldrivers
-    mkrlconf
-
-    if [[ $windows_drive ]]; then
-        cat > /boot/boot/refind_linux.conf <<EOF
-menuentry "Windows Boot Manager" {
-    loader \EFI\Boot\BOOTX64.EFI
-    options "root=$(blkid $windows_boot -o export | grep ^UUID=)"
-}
-menuentry "Windows Boot" {
-    loader \EFI\Microsoft\Boot\BOOTMGFW.EFI
-    options "root=$(blkid $windows_boot -o export | grep ^UUID=)"
-}
-menuentry "Windows 11" {
-    loader \Windows\Boot\EFI\bootmgfw.efi
-    options "root=$(blkid $windows_partition -o export | grep ^UUID=)"
-}
-EOF
-    fi
-
-    cat >> /boot/boot/refind_linux.conf <<EOF
-menuentry alpine Linux edge {
-    icon /EFI/refind/icons/os_linux.png
-    loader /vmlinuz-edge
-    initrd /initramfs-edge
-    options "root=$(blkid $boot_drive -o export | grep ^UUID=) ro"
-}
-menuentry alpine Linux LTS {
-    icon /EFI/refind/icons/os_linux.png
-    loader /vmlinuz-lts
-    initrd /initramfs-lts
-    options "root=$(blkid $boot_drive -o export | grep ^UUID=) ro"
-}
-EOF
-
-    if grep -q zfs /root/list; then
-        sed -i "s|root=.* ro|root=zfs=$pool ro|g" /boot/boot/refind_linux.conf
-    fi
-
-}
-
 install_syslinux() {
 
     echo ">>> installing syslinux bootloader"
@@ -1397,6 +1343,65 @@ EOF
 
 }
 
+install_refind() {
+
+    echo ">>> installing rEFInd bootloader"
+    apk add refind
+
+    echo ">>> downloading efifs drivers"
+    curl -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
+    curl -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
+
+    mkdir -p /boot/EFI/refind/drivers_x64/
+    mv xfs_x64.efi /boot/EFI/refind/drivers_x64/
+    mv zfs_x64.efi /boot/EFI/refind/drivers_x64/
+
+    echo "Y" | refind-install --root /boot/ --alldrivers
+    mkrlconf
+
+    echo ">>> configuring rEFInd bootloader"
+
+    if [[ $windows_drive ]]; then
+        cat > /boot/boot/refind_linux.conf <<EOF
+menuentry "Windows Boot Manager" {
+    loader \EFI\Boot\BOOTX64.EFI
+    options "root=$(blkid $windows_boot -o export | grep ^UUID=)"
+}
+menuentry "Windows Boot" {
+    loader \EFI\Microsoft\Boot\BOOTMGFW.EFI
+    options "root=$(blkid $windows_boot -o export | grep ^UUID=)"
+}
+menuentry "Windows 11" {
+    loader \Windows\Boot\EFI\bootmgfw.efi
+    options "root=$(blkid $windows_partition -o export | grep ^UUID=)"
+}
+EOF
+    fi
+
+    cat >> /boot/boot/refind_linux.conf <<EOF
+menuentry alpine Linux edge {
+    icon /EFI/refind/icons/os_linux.png
+    loader /vmlinuz-edge
+    initrd /initramfs-edge
+    options "root=$(blkid $boot_drive -o export | grep ^UUID=) ro"
+}
+menuentry alpine Linux LTS {
+    icon /EFI/refind/icons/os_linux.png
+    loader /vmlinuz-lts
+    initrd /initramfs-lts
+    options "root=$(blkid $boot_drive -o export | grep ^UUID=) ro"
+}
+EOF
+
+    if grep -q zfs /root/list; then
+        sed -i "s|root=.* ro|root=zfs=$pool ro|g" /boot/boot/refind_linux.conf
+    fi
+
+    sed -i 's|timeout 20| timeout 2|' /boot/EFI/refind/refind.conf
+    #sed -i 's|||' /boot/EFI/refind/refind.conf
+
+}
+
 finish() {
 
     echo ">>> cleaning apks"
@@ -1413,6 +1418,8 @@ if grep -q zfs /root/list; then
     zfs umount -a
     zpool export -a
 fi
+rm /mnt/root/install
+rm /mnt/root/reboot
 reboot
 EOF
 
