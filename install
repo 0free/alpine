@@ -1449,7 +1449,7 @@ EOF
 
 set -e
 
-if [ -f /mnt/root/reboot ] then
+if [ -f /mnt/root/reboot ]; then
     rm /mnt/root/install
     rm /mnt/root/reboot
     umount -Rf /mnt
