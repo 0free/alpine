@@ -1362,7 +1362,7 @@ install_refind() {
     echo ">>> configuring rEFInd bootloader"
 
     if [[ $windows_drive ]]; then
-        cat > /boot/boot/refind_linux.conf <<EOF
+        cat > /boot/refind_linux.conf <<EOF
 menuentry "Windows Boot Manager" {
     icon /EFI/refind/icons/os_win8.png
     volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
@@ -1385,17 +1385,18 @@ EOF
     fi
 
     if grep -q VirtualBox /root/list; then
-        cat >> /boot/boot/refind_linux.conf <<EOF
+        cat >> /boot/refind_linux.conf <<EOF
 menuentry 'alpine Linux VirtualMachine' {
     icon /EFI/refind/icons/os_linux.png
     volume $(blkid $boot_drive -o export | grep ^UUID= | grep -v UUID=)
     loader /vmlinuz-virt
     initrd /initramfs-virt
-    options 'rw'
+    initrd /initramfs-lts
+    options 'root='
 }
 EOF
     else
-        cat >> /boot/boot/refind_linux.conf <<EOF
+        cat >> /boot/refind_linux.conf <<EOF
 menuentry 'alpine Linux edge' {
     icon /EFI/refind/icons/os_linux.png
     volume $(blkid $boot_drive -o export | grep ^UUID= | grep -v UUID=)
@@ -1403,7 +1404,7 @@ menuentry 'alpine Linux edge' {
     initrd /amd-ucode.img
     initrd /intel-ucode.img
     initrd /initramfs-edge
-    options 'rw'
+    options 'root='
 }
 menuentry 'alpine Linux LTS' {
     icon /EFI/refind/icons/os_linux.png
@@ -1412,15 +1413,15 @@ menuentry 'alpine Linux LTS' {
     initrd /amd-ucode.img
     initrd /intel-ucode.img
     initrd /initramfs-lts
-    options 'rw'
+    options 'root='
 }
 EOF
     fi
 
     if grep -q zfs /root/list; then
-        sed -i "s|options 'rw'|options 'root=zfs=$pool loglevel=0 quiet mitigations=off rw'|g" /boot/boot/refind_linux.conf
+        sed -i "s|'root='|'root=zfs=$pool loglevel=0 quiet mitigations=off rw'|g" /boot/refind_linux.conf
     else
-        sed -i "s|options 'rw'|options 'loglevel=0 quiet mitigations=off rw'|g" /boot/boot/refind_linux.conf
+        sed -i "s|'root='|'root=$(blkid $boot_drive -o export | grep ^UUID=) loglevel=0 quiet mitigations=off rw'|g" /boot/refind_linux.conf
     fi
 
     sed -i 's|timeout 20| timeout 2|' /boot/EFI/refind/refind.conf
