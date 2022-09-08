@@ -1443,7 +1443,7 @@ finish() {
 
     cat > /root/reboot <<EOF
 #!/bin/bash
-sleep 3
+sleep 5
 set -e
 rm /mnt/root/install
 rm /mnt/root/reboot
@@ -1456,7 +1456,8 @@ reboot
 EOF
 
     while :;do
-        /mnt/root/reboot
+        /bin/bash /mnt/root/reboot
+        chroot / /bin/bash /root/reboot
         exit
         break
     done
