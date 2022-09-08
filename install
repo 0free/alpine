@@ -1456,8 +1456,8 @@ reboot
 EOF
 
     while :;do
-        echo ">>> changing rooot"
-        chroot / /bin/bash /mnt/root/reboot
+        echo ">>> changing root"
+        chroot / /bin/bash /root/reboot
         exit
         break
     done
