@@ -1460,11 +1460,8 @@ fi
 reboot
 EOF
 
-    while :;do
-        exit
-        /bin/bash /root/reboot
-        break
-    done
+    /bin/bash /root/reboot
+    exit
 
 }
 
