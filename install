@@ -1455,7 +1455,7 @@ EOF
 
     while :; do
         /bin/bash /root/reboot
-        exit; break
+        exit && sleep 10
     done
 
 }
