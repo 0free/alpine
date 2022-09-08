@@ -1441,26 +1441,24 @@ finish() {
 #!/bin/bash
 sleep 3
 set -e
-chroot / /bin/bash /root/install
+rm /mnt/root/install
+rm /mnt/root/reboot
+umount -Rf /mnt
+if grep -q zfs /root/list; then
+    zfs umount -a
+    zpool export -a
+fi
+reboot
 EOF
 
-    /bin/bash /root/reboot
+    chroot / /bin/bash /mnt/root/reboot
     exit
 
 }
 
 set -e
 
-if [ -f /mnt/root/reboot ]; then
-    rm /mnt/root/install
-    rm /mnt/root/reboot
-    umount -Rf /mnt
-    if grep -q zfs /root/list; then
-        zfs umount -a
-        zpool export -a
-    fi
-    reboot
-elif [ -f /mnt/root/chroot ]; then
+if [ -f /mnt/root/chroot ]; then
     if [ -f /mnt/root/list ]; then
         cp /mnt/root/list /root/list
     fi
