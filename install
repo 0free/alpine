@@ -1361,7 +1361,7 @@ install_refind() {
     echo ">>> configuring rEFInd bootloader"
 
     if [[ $windows_drive ]]; then
-        cat > /boot/boot/refind_linux.conf <<EOF
+        cat > /boot/refind_linux.conf <<EOF
 menuentry "Windows Boot Manager" {
     icon /EFI/refind/icons/os_win8.png
     volume $(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
@@ -1382,11 +1382,11 @@ menuentry "Windows 11" {
 }
 EOF
     else
-        echo '' > /boot/boot/refind_linux.conf
+        echo '' > /boot/refind_linux.conf
     fi
 
     if grep -q VirtualBox /root/list; then
-        cat >> /boot/boot/refind_linux.conf <<EOF
+        cat >> /boot/refind_linux.conf <<EOF
 menuentry 'alpine Linux VirtualMachine' {
     icon /EFI/refind/icons/os_linux.png
     volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
@@ -1397,7 +1397,7 @@ menuentry 'alpine Linux VirtualMachine' {
 }
 EOF
     else
-        cat >> /boot/boot/refind_linux.conf <<EOF
+        cat >> /boot/refind_linux.conf <<EOF
 menuentry 'alpine Linux edge' {
     icon /EFI/refind/icons/os_linux.png
     volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
@@ -1420,10 +1420,12 @@ EOF
     fi
 
     if grep -q zfs /root/list; then
-        sed -i "s|'root='|'root=zfs=$pool loglevel=0 quiet mitigations=off rw'|g" /boot/boot/refind_linux.conf
+        sed -i "s|'root='|'root=zfs=$pool loglevel=0 quiet mitigations=off rw'|g" /boot/refind_linux.conf
     else
-        sed -i "s|'root='|'root=$(blkid $boot_drive -o export | grep ^UUID=) loglevel=0 quiet mitigations=off rw'|g" /boot/boot/refind_linux.conf
+        sed -i "s|'root='|'root=$(blkid $boot_drive -o export | grep ^UUID=) loglevel=0 quiet mitigations=off rw'|g" /boot/refind_linux.conf
     fi
+
+    cp /boot/refind_linux.conf /boot/boot/refind_linux.conf
 
     sed -i 's|timeout 20| timeout 2|' /boot/EFI/refind/refind.conf
     #sed -i 's|||' /boot/EFI/refind/refind.conf
