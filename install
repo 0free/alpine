@@ -1453,8 +1453,11 @@ fi
 reboot
 EOF
 
-    /mnt/root/reboot
-    exit
+    while :,do
+        /mnt/root/reboot
+        exit
+        break
+    done
 
 }
 
