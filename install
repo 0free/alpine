@@ -1438,8 +1438,23 @@ finish() {
     echo ">>> cleaning apks"
     apk del *-doc
     echo ">>> installation is completed"
+
+    cat > /root/reboot <<EOF
+#!/bin/bash
+set -e
+echo ">>> un-mounting & reboot"
+rm /mnt/root/install
+rm /mnt/root/reboot
+umount -Rf /mnt
+if grep -q zfs /root/list; then
+    zfs umount -a
+    zpool export -a
+fi
+reboot
+EOF
+
     echo ">>> changing root"
-    chroot / /bin/bash /root/install
+    chroot / /bin/bash /root/reboot
 
 }
 
@@ -1449,17 +1464,7 @@ if [ -f /mnt/lib/apk/db/lock ]; then
     rm /mnt/lib/apk/db/lock
 fi
 
-if [ -f /mnt/root/reboot ]; then
-    echo ">>> un-mounting & reboot"
-    rm /mnt/root/install
-    rm /mnt/root/reboot
-    umount -Rf /mnt
-    if grep -q zfs /root/list; then
-        zfs umount -a
-        zpool export -a
-    fi
-    reboot
-elif [ -f /mnt/root/chroot ]; then
+if [ -f /mnt/root/chroot ]; then
     if [ -f /mnt/root/list ]; then
         cp /mnt/root/list /root/list
     fi
