@@ -1443,8 +1443,8 @@ finish() {
 
     cat > /root/reboot <<EOF
 #!/bin/bash
-sleep 10
 set -e
+sleep 3
 echo ">>> un-mounting & reboot"
 rm /root/install
 rm /root/reboot
@@ -1457,10 +1457,8 @@ reboot
 EOF
 
     while :;do
-        echo ">>> changing root"
-        chroot / /bin/bash /root/reboot
-        echo ">>> exit"
         exit
+        /bin/bash /root/reboot
         break
     done
 
