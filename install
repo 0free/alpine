@@ -724,11 +724,6 @@ setup_linux() {
 
 install_linux() {
 
-    if [ -f /mnt/lib/apk/db/lock ]; then
-        rm /mnt/lib/apk/db/lock
-        apk fix --root=/mnt
-    fi
-
     if grep -q VirtualBox /root/list; then
         if grep -q zfs /root/list; then
             list='linux-virt zfs-virt zfs zfs-openrc zfs-libs zfs-udev'
@@ -1449,6 +1444,10 @@ finish() {
 }
 
 set -e
+
+if [ -f /mnt/lib/apk/db/lock ]; then
+    rm /mnt/lib/apk/db/lock
+fi
 
 if [ -f /mnt/root/reboot ]; then
     echo ">>> un-mounting & reboot"
