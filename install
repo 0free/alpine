@@ -1348,6 +1348,12 @@ install_refind() {
     echo ">>> installing rEFInd bootloader"
     apk add refind
 
+    refind-install --root /boot
+
+    if [ -f /boot/EFI/refind/refind_x64.efi ]; then
+        mv /boot/EFI/refind/refind_x64.efi /boot/EFI/refind/bootx64.efi
+    fi
+
     if [ ! -d /boot/EFI/refind/drivers_x64/ ]; then
         echo ">>> downloading efifs drivers"
         curl -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
@@ -1356,12 +1362,6 @@ install_refind() {
         mkdir -p /boot/EFI/refind/drivers_x64/
         mv xfs_x64.efi /boot/EFI/refind/drivers_x64/
         mv zfs_x64.efi /boot/EFI/refind/drivers_x64/
-    fi
-
-    refind-install --root /boot
-
-    if [ -f /boot/EFI/refind/refind_x64.efi ]; then
-        mv /boot/EFI/refind/refind_x64.efi /boot/EFI/refind/bootx64.efi
     fi
 
     echo ">>> configuring rEFInd bootloader"
