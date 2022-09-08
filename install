@@ -1453,7 +1453,7 @@ fi
 reboot
 EOF
 
-    chroot / /bin/bash /mnt/root/reboot
+    /mnt/root/reboot
     exit
 
 }
