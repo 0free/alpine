@@ -1364,16 +1364,22 @@ install_refind() {
     if [[ $windows_drive ]]; then
         cat > /boot/boot/refind_linux.conf <<EOF
 menuentry "Windows Boot Manager" {
+    icon /EFI/refind/icons/os_win8.png
+    volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
     loader \EFI\Boot\BOOTX64.EFI
-    options "root=$(blkid $windows_boot -o export | grep ^UUID=)"
+    options ""
 }
 menuentry "Windows Boot" {
+    icon /EFI/refind/icons/os_win8.png
+    volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
     loader \EFI\Microsoft\Boot\BOOTMGFW.EFI
-    options "root=$(blkid $windows_boot -o export | grep ^UUID=)"
+    options ""
 }
 menuentry "Windows 11" {
+    icon /EFI/refind/icons/os_win8.png
+    volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
     loader \Windows\Boot\EFI\bootmgfw.efi
-    options "root=$(blkid $windows_partition -o export | grep ^UUID=)"
+    options ""
 }
 EOF
     fi
@@ -1382,24 +1388,31 @@ EOF
         cat >> /boot/boot/refind_linux.conf <<EOF
 menuentry 'alpine Linux VirtualMachine' {
     icon /EFI/refind/icons/os_linux.png
+    volume $(blkid $boot_drive -o export | grep ^UUID= | grep -v UUID=)
     loader /vmlinuz-virt
     initrd /initramfs-virt
-    options "root=$(blkid $boot_drive -o export | grep ^UUID=) rw"
+    options "loglevel=0 quiet mitigations=off rw"
 }
 EOF
     else
         cat >> /boot/boot/refind_linux.conf <<EOF
 menuentry 'alpine Linux edge' {
     icon /EFI/refind/icons/os_linux.png
+    volume $(blkid $boot_drive -o export | grep ^UUID= | grep -v UUID=)
     loader /vmlinuz-edge
+    initrd /amd-ucode.img
+    initrd /intel-ucode.img
     initrd /initramfs-edge
-    options "root=$(blkid $boot_drive -o export | grep ^UUID=) rw"
+    options "loglevel=0 quiet mitigations=off rw"
 }
 menuentry 'alpine Linux LTS' {
     icon /EFI/refind/icons/os_linux.png
+    volume $(blkid $boot_drive -o export | grep ^UUID= | grep -v UUID=)
     loader /vmlinuz-lts
+    initrd /amd-ucode.img
+    initrd /intel-ucode.img
     initrd /initramfs-lts
-    options "root=$(blkid $boot_drive -o export | grep ^UUID=) rw"
+    options "loglevel=0 quiet mitigations=off rw"
 }
 EOF
     fi
