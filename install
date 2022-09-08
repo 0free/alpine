@@ -1383,18 +1383,18 @@ menuentry alpine Linux edge {
     icon /EFI/refind/icons/os_linux.png
     loader /vmlinuz-edge
     initrd /initramfs-edge
-    options "root=$(blkid $boot_drive -o export | grep ^UUID=) ro"
+    options "root=$(blkid $boot_drive -o export | grep ^UUID=) rw"
 }
 menuentry alpine Linux LTS {
     icon /EFI/refind/icons/os_linux.png
     loader /vmlinuz-lts
     initrd /initramfs-lts
-    options "root=$(blkid $boot_drive -o export | grep ^UUID=) ro"
+    options "root=$(blkid $boot_drive -o export | grep ^UUID=) rw"
 }
 EOF
 
     if grep -q zfs /root/list; then
-        sed -i "s|root=.* ro|root=zfs=$pool ro|g" /boot/boot/refind_linux.conf
+        sed -i "s|root=.* rw|root=zfs=$pool rw|g" /boot/boot/refind_linux.conf
     fi
 
     sed -i 's|timeout 20| timeout 2|' /boot/EFI/refind/refind.conf
