@@ -1439,12 +1439,13 @@ finish() {
     echo ">>> cleaning apks"
     apk del *-doc
 
-    echo ">>> installation is completed .. un-mount & reboot"
+    echo ">>> installation is completed"
 
     cat > /root/reboot <<EOF
 #!/bin/bash
 sleep 10
 set -e
+echo ">>> un-mounting & reboot"
 rm /root/install
 rm /root/reboot
 umount -Rf /mnt
