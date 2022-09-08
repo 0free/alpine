@@ -1367,19 +1367,19 @@ menuentry "Windows Boot Manager" {
     icon /EFI/refind/icons/os_win8.png
     volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
     loader \EFI\Boot\BOOTX64.EFI
-    options ""
+    options ''
 }
 menuentry "Windows Boot" {
     icon /EFI/refind/icons/os_win8.png
     volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
     loader \EFI\Microsoft\Boot\BOOTMGFW.EFI
-    options ""
+    options ''
 }
 menuentry "Windows 11" {
     icon /EFI/refind/icons/os_win8.png
     volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
     loader \Windows\Boot\EFI\bootmgfw.efi
-    options ""
+    options ''
 }
 EOF
     fi
@@ -1391,7 +1391,7 @@ menuentry 'alpine Linux VirtualMachine' {
     volume $(blkid $boot_drive -o export | grep ^UUID= | grep -v UUID=)
     loader /vmlinuz-virt
     initrd /initramfs-virt
-    options "loglevel=0 quiet mitigations=off rw"
+    options 'rw'
 }
 EOF
     else
@@ -1403,7 +1403,7 @@ menuentry 'alpine Linux edge' {
     initrd /amd-ucode.img
     initrd /intel-ucode.img
     initrd /initramfs-edge
-    options "loglevel=0 quiet mitigations=off rw"
+    options 'rw'
 }
 menuentry 'alpine Linux LTS' {
     icon /EFI/refind/icons/os_linux.png
@@ -1412,13 +1412,15 @@ menuentry 'alpine Linux LTS' {
     initrd /amd-ucode.img
     initrd /intel-ucode.img
     initrd /initramfs-lts
-    options "loglevel=0 quiet mitigations=off rw"
+    options 'rw'
 }
 EOF
     fi
 
     if grep -q zfs /root/list; then
-        sed -i "s|root=.* rw|root=zfs=$pool rw|g" /boot/boot/refind_linux.conf
+        sed -i "s|options 'rw'|options 'root=zfs=$pool loglevel=0 quiet mitigations=off rw'|g" /boot/boot/refind_linux.conf
+    else
+        sed -i "s|options 'rw'|options 'loglevel=0 quiet mitigations=off rw'|g" /boot/boot/refind_linux.conf
     fi
 
     sed -i 's|timeout 20| timeout 2|' /boot/EFI/refind/refind.conf
