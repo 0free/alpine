@@ -1364,19 +1364,19 @@ install_refind() {
         cat > /boot/refind_linux.conf <<EOF
 menuentry "Windows Boot Manager" {
     icon /EFI/refind/icons/os_win8.png
-    volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
+    volume $(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
     loader \EFI\Boot\BOOTX64.EFI
     options ''
 }
 menuentry "Windows Boot" {
     icon /EFI/refind/icons/os_win8.png
-    volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
+    volume $(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
     loader \EFI\Microsoft\Boot\BOOTMGFW.EFI
     options ''
 }
 menuentry "Windows 11" {
     icon /EFI/refind/icons/os_win8.png
-    volume $(blkid $windows_boot -o export | grep ^UUID= | grep -v UUID=)
+    volume $(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
     loader \Windows\Boot\EFI\bootmgfw.efi
     options ''
 }
@@ -1389,7 +1389,7 @@ EOF
         cat >> /boot/refind_linux.conf <<EOF
 menuentry 'alpine Linux VirtualMachine' {
     icon /EFI/refind/icons/os_linux.png
-    volume $(blkid $boot_drive -o export | grep ^UUID= | grep -v UUID=)
+    volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
     loader /vmlinuz-virt
     initrd /initramfs-virt
     initrd /initramfs-lts
@@ -1400,7 +1400,7 @@ EOF
         cat >> /boot/refind_linux.conf <<EOF
 menuentry 'alpine Linux edge' {
     icon /EFI/refind/icons/os_linux.png
-    volume $(blkid $boot_drive -o export | grep ^UUID= | grep -v UUID=)
+    volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
     loader /vmlinuz-edge
     initrd /amd-ucode.img
     initrd /intel-ucode.img
@@ -1409,7 +1409,7 @@ menuentry 'alpine Linux edge' {
 }
 menuentry 'alpine Linux LTS' {
     icon /EFI/refind/icons/os_linux.png
-    volume $(blkid $boot_drive -o export | grep ^UUID= | grep -v UUID=)
+    volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
     loader /vmlinuz-lts
     initrd /amd-ucode.img
     initrd /intel-ucode.img
