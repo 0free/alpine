@@ -1356,8 +1356,7 @@ install_refind() {
     mv xfs_x64.efi /boot/EFI/refind/drivers_x64/
     mv zfs_x64.efi /boot/EFI/refind/drivers_x64/
 
-    echo "Y" | refind-install --root /boot/ --alldrivers
-    mkrlconf
+    refind-install --root /boot/
 
     echo ">>> configuring rEFInd bootloader"
 
