@@ -248,7 +248,7 @@ packages_list() {
 
         packages+=(
             # shell
-            starship
+            starship starship-bash-completion
             # wine
             wine vkd3d
             # thumbnail
@@ -1406,6 +1406,7 @@ finish() {
 
     cat > /root/reboot <<EOF
 #!/bin/bash
+set -e
 sleep 3
 umount -Rf /mnt
 if grep -q zfs /root/list; then
