@@ -1378,20 +1378,31 @@ menuentry "Windows 11" {
 EOF
     fi
 
-    cat >> /boot/boot/refind_linux.conf <<EOF
-menuentry alpine Linux edge {
+    if grep -q VirtualBox /root/list; then
+        cat >> /boot/boot/refind_linux.conf <<EOF
+menuentry 'alpine Linux VirtualMachine' {
+    icon /EFI/refind/icons/os_linux.png
+    loader /vmlinuz-virt
+    initrd /initramfs-virt
+    options "root=$(blkid $boot_drive -o export | grep ^UUID=) rw"
+}
+EOF
+    else
+        cat >> /boot/boot/refind_linux.conf <<EOF
+menuentry 'alpine Linux edge' {
     icon /EFI/refind/icons/os_linux.png
     loader /vmlinuz-edge
     initrd /initramfs-edge
     options "root=$(blkid $boot_drive -o export | grep ^UUID=) rw"
 }
-menuentry alpine Linux LTS {
+menuentry 'alpine Linux LTS' {
     icon /EFI/refind/icons/os_linux.png
     loader /vmlinuz-lts
     initrd /initramfs-lts
     options "root=$(blkid $boot_drive -o export | grep ^UUID=) rw"
 }
 EOF
+    fi
 
     if grep -q zfs /root/list; then
         sed -i "s|root=.* rw|root=zfs=$pool rw|g" /boot/boot/refind_linux.conf
