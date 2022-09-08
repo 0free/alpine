@@ -1448,7 +1448,7 @@ finish() {
     cat > /root/reboot <<EOF
 #!/bin/bash
 set -e
-sleep 3
+sleep 2
 echo ">>> un-mounting & reboot"
 rm /root/install
 rm /root/reboot
@@ -1461,7 +1461,7 @@ reboot
 EOF
 
     /bin/bash /root/reboot
-    exit
+    exit 0
 
 }
 
