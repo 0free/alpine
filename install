@@ -1356,7 +1356,7 @@ install_refind() {
     mv xfs_x64.efi /boot/EFI/refind/drivers_x64/
     mv zfs_x64.efi /boot/EFI/refind/drivers_x64/
 
-    refind-install --root /boot/
+    refind-install --root /boot
 
     echo ">>> configuring rEFInd bootloader"
 
@@ -1437,26 +1437,20 @@ finish() {
 
     cat > /root/reboot <<EOF
 #!/bin/bash
-set -e
 sleep 3
+set -e
+rm /mnt/root/install
+rm /mnt/root/reboot
 umount -Rf /mnt
 if grep -q zfs /root/list; then
     zfs umount -a
     zpool export -a
 fi
-    if [ -f /mnt/root/install ]; then
-        rm /mnt/root/install
-    fi
-    if [ -f /mnt/root/reboot ]; then
-        rm /mnt/root/reboot
-    fi
 reboot
 EOF
 
-    while :; do
-        /bin/bash /root/reboot
-        exit && sleep 10
-    done
+    /bin/bash /root/reboot
+    exit
 
 }
 
