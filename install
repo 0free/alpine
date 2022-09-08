@@ -1445,8 +1445,8 @@ finish() {
 #!/bin/bash
 sleep 10
 set -e
-rm /mnt/root/install
-rm /mnt/root/reboot
+rm /root/install
+rm /root/reboot
 umount -Rf /mnt
 if grep -q zfs /root/list; then
     zfs umount -a
