@@ -1429,8 +1429,12 @@ if grep -q zfs /root/list; then
     zfs umount -a
     zpool export -a
 fi
-rm /mnt/root/install
-rm /mnt/root/reboot
+    if [ -f /mnt/root/install ]; then
+        rm /mnt/root/install
+    fi
+    if [ -f /mnt/root/reboot ]; then
+        rm /mnt/root/reboot
+    fi
 reboot
 EOF
 
@@ -1442,24 +1446,11 @@ EOF
 
 }
 
-reboot_system() {
-
-    umount -Rf /mnt
-    if grep -q zfs /root/list; then
-        zfs umount -a
-        zpool export -a
-    fi
-    reboot
-
-}
-
 set -e
 
-if [ -f /root/reboot ]; then
-    exit
-elif [ -f /mnt/root/reboot ]; then
-    rm /mnt/root/reboot
-    reboot_system
+if [ -f /mnt/root/reboot ]; then
+    mv /mnt/root/reboot /root/reboot
+    /bin/bash /root/reboot
 elif [ -f /mnt/root/chroot ]; then
     if [ -f /mnt/root/list ]; then
         cp /mnt/root/list /root/list
