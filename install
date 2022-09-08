@@ -1440,18 +1440,14 @@ EOF
 
     while :; do
         /bin/bash /root/reboot
-        exit
-        break
+        exit; break
     done
 
 }
 
 set -e
 
-if [ -f /mnt/root/reboot ]; then
-    mv /mnt/root/reboot /root/reboot
-    /bin/bash /root/reboot
-elif [ -f /mnt/root/chroot ]; then
+if [ -f /mnt/root/chroot ]; then
     if [ -f /mnt/root/list ]; then
         cp /mnt/root/list /root/list
     fi
