@@ -1381,6 +1381,8 @@ menuentry "Windows 11" {
     options ''
 }
 EOF
+    else
+        echo '' > /boot/refind_linux.conf
     fi
 
     if grep -q VirtualBox /root/list; then
