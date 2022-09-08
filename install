@@ -1455,7 +1455,7 @@ fi
 reboot
 EOF
 
-    while :,do
+    while :;do
         /mnt/root/reboot
         exit
         break
