@@ -1222,7 +1222,7 @@ install_grub() {
     apk fix
     apk add efibootmgr grub grub-efi grub-bash-completion
     echo ">>> installing grub bootloader"
-    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id="alpine" $boot_drive
+    grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id="alpine" $boot_drive
 
     if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
