@@ -1112,7 +1112,7 @@ setup_bootloader() {
     fi
 
     if grep -q rEFInd /root/list; then
-        if [ ! -f /boot/EFI/refind/refind.conf ]; then
+        if ! grep -q alpine /boot/EFI/refind/refind.conf; then
             install_refind
         fi
     elif grep -q syslinux /root/list; then
