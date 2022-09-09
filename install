@@ -1112,7 +1112,9 @@ setup_bootloader() {
     fi
 
     if grep -q rEFInd /root/list; then
-        install_refind
+        if [ ! -f /boot/EFI/refind/refind.conf ]; then
+            install_refind
+        fi
     elif grep -q syslinux /root/list; then
         install_syslinux
     elif grep -q clover /root/list; then
@@ -1362,7 +1364,7 @@ install_refind() {
     echo ">>> configuring rEFInd bootloader"
 
     if [[ $windows_drive ]]; then
-        cat > /boot/refind_linux.conf <<EOF
+        cat >> /boot/EFI/refind/refind.conf <<EOF
 menuentry "Windows Boot Manager" {
     icon /EFI/refind/icons/os_win8.png
     volume $(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
@@ -1382,54 +1384,51 @@ menuentry "Windows 11" {
     options ''
 }
 EOF
-    else
-        echo '' > /boot/refind_linux.conf
     fi
 
     if grep -q VirtualBox /root/list; then
-        cat >> /boot/refind_linux.conf <<EOF
-menuentry 'alpine Linux VirtualMachine' {
+        cat >> /boot/EFI/refind/refind.conf <<EOF
+menuentry "alpine Linux VirtualMachine" {
     icon /EFI/refind/icons/os_linux.png
     volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
     loader /vmlinuz-virt
     initrd /initramfs-virt
-    initrd /initramfs-lts
-    options 'root='
+    options 'root= initrd=/initramfs-lts'
 }
 EOF
     else
-        cat >> /boot/refind_linux.conf <<EOF
-menuentry 'alpine Linux edge' {
+        cat >> /boot/EFI/refind/refind.conf <<EOF
+menuentry "alpine Linux edge" {
     icon /EFI/refind/icons/os_linux.png
     volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
     loader /vmlinuz-edge
-    initrd /amd-ucode.img
-    initrd /intel-ucode.img
     initrd /initramfs-edge
-    options 'root='
+    options 'root= initrd=\amd-ucode.img initrd=\intel-ucode.img'
 }
-menuentry 'alpine Linux LTS' {
+menuentry "alpine Linux LTS" {
     icon /EFI/refind/icons/os_linux.png
     volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
     loader /vmlinuz-lts
-    initrd /amd-ucode.img
-    initrd /intel-ucode.img
     initrd /initramfs-lts
-    options 'root='
+    options 'root= initrd=\amd-ucode.img initrd=\intel-ucode.img'
 }
 EOF
     fi
 
     if grep -q zfs /root/list; then
-        sed -i "s|'root='|'root=zfs=$pool loglevel=0 quiet mitigations=off rw'|g" /boot/refind_linux.conf
+        sed -i "s|root=|root=zfs=$pool rw quiet mitigations=off|g" /boot/EFI/refind/refind.conf
     else
-        sed -i "s|'root='|'root=$(blkid $boot_drive -o export | grep ^UUID=) loglevel=0 quiet mitigations=off rw'|g" /boot/refind_linux.conf
+        sed -i "s|root=|root=$(blkid $boot_drive -o export | grep ^UUID=) rw quiet mitigations=off|g" /boot/EFI/refind/refind.conf
     fi
 
-    cp /boot/refind_linux.conf /boot/boot/refind_linux.conf
+    rm /boot/refind_linux.conf
+    rm /boot/boot/refind_linux.conf
 
-    sed -i 's|timeout 20| timeout 2|' /boot/EFI/refind/refind.conf
-    #sed -i 's|||' /boot/EFI/refind/refind.conf
+    sed -i 's|timeout 20|timeout 2|' /boot/EFI/refind/refind.conf
+    sed -i 's|#loglevel=1|loglevel=0|' /boot/EFI/refind/refind.conf
+    sed -i 's|#scan_drivers_dirs .*|scan_drivers_dirs EFI/refind/drivers_x64|' /boot/EFI/refind/refind.conf
+    sed -i 's|#scanfor|scanfor|' /boot/EFI/refind/refind.conf
+    sed -i 's|#extra_kernel_version_strings |extra_kernel_version_strings linux-edge,linux-virt|' /boot/EFI/refind/refind.conf
 
 }
 
