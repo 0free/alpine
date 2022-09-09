@@ -1439,29 +1439,25 @@ finish() {
     apk del *-doc
     echo ">>> installation is completed"
 
-    cat > /root/reboot <<EOF
-#!/bin/bash
-set -e
-sleep 1
-echo ">>> un-mounting & reboot"
-rm /mnt/root/install
-rm /mnt/root/reboot
-umount -Rf /mnt
-if grep -q zfs /root/list; then
-    zfs umount -a
-    zpool export -a
-fi
-reboot
-EOF
-
     while :; do
-        /bin/bash /root/reboot
-        break
+        /bin/bash /root/install
     done
 
 }
 
 set -e
+
+if [ -f /mnt/root/reboot ]; then
+    echo ">>> un-mounting & reboot"
+    rm /mnt/root/install
+    rm /mnt/root/reboot
+    umount -Rf /mnt
+    if grep -q zfs /root/list; then
+        zfs umount -a
+        zpool export -a
+    fi
+    reboot
+fi
 
 if [ -f /mnt/lib/apk/db/lock ]; then
     rm /mnt/lib/apk/db/lock
