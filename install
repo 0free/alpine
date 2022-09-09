@@ -1421,7 +1421,6 @@ EOF
         sed -i "s|root=|root=$(blkid $boot_drive -o export | grep ^UUID=) rw quiet mitigations=off|g" /boot/EFI/refind/refind.conf
     fi
 
-    rm /boot/refind_linux.conf
     rm /boot/boot/refind_linux.conf
 
     sed -i 's|timeout 20|timeout 2|' /boot/EFI/refind/refind.conf
