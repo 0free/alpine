@@ -1438,6 +1438,7 @@ finish() {
     echo ">>> cleaning apks"
     apk del *-doc
     echo ">>> installation is completed"
+    echo '' > /root/reboot
     exit
 
 }
