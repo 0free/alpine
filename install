@@ -1427,8 +1427,6 @@ EOF
     sed -i 's|#scanfor|scanfor|' /boot/EFI/refind/refind.conf
     sed -i 's|#extra_kernel_version_strings |extra_kernel_version_strings linux-edge,linux-virt|' /boot/EFI/refind/refind.conf
 
-    rm /boot/boot/refind_linux.conf
-
 }
 
 finish() {
