@@ -1296,6 +1296,7 @@ install_gummiboot() {
 
     echo ">>> installing gummiboot"
     apk add gummiboot efibootmgr
+    gummiboot install --path=/boot
 
     cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/bootx64.efi
 
