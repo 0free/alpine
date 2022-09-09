@@ -1421,13 +1421,13 @@ EOF
         sed -i "s|root=|root=$(blkid $boot_drive -o export | grep ^UUID=) rw quiet mitigations=off|g" /boot/EFI/refind/refind.conf
     fi
 
-    rm /boot/boot/refind_linux.conf
-
     sed -i 's|timeout 20|timeout 2|' /boot/EFI/refind/refind.conf
     sed -i 's|#loglevel=1|loglevel=0|' /boot/EFI/refind/refind.conf
     sed -i 's|#scan_drivers_dirs .*|scan_drivers_dirs EFI/refind/drivers_x64|' /boot/EFI/refind/refind.conf
     sed -i 's|#scanfor|scanfor|' /boot/EFI/refind/refind.conf
     sed -i 's|#extra_kernel_version_strings |extra_kernel_version_strings linux-edge,linux-virt|' /boot/EFI/refind/refind.conf
+
+    rm /boot/boot/refind_linux.conf
 
 }
 
