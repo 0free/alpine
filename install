@@ -1438,10 +1438,7 @@ finish() {
     echo ">>> cleaning apks"
     apk del *-doc
     echo ">>> installation is completed"
-
-    while :; do
-        /bin/bash /root/install
-    done
+    exit
 
 }
 
