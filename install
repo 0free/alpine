@@ -888,10 +888,6 @@ enable_services() {
         rc-update add zfs-load-key boot
     fi
 
-    if grep -q ext4 /root/list; then
-        rc-update add ext4 boot
-    fi
-
     rc-update add dbus default
     rc-update add elogind default
     rc-update add polkit default
