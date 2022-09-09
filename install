@@ -947,13 +947,16 @@ configure_alpine() {
 
     sed -i 's|#unicode="NO"|unicode="YES"|' /etc/rc.conf
     sed -i 's|#rc_parallel="NO"|rc_parallel="YES"|' /etc/rc.conf
+    sed -i 's|#rc_interactive="YES"|rc_interactive="NO"|' /etc/rc.conf
+    sed -i 's|#rc_shell=/bin/sh|rc_shell=/bin/sh|' /etc/rc.conf
     sed -i 's|#rc_depend_strict="YES"|rc_depend_strict="NO"|' /etc/rc.conf
     sed -i 's|#rc_logger="NO"|rc_logger="YES"|' /etc/rc.conf
+    sed -i 's|#rc_env_allow=".*"|rc_env_allow="*"|' /etc/rc.conf
     sed -i 's|#rc_hotplug=".*"|rc_hotplug="!net.*"|' /etc/rc.conf
-    sed -i 's|#rc_sighup="NO"|rc_sighup="YES"|' /etc/rc.conf
+    sed -i 's|#rc_send_sighup="NO"|rc_send_sighup="YES"|' /etc/rc.conf
     sed -i 's|#rc_timeout_stopsec="90"|rc_timeout_Stopsec="0"|' /etc/rc.conf
     sed -i 's|#rc_send_sigkill="YES"|rc_send_sigkill="YES"|' /etc/rc.conf
-    sed -i 's|#rc_tty_number=12|rc_tty_number=4|' /etc/rc.conf
+    sed -i 's|rc_tty_number=12|rc_tty_number=24|' /etc/rc.conf
 
     echo ">>> setting locales"
     echo 'LANG=en_US.UTF-8' > /etc/locale.conf
@@ -1352,11 +1355,12 @@ install_refind() {
     fi
 
     if [ ! -d /boot/EFI/refind/drivers_x64/ ]; then
+        mkdir -p /boot/EFI/refind/drivers_x64/
+        echo ">>> copying rEFInd drivers"
+        cp /usr/share/refind/drivers_x86_64/*.efi /boot/EFI/refind/drivers_x64/
         echo ">>> downloading efifs drivers"
         curl -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
         curl -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
-
-        mkdir -p /boot/EFI/refind/drivers_x64/
         mv xfs_x64.efi /boot/EFI/refind/drivers_x64/
         mv zfs_x64.efi /boot/EFI/refind/drivers_x64/
     fi
