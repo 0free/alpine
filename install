@@ -1444,6 +1444,10 @@ finish() {
 
 set -e
 
+if [ -f /mnt/lib/apk/db/lock ]; then
+    rm /mnt/lib/apk/db/lock
+fi
+
 if [ -f /mnt/root/reboot ]; then
     echo ">>> un-mounting & reboot"
     rm /mnt/root/install
@@ -1454,13 +1458,7 @@ if [ -f /mnt/root/reboot ]; then
         zpool export -a
     fi
     reboot
-fi
-
-if [ -f /mnt/lib/apk/db/lock ]; then
-    rm /mnt/lib/apk/db/lock
-fi
-
-if [ -f /mnt/root/chroot ]; then
+elif [ -f /mnt/root/chroot ]; then
     if [ -f /mnt/root/list ]; then
         cp /mnt/root/list /root/list
     fi
