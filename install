@@ -631,12 +631,8 @@ mount_root() {
         exit
     fi
 
-    if [ ! -d /mnt/boot ]; then
-        mkdir -p /mnt/boot
-    fi
-
-    if [ ! -d /mnt/boot/efi ]; then
-        mkdir -p /mnt/boot/efi
+    if [ ! -d /mnt/boot/ ]; then
+        mkdir -p /mnt/boot/
     fi
 
 }
@@ -645,6 +641,9 @@ mount_boot() {
 
     echo ">>> mounting boot drive"
     mount $boot_drive /mnt/boot/
+    if [ ! -d /mnt/boot/efi/ ]; then
+        mkdir -p /mnt/boot/efi/
+    fi
 
 }
 
@@ -1297,11 +1296,10 @@ install_gummiboot() {
 
     echo ">>> installing gummiboot"
     apk add gummiboot efibootmgr
-    gummiboot install --path /boot
 
-    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/
+    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/bootx64.efi
 
-    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "gummiboot" -l '\efi\gummibootx64.efi'
+    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "gummiboot" -l '\efi\bootx64.efi'
 
     echo ">>> configuring gummiboot"
     sed -i 's|#timeout 3|timeout 1|' /boot/loader/loader.conf
