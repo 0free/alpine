@@ -1056,11 +1056,17 @@ make_initramfs() {
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
+    kernel_iso=$(uname -r)
+    echo ">>> making /lib/modules/$kernel_iso"
+    if [ ! -d /lib/modules/$kernel_iso ]; then
+        mkdir /lib/modules/$kernel_iso
+    fi
+
     echo ">>> building initial ramdisk"
     if ! grep -q VirtualBox /root/list; then
-    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C zstd -o /boot/initramfs-edge $kernel_edge
+    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4 -o /boot/initramfs-edge $kernel_edge
     fi
-    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C zstd -o /boot/initramfs-lts $kernel_lts
+    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4 -o /boot/initramfs-lts $kernel_lts
 
 }
 
