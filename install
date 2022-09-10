@@ -1057,7 +1057,9 @@ make_initramfs() {
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
     echo ">>> building initial ramdisk"
+    if ! grep -q VirtualBox /root/list; then
     mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C zstd -o /boot/initramfs-edge $kernel_edge
+    fi
     mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C zstd -o /boot/initramfs-lts $kernel_lts
 
 }
