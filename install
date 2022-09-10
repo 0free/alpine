@@ -27,7 +27,7 @@ packages_list() {
         ibus ibus-bash-completion
         udev-init-scripts udev-init-scripts-openrc
         eudev eudev-openrc eudev-libs
-        xorg-server xf86-input-libinput
+        xorg-server
         mesa-dri-gallium mesa-va-gallium
         polkit polkit-openrc polkit-common polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
@@ -147,7 +147,8 @@ packages_list() {
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
-            plasma-desktop plasma-workspace plasma-workspace-lang plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-browser-integration plasma-thunderbolt plasma-disks
+            plasma-desktop plasma-workspace plasma-workspace-lang
+            plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-browser-integration plasma-thunderbolt plasma-disks
             # required
             polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools
             kconfig kconfigwidgets
@@ -1243,7 +1244,7 @@ GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
 GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=y
-GRUB_CMDLINE_LINUX_DEFAULT="rootfstype=$filesystem quiet splash=silent mitigations=off"
+GRUB_CMDLINE_LINUX_DEFAULT="rw rootfstype=$filesystem modules=sd-mod,usb-storage quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
 GRUB_GFXMODE=1280x720,1920x1080,auto
 EOF
@@ -1253,7 +1254,6 @@ EOF
     list+=' usb usb_keyboard'
     list+=' linux chain btrfs xfs fat exfat ntfs'
     list+=' gfxterm gfxmenu'
-
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
