@@ -1217,7 +1217,7 @@ install_grub() {
     apk fix
     apk add efibootmgr grub grub-efi grub-bash-completion
     echo ">>> installing grub bootloader"
-    grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id="alpine" $boot_drive
+    grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id="alpine linux" $boot_drive
 
     if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
@@ -1424,7 +1424,7 @@ EOF
     sed -i 's|#enable_mouse|enable_mouse|' /boot/EFI/refind/refind.conf
     sed -i 's|#mouse_size 16|mouse_size 16|' /boot/EFI/refind/refind.conf
     sed -i 's|#mouse_speed 4|mouse_speed 4|' /boot/EFI/refind/refind.conf
-    sed -i 's|#use_graphics_for .*|use_graphics_for osx,linux,windows,grub|' /boot/EFI/refind/refind.conf
+    sed -i 's|#use_graphics_for .*|use_graphics_for osx,linux,windows|' /boot/EFI/refind/refind.conf
     sed -i 's|#scan_driver_dirs .*|scan_driver_dirs EFI/refind/drivers_x64|' /boot/EFI/refind/refind.conf
     sed -i 's|#scanfor|scanfor|' /boot/EFI/refind/refind.conf
     sed -i 's|#extra_kernel_version_strings |extra_kernel_version_strings linux-edge,linux-virt,|' /boot/EFI/refind/refind.conf
