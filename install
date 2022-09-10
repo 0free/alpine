@@ -7,6 +7,8 @@ mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
 branch='edge'
 version='v3.16'
+kernel_edge='5.19.8-0-edge'
+kernel_lts='5.15.67-0-lts'
 pool='rpool'
 hostname='linux'
 user='user'
@@ -1065,8 +1067,8 @@ make_initramfs() {
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
     echo ">>> building initial ramdisk"
-    mkinitfs -o /boot/initramfs-edge 5.19.8 -c /etc/mkinitfs/mkinitfs.conf -b / -f /etc/fstab -C lz4
-    mkinitfs -o /boot/initramfs-lts 5.15.67 -c /etc/mkinitfs/mkinitfs.conf -b / -f /etc/fstab -C lz4
+    mkinitfs -o /boot/initramfs-edge $kernel_edge -c /etc/mkinitfs/mkinitfs.conf -b / -f /etc/fstab -C lz4
+    mkinitfs -o /boot/initramfs-lts $kernel_lts -c /etc/mkinitfs/mkinitfs.conf -b / -f /etc/fstab -C lz4
 
 }
 
