@@ -1067,8 +1067,8 @@ make_initramfs() {
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
     echo ">>> building initial ramdisk"
-    mkinitfs -o /boot/initramfs-edge $kernel_edge -c /etc/mkinitfs/mkinitfs.conf -b / -f /etc/fstab -C lz4
-    mkinitfs -o /boot/initramfs-lts $kernel_lts -c /etc/mkinitfs/mkinitfs.conf -b / -f /etc/fstab -C lz4
+    mkinitfs -o /boot/initramfs-edge $kernel_edge -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4
+    mkinitfs -o /boot/initramfs-lts $kernel_lts -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4
 
 }
 
