@@ -1056,13 +1056,6 @@ make_initramfs() {
         list+=' '
     done
 
-    #kernel=$(uname -r)
-
-    #if [ ! -d "/lib/modules/$kernel/" ]; then
-    #    echo ">>> create /lib/modules/$kernel/"
-    #    mkdir "/lib/modules/$kernel/"
-    #fi
-
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
@@ -1250,7 +1243,7 @@ GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
 GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=y
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash=silent mitigations=off"
+GRUB_CMDLINE_LINUX_DEFAULT="rootfstype=$filesystem quiet splash=silent mitigations=off"
 GRUB_CMDLINE_LINUX=""
 GRUB_GFXMODE=1280x720,1920x1080,auto
 EOF
@@ -1261,9 +1254,12 @@ EOF
     list+=' linux chain btrfs xfs fat exfat ntfs'
     list+=' gfxterm gfxmenu'
 
+
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
         sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=zfs=$pool\"|" /etc/default/grub
+    else
+        sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=$(blkid $root_drive -o export | grep ^UUID=)\"|" /etc/default/grub
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
