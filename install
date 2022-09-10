@@ -1056,19 +1056,19 @@ make_initramfs() {
         list+=' '
     done
 
-    kernel=$(uname -r)
+    #kernel=$(uname -r)
 
-    if [ ! -d "/lib/modules/$kernel/" ]; then
-        echo ">>> create /lib/modules/$kernel/"
-        mkdir "/lib/modules/$kernel/"
-    fi
+    #if [ ! -d "/lib/modules/$kernel/" ]; then
+    #    echo ">>> create /lib/modules/$kernel/"
+    #    mkdir "/lib/modules/$kernel/"
+    #fi
 
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
     echo ">>> building initial ramdisk"
-    mkinitfs -o /boot/initramfs-edge $kernel_edge -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4
-    mkinitfs -o /boot/initramfs-lts $kernel_lts -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4
+    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C zstd -o /boot/initramfs-edge $kernel_edge
+    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C zstd -o /boot/initramfs-lts $kernel_lts
 
 }
 
