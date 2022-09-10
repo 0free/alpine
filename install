@@ -31,10 +31,6 @@ packages_list() {
         mesa-dri-gallium mesa-va-gallium
         polkit polkit-openrc polkit-common polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
-        # hardware
-        hwids hwids-net hwids-pci hwids-usb hwids-udev
-        # wayland
-        xwayland
         # base
         sudo bash bash-completion build-base fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-login util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
         # utilities
