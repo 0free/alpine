@@ -468,7 +468,7 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    bootloaders=(rEFInd gummiboot limine syslinux efibootmgr clover grub)
+    bootloaders=(rEFInd grub gummiboot limine syslinux efibootmgr clover)
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     echo -e "\n"
@@ -485,10 +485,10 @@ setup_drive() {
         echo ">>> deleting partitions"
         sgdisk -Z $drive
         echo ">>> creating GPT"
-        sgdisk -U $drive
+        sgdisk -o -U $drive
 
         echo ">>> creating boot partition"
-        sgdisk -n 0:0:+$bootSize -c 0:efi -t 0:ef00 $drive
+        sgdisk -n 1:0:+$bootSize -c 1:ESP -t 1:ef00 $drive
         if ls $drive | grep nvme; then
             boot_drive=$drive"p1"
         else
@@ -496,7 +496,7 @@ setup_drive() {
         fi
 
         echo ">>> creating swap partition"
-        sgdisk -n 0:0:+$swapSize -c 0:swap -t 0:8200 $drive
+        sgdisk -n 2:0:+$swapSize -c 2:SWAP -t 2:8200 $drive
         if ls $drive | grep nvme; then
             swap_drive=$drive"p2"
         else
@@ -505,9 +505,9 @@ setup_drive() {
 
         echo ">>> creating root partition"
         if [[ $filesystem == zfs ]]; then
-            sgdisk -n 0:0:0 -c 0:zfs -t 0:bf00 $drive
+            sgdisk -n 3:0:0 -c 3:ROOT -t 3:bf00 $drive
         else
-            sgdisk -n 0:0:0 -c 0:$filesystem -t 0:8300 $drive
+            sgdisk -n 3:0:0 -c 3:ROOT -t 3:8300 $drive
         fi
         if ls $drive | grep nvme; then
             root_drive=$drive"p3"
