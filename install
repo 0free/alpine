@@ -144,14 +144,14 @@ packages_list() {
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
             plasma-desktop plasma-workspace plasma-workspace-lang
-            plasma-settings plasma-systemmonitor plasma-firewall
+            plasma-settings
             plasma-integration plasma-browser-integration
             plasma-thunderbolt plasma-disks
             # required
             polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools
             kconfig kconfigwidgets
             # system
-            systemsettings kactivities kactivities-stats kactivitymanagerd ksysguard
+            systemsettings ksysguard
             # kwallet
             kwallet kwallet-pam kwalletmanager kio-kwallet
             # theme
@@ -209,8 +209,10 @@ packages_list() {
         if grep -q kde /root/list; then
             packages+=(
                 # plasma
+                plasma-systemmonitor plasma-firewall
                 plasma-camera plasma-videoplayer plasma-phonebook
                 # kde
+                kactivities kactivities-stats kactivitymanagerd
                 shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool krename kcolorchooser kunitconversion
                 # widgets
                 kconfigwidgets
@@ -1007,7 +1009,7 @@ EOF
 
     echo ">>> setting ~/"
     chown -R $user:wheel /home/$user/
-    chmod -R 770 /home/$user/
+    chmod -R 700 /home/$user/.config/*
 
 }
 
