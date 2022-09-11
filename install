@@ -1423,7 +1423,7 @@ EOF
     if grep -q zfs /root/list; then
         sed -i "s|root=|root=zfs=$pool rw quiet mitigations=off|g" /boot/EFI/refind/refind.conf
     else
-        sed -i "s|root=|root=$(blkid $boot_drive -o export | grep ^UUID=) rw quiet mitigations=off|g" /boot/EFI/refind/refind.conf
+        sed -i "s|root=|root=$(blkid $root_drive -o export | grep ^UUID=) rw quiet mitigations=off|g" /boot/EFI/refind/refind.conf
     fi
 
     sed -i 's|timeout 20|timeout 2|' /boot/EFI/refind/refind.conf
