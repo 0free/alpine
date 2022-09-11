@@ -32,8 +32,10 @@ else
 fi
 
 cd ~/aports/scripts/
-curl -LO raw.githubusercontent.com/0free/AlpineLinux/1/apkovl.sh
+curl -LO raw.githubusercontent.com/0free/alpine/1/apkovl.sh
 cd ~
+
+chmod +x ~/aports/scripts/apkovl.sh
 
 cat << EOF > ~/aports/scripts/mkimg.linux.sh
 profile_linux() {
