@@ -1450,10 +1450,13 @@ if [ -f /mnt/lib/apk/db/lock ]; then
 fi
 
 if [ -f /mnt/root/reboot ]; then
-    echo ">>> un-mounting & reboot"
     rm /mnt/root/install
     rm /mnt/root/reboot
-    umount -Rf /mnt
+    echo ">>> un-mounting & reboot"
+    dir=(/mnt/proc/ /mnt/dev /mnt/sys /mnt/boot /mnt/)
+    for d in ${dir[@]}; do
+        umount $d
+    done
     if grep -q zfs /root/list; then
         zfs umount -a
         zpool export -a
