@@ -27,7 +27,7 @@ packages_list() {
         ibus ibus-bash-completion
         udev-init-scripts udev-init-scripts-openrc
         eudev eudev-openrc eudev-libs
-        xorg-server
+        xorg-server xf86-input-evdev
         mesa-dri-gallium mesa-va-gallium
         polkit polkit-openrc polkit-common polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
@@ -1061,13 +1061,13 @@ make_initramfs() {
             mkdir /lib/modules/$kernel_edge
         fi
         echo ">>> building linux edge initial ramdisk"
-        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4 -o /boot/initramfs-edge $kernel_edge
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-edge $kernel_edge
     fi
     if [ ! -d  /lib/modules/$kernel_lts ]; then
         mkdir /lib/modules/$kernel_lts
     fi
     echo ">>> building linux LTS initial ramdisk"
-    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4 -o /boot/initramfs-lts $kernel_lts
+    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-lts $kernel_lts
 
 }
 
