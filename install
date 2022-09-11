@@ -144,7 +144,9 @@ packages_list() {
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
             plasma-desktop plasma-workspace plasma-workspace-lang
-            plasma-integration plasma-systemmonitor plasma-firewall plasma-settings plasma-browser-integration plasma-thunderbolt plasma-disks
+            plasma-settings plasma-systemmonitor plasma-firewall
+            plasma-integration plasma-browser-integration
+            plasma-thunderbolt plasma-disks
             # required
             polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools
             kconfig kconfigwidgets
