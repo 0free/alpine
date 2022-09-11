@@ -1057,11 +1057,15 @@ make_initramfs() {
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
     if ! grep -q VirtualBox /root/list; then
-        mkdir /lib/modules/$kernel_edge
+        if [ ! -d /lib/modules/$kernel_edge ]; then
+            mkdir /lib/modules/$kernel_edge
+        fi
         echo ">>> building linux edge initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4 -o /boot/initramfs-edge $kernel_edge
     fi
-    mkdir /lib/modules/$kernel_lts
+    if [ ! -d  /lib/modules/$kernel_lts ]; then
+        mkdir /lib/modules/$kernel_lts
+    fi
     echo ">>> building linux LTS initial ramdisk"
     mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -C lz4 -o /boot/initramfs-lts $kernel_lts
 
