@@ -65,7 +65,7 @@ rc_add add udev-settle default
 rc_add add udev-trigger default
 rc_add add udev-postmount default
 
-rc_add sddm
+rc_add add sddm default
 
 rc_add devfs sysinit
 rc_add dmesg sysinit
