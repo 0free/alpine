@@ -45,7 +45,7 @@ profile_linux() {
    arch='x86_64'
 	hostname='alpine'
 
-	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage quiet'
+	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage quiet mitigations=off'
 
 	initfs_features='base nvme ata usb bootchart btrfs zfs xfs ext4 f2fs lvm mmc raid scsi squashfs'
 
@@ -85,8 +85,29 @@ profile_linux() {
          nfs-utils ntfs-3g ntfs-3g-progs
          f2fs-tools
          sfdisk sgdisk
-        "
 
+        alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release
+        openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
+        busybox
+        busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
+        musl musl-utils musl-locales
+        dbus dbus-openrc dbus-libs dbus-x11
+        ibus ibus-bash-completion
+        udev-init-scripts udev-init-scripts-openrc
+        eudev eudev-openrc eudev-libs
+        hwids-net hwids-pci hwids-udev hwids-usb
+        xauth xinit xorg-server xorg-server-common
+        xwayland
+        mesa mesa-dri-gallium
+        vulkan-loader vulkan-tools
+        polkit-openrc polkit-common polkit-elogind polkit-elogind-libs
+        elogind elogind-openrc elogind-bash-completion
+        xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
+        plasma-desktop plasma-workspace
+         breeze-icons
+         sddm sddm-openrc sddm-kcm sddm-breeze
+
+        "
 }
 EOF
 
