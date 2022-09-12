@@ -17,22 +17,43 @@ password='0000'
 packages_list() {
 
     packages+=(
-        # busybox/openrc
-        busybox openrc openrc-bash-completion
+        # alpine
+        alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release
+        # openrc
+        openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
+        # busybox
+        busybox
         # busybox@edge
-        busybox-openrc busybox-mdev-openrc busybox-binsh
-        # desktop
-        musl musl-locales
-        dbus dbus-openrc dbus-x11
+        busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
+        # musl
+        musl musl-utils musl-locales
+        # dbus
+        dbus dbus-openrc dbus-libs dbus-x11
+        # ibus
         ibus ibus-bash-completion
+        # udev
         udev-init-scripts udev-init-scripts-openrc
+        # eudev
         eudev eudev-openrc eudev-libs
-        xorg-server xf86-input-evdev
-        mesa-dri-gallium mesa-va-gallium
-        polkit polkit-openrc polkit-common polkit-elogind polkit-elogind-libs
+        # hardware
+        hwids-net hwids-pci hwids-udev hwids-usb
+        # xorg
+        xauth xinit xorg-server xorg-server-common
+        # wayland
+        xwayland
+        # mesa
+        mesa mesa-dri-gallium
+        # vulkan
+        vulkan-loader vulkan-tools
+        # polkit/elogind
+        polkit-openrc polkit-common polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
+        # input
+        xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
         # base
-        sudo bash bash-completion build-base fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep util-linux util-linux-openrc util-linux-login util-linux-bash-completion pciutils usbutils binutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
+        sudo bash bash-completion build-base fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep pciutils usbutils binutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
+        # util-linux
+        util-linux util-linux-openrc util-linux-login util-linux-misc util-linux-bash-completion
         # utilities
         openssl ncurses-dev
         # git
@@ -43,6 +64,7 @@ packages_list() {
         e2fsprogs lvm2 gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
         udisks2 udisks2-bash-completion 
         # network
+        ethtool ethtool-bash-completion
         networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind
         # firewall
         ufw ufw-openrc ufw-bash-completion
@@ -51,8 +73,6 @@ packages_list() {
         alsa-plugins-pulse alsa-lib
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
-        # trackpad
-        xf86-input-synaptics xf86-input-mtrack
         # browser
         chromium
         # fonts
@@ -61,11 +81,9 @@ packages_list() {
         font-opensans font-xfree86-type1
         ttf-font-awesome ttf-dejavu ttf-freefont ttf-droid
         # keyboard
-        setxkbmap
+        setxbmap xkbcomp xkeyboard-config
         # timezone
         tzdata
-        # gvfs
-        gvfs gvfs-afc gvfs-archive gvfs-dev gvfs-fuse gvfs-mtp gvfs-nfs gvfs-smb
         # colord
         colord colord-bash-completion colord-gtk
     )
@@ -143,25 +161,24 @@ packages_list() {
             # sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
             # plasma
-            plasma-desktop plasma-workspace plasma-workspace-lang
+            plasma-desktop
+            plasma-workspace plasma-workspace-lang plasma-workspace-libs
             plasma-settings
+            plasma-framework
             plasma-integration plasma-browser-integration
             plasma-thunderbolt plasma-disks
-            # required
-            polkit-kde-agent-1 xdg-user-dirs pinentry-qt kde-cli-tools
-            kconfig kconfigwidgets
             # system
             systemsettings ksysguard
             # kwallet
-            kwallet kwallet-pam kwalletmanager kio-kwallet
+            kwallet kwallet-pam kwalletmanager
             # theme
-            kiconthemes breeze breeze-gtk breeze-icons
+            breeze-gtk breeze-icons
             # bluetooth
             bluedevil
             # power
             powerdevil
             # wayland
-            plasma-wayland-protocols kwayland kwayland-integration
+            kwayland
             # network
             plasma-nm
             # firewall
@@ -257,7 +274,7 @@ packages_list() {
             # thumbnail
             ffmpegthumbnailer
             # mkimage
-            abuild alpine-sdk apk-tools alpine-conf mkinitfs xorriso squashfs-tools
+            abuild alpine-sdk apk-tools mkinitfs xorriso squashfs-tools
             # fonts tools
             font-manager font-viewer
             # office
@@ -829,6 +846,8 @@ disable_root() {
     echo -en "$password\n$password" | passwd root
     echo ">>> disabling root login"
     passwd -l root
+    echo ">>> disabling root password"
+    passwd -d root
 
 }
 
@@ -1009,6 +1028,7 @@ EOF
 
     echo ">>> setting ~/"
     chown -R $user:wheel /home/$user/
+    chmod -R 700 /home/$user/
     chmod -R 700 /home/$user/.config/*
 
 }
