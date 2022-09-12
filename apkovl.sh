@@ -56,14 +56,14 @@ https://dl-cdn.alpinelinux.org/alpine/edge/community
 https://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
-rc-update add dbus default
-rc-update add elogind default
-rc-update add polkit default
+rc_add add dbus default
+rc_add add elogind default
+rc_add add polkit default
 
-rc-update add udev default
-rc-update add udev-settle default
-rc-update add udev-trigger default
-rc-update add udev-postmount default
+rc_add add udev default
+rc_add add udev-settle default
+rc_add add udev-trigger default
+rc_add add udev-postmount default
 
 rc_add sddm
 
