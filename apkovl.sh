@@ -47,16 +47,7 @@ EOF
 mkdir -p "$tmp"/etc/apk
 
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
-         alpine-base iwd dbus curl bash bash-completion nano
-         sfdisk sgdisk zfs
-         util-linux coreutils usbutils
-         e2fsprogs e2fsprogs-extra
-         dosfstools mtools lvm2
-         btrfs-progs btrfs-progs-extra
-         xfsprogs xfsprogs-extra
-         exfatprogs
-         nfs-utils ntfs-3g ntfs-3g-progs
-         f2fs-tools
+         alpine-base
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
@@ -64,6 +55,17 @@ https://dl-cdn.alpinelinux.org/alpine/edge/main
 https://dl-cdn.alpinelinux.org/alpine/edge/community
 https://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
+
+rc-update add dbus default
+rc-update add elogind default
+rc-update add polkit default
+
+rc-update add udev default
+rc-update add udev-settle default
+rc-update add udev-trigger default
+rc-update add udev-postmount default
+
+rc_add sddm
 
 rc_add devfs sysinit
 rc_add dmesg sysinit
