@@ -1028,8 +1028,9 @@ EOF
 
     echo ">>> setting ~/"
     chown -R $user:wheel /home/$user/
+    chown -R $user:wheel /home/$user/.config/
     chmod -R 700 /home/$user/
-    chmod -R 700 /home/$user/.config/*
+    chmod -R 700 /home/$user/.config/
 
 }
 
