@@ -81,7 +81,7 @@ packages_list() {
         font-opensans font-xfree86-type1
         ttf-font-awesome ttf-dejavu ttf-freefont ttf-droid
         # keyboard
-        setxbmap xkbcomp xkeyboard-config
+        setxkbmap xkbcomp xkeyboard-config
         # timezone
         tzdata
         # colord
