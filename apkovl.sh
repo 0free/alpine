@@ -47,28 +47,16 @@ EOF
 mkdir -p "$tmp"/etc/apk
 
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
-alpine-base zfs
-dhcpcd ethtool kbd-bkeymaps
-linux-firmware-other
-linux-firmware-amd linux-firmware-amd-ucode
-linux-firmware-amdgpu linux-firmware-radeon
-linux-firmware-nvidia
-linux-firmware-intel linux-firmware-i915
-linux-firmware-rtl_bt linux-firmware-rtl_nic
-linux-firmware-rtlwifi
-linux-firmware-brcm
-linux-firmware-qca
-util-linux coreutils usbutils
-bash bash-completion sudo nano openssl curl
-network-extras iwd dbus wireless-regdb
-e2fsprogs e2fsprogs-extra
-dosfstools mtools lvm2
-btrfs-progs btrfs-progs-extra
-xfsprogs xfsprogs-extra
-exfatprogs
-nfs-utils ntfs-3g ntfs-3g-progs
-f2fs-tools
-sfdisk sgdisk
+         alpine-base iwd dbus curl bash bash-completion nano
+         sfdisk sgdisk zfs
+         util-linux coreutils usbutils
+         e2fsprogs e2fsprogs-extra
+         dosfstools mtools lvm2
+         btrfs-progs btrfs-progs-extra
+         xfsprogs xfsprogs-extra
+         exfatprogs
+         nfs-utils ntfs-3g ntfs-3g-progs
+         f2fs-tools
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
