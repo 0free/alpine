@@ -1082,6 +1082,9 @@ make_initramfs() {
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
+    #kernel_lts=$(apk search -e linux-lts | sed 's|-r.*||')
+    #kernel_edge=$(apk search -e linux-edge | sed 's|-r.*||')
+
     if ! grep -q VirtualBox /root/list; then
         if [ ! -d /lib/modules/$kernel_edge ]; then
             mkdir /lib/modules/$kernel_edge
@@ -1520,9 +1523,7 @@ else
         fi
     else
         if mountpoint -q /mnt; then
-            if [ -f /mnt/boot/initramfs-* ]; then
-                install_packages
-            elif [ -d /mnt/root/ ]; then
+            if [ -d /mnt/root/ ]; then
                 setup_linux
             else
                 install_base
