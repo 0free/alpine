@@ -35,7 +35,7 @@ cd ~/aports/scripts/
 curl -LO raw.githubusercontent.com/0free/alpine/1/apkovl.sh
 cd ~
 
-chmod +x ~/aports/scripts/apkovl.sh
+chmod 700 ~/aports/scripts/apkovl.sh
 
 cat << EOF > ~/aports/scripts/mkimg.linux.sh
 profile_linux() {
@@ -43,10 +43,10 @@ profile_linux() {
     image_ext='iso'
     arch='x86_64'
 	hostname='alpine'
-	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage quiet mitigations=off'
+	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage quiet'
 	initfs_features='base nvme ata usb bootchart btrfs zfs xfs ext4 f2fs lvm mmc raid scsi squashfs'
 	modloop_sign=yes
-	grub_mod='disk part_gpt part_msdos linux normal configfile fat'
+	grub_mod='all_video disk part_gpt part_msdos linux normal configfile efi_gop ntfs chain fat'
     boot_addons='amd-ucode intel-ucode'
     initrd_ucode='/boot/amd-ucode.img /boot/intel-ucode.img'
     apkovl='./aports/scripts/apkovl.sh'
@@ -75,11 +75,11 @@ profile_linux() {
                 nfs-utils ntfs-3g ntfs-3g-progs
                 f2fs-tools
                 sfdisk sgdisk
- "
+    "
 }
 EOF
 
-chmod +x ~/aports/scripts/mkimg.linux.sh
+chmod 700 ~/aports/scripts/mkimg.linux.sh
 
 sed -i 's|linux-firmware||' ~/aports/scripts/mkimg.base.sh
 sed -i 's|wireless-regdb||' ~/aports/scripts/mkimg.base.sh
