@@ -592,7 +592,7 @@ create_zfs() {
        create_rootfs
     fi
     echo ">>> creating ZFS pool"
-    zpool create -f -o ashift=12 -o autotrim=on \
+    zpool create -f -o ashift=9 -o autotrim=on \
     -o cachefile=/etc/zfs/zpool.cache \
     -O recordsize=8192 -O compression=lz4 -O acltype=posixacl \
     -O devices=off -O xattr=sa -O relatime=off -O atime=off \
