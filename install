@@ -86,6 +86,8 @@ packages_list() {
         tzdata
         # colord
         colord colord-bash-completion colord-gtk
+        # efi
+        efibootmgr
     )
 
     if grep -q btrfs /root/list; then
@@ -1188,6 +1190,11 @@ find_windows() {
         fi
     done
 
+    echo ">>> creating efi records"
+    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
+    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
+    efibootmgr -c --gpt --unicode -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
+
 }
 
 install_syslinux() {
@@ -1224,9 +1231,9 @@ MODULE_PATH=boot:///initramfs-lts
 EOF
 
     if grep -q zfs /root/list; then
-        sed -i "s|CMDLINE=root=|CMDLINE=root=zfs=$pool rw loglevel=1 quiet|" /boot/limine.cfg
+        sed -i "s|CMDLINE=root=|CMDLINE=root=zfs=$pool rw loglevel=1 quiet mitigations=off|" /boot/limine.cfg
     else
-        sed -i "s|CMDLINE=root=|CMDLINE=root=$(blkid $root_drive -o export | grep ^UUID=) rw loglevel=1 quiet|" /boot/limine.cfg
+        sed -i "s|CMDLINE=root=|CMDLINE=root=$(blkid $root_drive -o export | grep ^UUID=) rw loglevel=1 quiet mitigations=off|" /boot/limine.cfg
     fi
 
 }
@@ -1248,7 +1255,7 @@ install_grub() {
 
     echo ">>> installing grub package"
     apk fix
-    apk add efibootmgr grub grub-efi grub-bash-completion
+    apk add grub grub-efi grub-bash-completion
     echo ">>> installing grub bootloader"
     grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id="alpine linux" $drive
 
@@ -1307,25 +1314,22 @@ EOF
 
 install_efibootmgr() {
 
-    echo ">>> installing efibootmgr"
-    apk add efibootmgr
+    if grep -q zfs /root/list; then
+        root="zfs=$pool"
+    else
+        root=""
+    fi
 
-    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
+    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux LTS" -l '\vmlinux-lts' -u "$root rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts"
 
-    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
-
-    efibootmgr -c --gpt --unicode -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
-
-    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux LTS" -l '\vmlinux-lts' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts"
-
-    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux EDGE" -l '\vmlinux-edge' -u "zfs=$pool rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge"
+    efibootmgr -c --gpt --unicode -d $drive -p 1 -L "alpine Linux edge" -l '\vmlinux-edge' -u "$root rw quiet initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge"
 
 }
 
 install_gummiboot() {
 
     echo ">>> installing gummiboot"
-    apk add gummiboot efibootmgr
+    apk add gummiboot
     gummiboot install --path=/boot
 
     cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/bootx64.efi
