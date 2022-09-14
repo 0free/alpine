@@ -1190,10 +1190,12 @@ find_windows() {
         fi
     done
 
-    echo ">>> creating efi records"
-    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
-    efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
-    efibootmgr -c --gpt --unicode -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
+    if [[ $windows_drive ]]; then
+        echo ">>> creating efi records"
+        efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
+        efibootmgr -c --gpt --unicode -d $windows_drive -p 1 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
+        efibootmgr -c --gpt --unicode -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
+    fi
 
 }
 
