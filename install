@@ -599,7 +599,7 @@ create_zfs() {
     -O recordsize=8192 -O compression=lz4 -O acltype=posixacl \
     -O devices=off -O xattr=sa -O relatime=off -O atime=off \
     -O dnodesize=legacy -O normalization=formD \
-    -O canmount=noauto -O mountpoint=legacy -R /mnt $pool $root_drive
+    -O canmount=noauto -O mountpoint=/ -R /mnt $pool $root_drive
     echo ">>> checking ZFS pool"
     zpool status
 
@@ -643,7 +643,8 @@ mount_root() {
         echo ">>> importing zpool"
         zpool import $pool -d $root_drive -R /mnt/
         echo ">>> mounting zfs dataset"
-        mount -t zfs $pool /mnt/
+        zfs mount $pool
+        zfs mount -a
     else
         echo ">>> mounting root drive"
         mount $root_drive /mnt/
@@ -1496,7 +1497,7 @@ if [ -f /mnt/root/reboot ]; then
     rm /mnt/root/install
     rm /mnt/root/reboot
     echo ">>> un-mounting & reboot"
-    dir=(/mnt/proc/ /mnt/dev /mnt/sys /mnt/boot)
+    dir=(/mnt/boot/ /mnt/sys/ /mnt/dev/ /mnt/proc/)
     for d in ${dir[@]}; do
         umount $d
     done
