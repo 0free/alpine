@@ -1160,6 +1160,7 @@ setup_bootloader() {
 
 find_windows() {
 
+    echo ">>> looking for Windows"
     drives=($(ls /dev/ | grep '^nvme.\{3\}$\|^sd.\{1\}$'))
 
     if [ ! -d /windows/ ]; then
