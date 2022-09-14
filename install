@@ -1400,6 +1400,7 @@ install_refind() {
 
     if [[ $windows_drive ]]; then
         cat >> /boot/EFI/refind/refind.conf <<EOF
+
 menuentry "Windows Boot Manager" {
     icon \EFI\refind\icons\os_win8.png
     volume $(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
@@ -1418,11 +1419,13 @@ menuentry "Windows 11" {
     loader \Windows\Boot\EFI\bootmgfw.efi
     options ''
 }
+
 EOF
     fi
 
     if grep -q VirtualBox /root/list; then
         cat >> /boot/EFI/refind/refind.conf <<EOF
+
 menuentry "alpine Linux VirtualMachine" {
     icon /EFI/refind/icons/os_linux.png
     volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
@@ -1430,9 +1433,11 @@ menuentry "alpine Linux VirtualMachine" {
     initrd /initramfs-virt
     options 'root= initrd=/initramfs-lts'
 }
+
 EOF
     else
         cat >> /boot/EFI/refind/refind.conf <<EOF
+
 menuentry "alpine Linux edge" {
     icon /EFI/refind/icons/os_linux.png
     volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
@@ -1447,6 +1452,7 @@ menuentry "alpine Linux LTS" {
     initrd /initramfs-lts
     options 'root= initrd=/amd-ucode.img initrd=/intel-ucode.img'
 }
+
 EOF
     fi
 
