@@ -1482,7 +1482,7 @@ finish() {
     apk del *-doc
     echo ">>> installation is completed"
     echo '' > /root/reboot
-    exit
+    exit 0
 
 }
 
@@ -1496,10 +1496,11 @@ if [ -f /mnt/root/reboot ]; then
     rm /mnt/root/install
     rm /mnt/root/reboot
     echo ">>> un-mounting & reboot"
-    dir=(/mnt/proc/ /mnt/dev /mnt/sys /mnt/boot /mnt/)
+    dir=(/mnt/proc/ /mnt/dev /mnt/sys /mnt/boot)
     for d in ${dir[@]}; do
         umount $d
     done
+    umount -Rf /mnt/
     if grep -q zfs /root/list; then
         zfs umount -a
         zpool export -a
