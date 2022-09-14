@@ -885,15 +885,23 @@ enable_services() {
     rc-update add devfs sysinit
     rc-update add dmesg sysinit
     rc-update add mdev sysinit
+    rc-update add hwdrivers sysinit
     rc-update add udev sysinit
     rc-update add udev-trigger sysinit
-    rc-update add hwdrivers sysinit
     rc-update add dbus sysinit
     rc-update add udev-settle sysinit
     rc-update add udev-postmount sysinit
+    rc-update add modloop sysinit
+
+    rc-update add procfs boot
+    rc-update add devfs boot
+    rc-update add sysfs boot
+    rc-update add root boot
 
     rc-update add modules boot
+    rc-update add mtab boot
     rc-update add hwclock boot
+    rc-update add save-keymaps boot
     rc-update add lvm boot
     rc-update add swap boot
     rc-update add localmount boot
