@@ -74,7 +74,7 @@ packages_list() {
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
         # browser
-        chromium
+        chromium-chromedriver
         # fonts
         font-hack font-adobe-source-code-pro
         font-noto-arabic
