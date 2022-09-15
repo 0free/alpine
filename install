@@ -643,7 +643,6 @@ mount_root() {
         echo ">>> importing zpool"
         zpool import $pool -d $root_drive -R /mnt/
         echo ">>> mounting zfs dataset"
-        zfs mount $pool
         zfs mount -a
     else
         echo ">>> mounting root drive"
@@ -1545,6 +1544,9 @@ else
         fi
     else
         if mountpoint -q /mnt; then
+            if ! mountpoint -q /mnt/boot/; then
+                mount_boot
+            fi
             if [ -d /mnt/root/ ]; then
                 setup_linux
             else
