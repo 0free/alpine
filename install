@@ -1329,7 +1329,13 @@ install_EFIstub() {
     echo ">>> installing EFIstub"
     apk add efi-mkuki gummiboot-efistub 
 
-    unicode="root=$(blkid $root_drive -o export | grep ^UUID=) rootfstype=$filesystem add_efi_memmap rw quiet mitigations=off loglevel=3"
+    if grep -q zfs /root/lis; then
+        disk="root=zfs=$pool"
+    else
+        disk="root=$(blkid $root_drive -o export | grep ^UUID=)"
+    fi
+
+    unicode="$disk rootfstype=$filesystem add_efi_memmap rw quiet mitigations=off loglevel=3"
 
     if grep -q VirtualBox /root/list; then
         efibootmgr -c -d $drive -p 1 -t 0 -L "alpine Linux VirtualMachine" -l '\vmlinuz-virt' -u "$unicode initrd=\initramfs-virt"
