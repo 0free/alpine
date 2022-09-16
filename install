@@ -27,6 +27,8 @@ packages_list() {
         busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
         # musl
         musl musl-utils musl-locales
+        # GNU libc
+        gcompat
         # dbus
         dbus dbus-openrc dbus-libs dbus-x11
         # ibus
@@ -1327,7 +1329,7 @@ install_EFIstub() {
     echo ">>> installing EFIstub"
     apk add efi-mkuki gummiboot-efistub 
 
-    unicode="root=$(blkid $root_drive -o export | grep ^UUID=) rootfstype=$filesystem add_efi_memmap rw quiet mitigations=off"
+    unicode="root=$(blkid $root_drive -o export | grep ^UUID=) rootfstype=$filesystem add_efi_memmap rw quiet mitigations=off loglevel=3"
 
     if grep -q VirtualBox /root/list; then
         efibootmgr -c -d $drive -p 1 -t 0 -L "alpine Linux VirtualMachine" -l '\vmlinuz-virt' -u "$unicode initrd=\initramfs-virt"
@@ -1359,6 +1361,12 @@ timeout 1
 console-mode auto
 EOF
 
+    if grep -q zfs /etc/fstab; then
+        disk="root=zfs=rpool boot=zfs"
+    else
+        disk="root=UUID=$(blkid $root_drive -o export | grep ^UUID=)"
+    fi
+
     echo ">>> adding entries to gummiboot"
     cat >> /boot/loader/entries/linux-edge.conf <<EOF
 title       alpine Linux edge
@@ -1366,6 +1374,7 @@ linux       /vmlinuz-edge
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
 initrd      /initramfs-edge
+options     $disk rw quiet splash mitigations=off modules=sd-mod,usb-storage loglevel=3
 EOF
     cat >> /boot/loader/entries/linux-lts.conf <<EOF
 title       alpine Linux LTS
@@ -1373,6 +1382,7 @@ linux       /vmlinuz-lts
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
 initrd      /initramfs-lts
+options     $disk rw quiet splash mitigations=off modules=sd-mod,usb-storage loglevel=3
 EOF
 
     if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
@@ -1383,14 +1393,6 @@ title firmware update
 efi /fwupdx64.efi
 EOF
     fi
-
-    if grep -q zfs /etc/fstab; then
-        output="options root=zfs=rpool boot=zfs rw quiet splash mitigations=off"
-    else
-        output="options root=UUID=$(blkid $root_drive -o export | grep ^UUID=) rw quiet splash mitigations=off"
-    fi
-
-    echo $output >> /boot/loader/entries/linux.conf
 
 }
 
