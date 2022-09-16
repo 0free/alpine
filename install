@@ -7,8 +7,8 @@ mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
 branch='edge'
 version='v3.16'
-kernel_edge='5.19.8-0-edge'
-kernel_lts='5.15.67-0-lts'
+kernel_edge='5.19.9-0-edge'
+kernel_lts='5.15.68-0-lts'
 pool='rpool'
 hostname='linux'
 user='user'
@@ -1200,9 +1200,9 @@ find_windows() {
 
     if [[ $windows_drive ]]; then
         echo ">>> creating efi records"
-        efibootmgr -c -d $windows_drive -p 1 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
-        efibootmgr -c -d $windows_drive -p 1 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
-        efibootmgr -c -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
+        efibootmgr -c -d $windows_drive -p 1 -t 0 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
+        efibootmgr -c -d $windows_drive -p 1 -t 0 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
+        efibootmgr -c -d $windows_drive -p 2 -t 0 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
     fi
 
 }
@@ -1330,10 +1330,10 @@ install_EFIstub() {
     unicode="root=$(blkid $root_drive -o export | grep ^UUID=) rootfstype=$filesystem add_efi_memmap rw quiet mitigations=off"
 
     if grep -q VirtualBox /root/list; then
-        efibootmgr -c -d $drive -p 1 -L "alpine Linux VirtualMachine" -l '\vmlinuz-virt' -u "$unicode initrd=\initramfs-virt"
+        efibootmgr -c -d $drive -p 1 -t 0 -L "alpine Linux VirtualMachine" -l '\vmlinuz-virt' -u "$unicode initrd=\initramfs-virt"
     else
-        efibootmgr -c -d $drive -p 1 -L "alpine Linux LTS" -l '\vmlinuz-lts' -u "$unicode initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts"
-        efibootmgr -c -d $drive -p 1 -L "alpine Linux edge" -l '\vmlinuz-edge' -u "$unicode initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge"
+        efibootmgr -c -d $drive -p 1 -t 0 -L "alpine Linux LTS" -l '\vmlinuz-lts' -u "$unicode initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts"
+        efibootmgr -c -d $drive -p 1 -t 0 -L "alpine Linux edge" -l '\vmlinuz-edge' -u "$unicode initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge"
     fi
 
     #efi-mkuki -o /boot/vmlinuz.efi -r /etc/os-release -s /splash-image -S /boot/linux_x64.efi.stub 
@@ -1348,22 +1348,26 @@ install_gummiboot() {
 
     cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/bootx64.efi
 
-    efibootmgr -c -d $drive -p 1 -L "gummiboot" -l '\efi\bootx64.efi'
+    efibootmgr -c -d $drive -p 1 -t 0 -L "gummiboot" -l '\efi\bootx64.efi'
 
     mkdir -p /boot/loader/entries/
 
     echo ">>> configuring gummiboot"
-    sed -i 's|#timeout 3|timeout 1|' /boot/loader/loader.conf
-    sed -i 's|default .*|default boot-*|' /boot/loader/loader.conf
+    cat > /boot/loader/loader.conf <<EOF
+default linux-lts.conf
+timeout 1
+console-mode auto
+EOF
 
     echo ">>> adding entries to gummiboot"
-    cat >> /boot/loader/entries/linux.conf <<EOF
+    cat >> /boot/loader/entries/linux-edge.conf <<EOF
 title       alpine Linux edge
 linux       /vmlinuz-edge
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
 initrd      /initramfs-edge
-
+EOF
+    cat >> /boot/loader/entries/linux-lts.conf <<EOF
 title       alpine Linux LTS
 linux       /vmlinuz-lts
 initrd      /amd-ucode.img
@@ -1374,14 +1378,16 @@ EOF
     if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
         echo ">>> adding fwupd to gummiboot"
         cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/
-        echo "title firmware update" > /boot/loader/entries/fwupd.conf
-        echo "efi /fwupdx64.efi" >> /boot/loader/entries/fwupd.conf
+        cat > /boot/loader/entries/fwupd.conf <<EOF
+title firmware update
+efi /fwupdx64.efi
+EOF
     fi
 
     if grep -q zfs /etc/fstab; then
-        output="options zfs=rpool rw"
+        output="options root=zfs=rpool boot=zfs rw quiet splash mitigations=off"
     else
-        output="options root=UUID=$(blkid $root_drive -o export | grep ^UUID=) quiet architecture x64 rw"
+        output="options root=UUID=$(blkid $root_drive -o export | grep ^UUID=) rw quiet splash mitigations=off"
     fi
 
     echo $output >> /boot/loader/entries/linux.conf
