@@ -762,6 +762,7 @@ install_linux() {
             list='linux-lts linux-edge'
         fi
         list+=' amd-ucode intel-ucode'
+        list+=' linux-firmware-none'
         list+=' linux-firmware-intel'
         list+=' linux-firmware-i915'
         list+=' linux-firmware-amd'
@@ -1060,7 +1061,7 @@ make_initramfs() {
 
     echo ">>> installing mkinitfs"
 
-    modules=(base nvme ata ide scsi usb lvm keymap virtio kms mmc)
+    modules=(base ata nvme ide scsi usb lvm keymap virtio kms mmc)
 
     if grep -q zfs /root/list; then
         modules+=(zfs)
@@ -1368,7 +1369,7 @@ console-mode auto
 EOF
 
     if grep -q zfs /etc/fstab; then
-        disk="root=zfs=rpool boot=zfs"
+        disk="root=zfs=$pool boot=zfs"
     else
         disk="root=UUID=$(blkid $root_drive -o export | grep ^UUID=)"
     fi
