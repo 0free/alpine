@@ -491,7 +491,7 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    bootloaders=(efibootmgr grub rEFInd gummiboot limine syslinux clover)
+    bootloaders=(EFIstub grub rEFInd gummiboot limine syslinux clover)
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     echo -e "\n"
@@ -1156,8 +1156,8 @@ setup_bootloader() {
         install_clover
     elif grep -q grub /root/list; then
         install_grub
-    elif grep -q efibootmgr /root/list; then
-        install_efibootmgr
+    elif grep -q EFIstub /root/list; then
+        install_EFIstub
     elif grep -q gummiboot /root/list; then
         install_gummiboot
     elif grep -q limine /root/list; then
@@ -1200,9 +1200,9 @@ find_windows() {
 
     if [[ $windows_drive ]]; then
         echo ">>> creating efi records"
-        efibootmgr -c --gpt -d $windows_drive -p 1 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
-        efibootmgr -c --gpt -d $windows_drive -p 1 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
-        efibootmgr -c --gpt -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
+        efibootmgr -c -d $windows_drive -p 1 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
+        efibootmgr -c -d $windows_drive -p 1 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
+        efibootmgr -c -d $windows_drive -p 2 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
     fi
 
 }
@@ -1322,20 +1322,21 @@ EOF
 
 }
 
-install_efibootmgr() {
+install_EFIstub() {
 
-    if grep -q zfs /root/list; then
-        disk="zfs=$pool"
-    else
-        disk="$(blkid $root_drive -o export | grep ^PARTUUID=)"
-    fi
+    echo ">>> installing EFIstub"
+    apk add efi-mkuki gummiboot-efistub 
+
+    unicode="root=$(blkid $root_drive -o export | grep ^UUID=) rootfstype=$filesystem add_efi_memmap rw quiet mitigations=off"
 
     if grep -q VirtualBox /root/list; then
-        efibootmgr -c --gpt -d $drive -p 1 -L "alpine Linux VirtualBox" -l '\vmlinux-virt' -u "root=$disk ro quiet initrd=\initramfs-virt"
+        efibootmgr -c -d $drive -p 1 -L "alpine Linux VirtualMachine" -l '\vmlinuz-virt' -u "$unicode initrd=\initramfs-virt"
     else
-        efibootmgr -c --gpt -d $drive -p 1 -L "alpine Linux LTS" -l '\vmlinux-lts' -u "root=$disk ro quiet mitigations=off initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts"
-        efibootmgr -c --gpt -d $drive -p 1 -L "alpine Linux edge" -l '\vmlinux-edge' -u "root=$disk ro quiet mitigations=off initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge"
+        efibootmgr -c -d $drive -p 1 -L "alpine Linux LTS" -l '\vmlinuz-lts' -u "$unicode initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts"
+        efibootmgr -c -d $drive -p 1 -L "alpine Linux edge" -l '\vmlinuz-edge' -u "$unicode initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge"
     fi
+
+    #efi-mkuki -o /boot/vmlinuz.efi -r /etc/os-release -s /splash-image -S /boot/linux_x64.efi.stub 
 
 }
 
@@ -1347,7 +1348,7 @@ install_gummiboot() {
 
     cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/bootx64.efi
 
-    efibootmgr -c --gpt -d $drive -p 1 -L "gummiboot" -l '\efi\bootx64.efi'
+    efibootmgr -c -d $drive -p 1 -L "gummiboot" -l '\efi\bootx64.efi'
 
     mkdir -p /boot/loader/entries/
 
