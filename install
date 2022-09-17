@@ -762,7 +762,6 @@ install_linux() {
             list='linux-lts linux-edge'
         fi
         list+=' amd-ucode intel-ucode'
-        list+=' linux-firmware-none'
         list+=' linux-firmware-intel'
         list+=' linux-firmware-i915'
         list+=' linux-firmware-amd'
@@ -777,6 +776,7 @@ install_linux() {
     fi
 
     echo ">>> installing linux"
+    apk add --root=/mnt/ linux-firmware-none
     apk add --root=/mnt/ $list
 
 }
