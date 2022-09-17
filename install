@@ -665,8 +665,8 @@ mount_boot() {
 
     echo ">>> mounting boot drive"
     mount $boot_drive /mnt/boot/
-    if [ ! -d /mnt/boot/efi/ ]; then
-        mkdir -p /mnt/boot/efi/
+    if [ ! -d /mnt/boot/EFI/ ]; then
+        mkdir -p /mnt/boot/EFI/
     fi
 
 }
@@ -1192,7 +1192,7 @@ find_windows() {
                     windows_drive=$drive
                     windows_boot=$partition
                     echo "windows_boot=$partition" >> /root/list
-                elif [ -f /windows/Windows/Boot/EFI/bootmgfw.efi ]; then
+                elif [ -f /windows/Windows/boot/EFI/bootmgfw.efi ]; then
                     windows_partition=$partition
                     echo "windows_partition=$partition" >> /root/list
                 fi
@@ -1224,7 +1224,7 @@ install_limine() {
 
     echo ">>> installing limine bootloader"
     apk add limine limine-64
-    cp /usr/share/limine/BOOTX64.EFI /boot/efi
+    cp /usr/share/limine/BOOTX64.EFI /boot/EFI
 
     cat > /boot/limine.cfg <<EOF
 TIMEOUT=1
@@ -1354,9 +1354,10 @@ install_gummiboot() {
     echo ">>> installing gummiboot"
     apk add gummiboot
 
-    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/bootx64.efi
+    mkdir /boot/EFI/alpineLinux/
+    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/EFI/alpineLinux/bootx64.efi
 
-    efibootmgr -c -d $drive -p 1 -t 0 -L "gummiboot" -l '\efi\bootx64.efi'
+    efibootmgr -c -d $drive -p 1 -t 0 -L "alpineLinux" -l '\efi\alpineLinux\bootx64.efi'
 
     mkdir -p /boot/loader/entries/
 
@@ -1374,7 +1375,7 @@ EOF
     fi
 
     echo ">>> adding entries to gummiboot"
-    cat >> /boot/loader/entries/linux-edge.conf <<EOF
+    cat > /boot/loader/entries/linux-edge.conf <<EOF
 title       alpine Linux edge
 linux       /vmlinuz-edge
 initrd      /amd-ucode.img
@@ -1382,7 +1383,7 @@ initrd      /intel-ucode.img
 initrd      /initramfs-edge
 options     $disk rw quiet splash mitigations=off modules=sd-mod,usb-storage loglevel=3
 EOF
-    cat >> /boot/loader/entries/linux-lts.conf <<EOF
+    cat > /boot/loader/entries/linux-lts.conf <<EOF
 title       alpine Linux LTS
 linux       /vmlinuz-lts
 initrd      /amd-ucode.img
@@ -1393,10 +1394,11 @@ EOF
 
     if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
         echo ">>> adding fwupd to gummiboot"
-        cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/
+        mkdir -p /boot/EFI/fwupd/
+        cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/EFI/fwupd/
         cat > /boot/loader/entries/fwupd.conf <<EOF
-title firmware update
-efi /fwupdx64.efi
+title   firmware update
+efi     /fwupd/fwupdx64.efi
 EOF
     fi
 
