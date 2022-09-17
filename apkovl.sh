@@ -83,6 +83,13 @@ rc_add local boot
 rc_add dbus boot
 rc_add iwd boot
 
+rc_add spl boot
+rc_add zfs boot
+rc_add zcommon boot
+rc_add zzstd boot
+
+rc_add efivars
+
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
 rc_add savecache shutdown
