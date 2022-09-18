@@ -1273,6 +1273,7 @@ LABEL 'alpine Linux edge'
     INITRD ../intel-ucode.img
 
 EOF
+    fi
 
     if [[ $windows_drive ]]; then
         cat >> /boot/EFI/syslinux/syslinux.cfg <<EOF
