@@ -1201,7 +1201,7 @@ find_windows() {
         partitions=($(ls $drive* | grep -E "$drive.{1}$|$drive.{2}$"))
         i=0
         if [[ $partitions ]]; then
-            for partition in ${!partitions[@]}; do
+            for partition in ${partitions[@]}; do
                 i=i+1
                 mount $partition /windows/
                 if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
