@@ -1198,7 +1198,7 @@ find_windows() {
 
     for d in ${drives[@]}; do
         drive="/dev/$d"
-        partitions=($(ls $drive* | grep -E '$drive.{1}|$drive.{2}'))
+        partitions=($(ls $drive* | grep -E "$drive.{1}$|$drive.{2}$"))
         i=0
         if [[ $partitions ]]; then
             for partition in ${!partitions[@]}; do
