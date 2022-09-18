@@ -7,8 +7,6 @@ mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
 branch='edge'
 version='v3.16'
-kernel_edge='5.19.9-0-edge'
-kernel_lts='5.15.68-0-lts'
 pool='rpool'
 hostname='linux'
 user='user'
@@ -100,7 +98,11 @@ packages_list() {
         )
     fi
 
-    if ! grep -q VirtualBox /root/list; then
+    if grep -q VirtualBox /root/list; then
+        packages+=(
+            virtualbox-guest-additions virtualbox-guest-additions-openrc virtualbox-guest-additions-x11
+        )
+    else
         packages+=(
             # hardware
             bolt pciutils
@@ -121,10 +123,6 @@ packages_list() {
             ethtool ethtool-bash-completion
             rsync rsync-openrc
             networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn networkmanager-initrd-generator
-        )
-    else
-        packages+=(
-            virtualbox-guest-additions virtualbox-guest-additions-openrc virtualbox-guest-additions-x11
         )
     fi
 
@@ -465,7 +463,7 @@ setup_drive() {
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
-    drives=($(ls /dev/ | grep '^nvme.\{3\}$\|^sd.\{1\}$'))
+    drives=($(ls /dev/ | grep -E '^nvme.{3}$|^sd.{1}$'))
 
     for i in ${!drives[@]}; do
         drives[$i]="/dev/${drives[$i]}"
@@ -473,12 +471,12 @@ setup_drive() {
 
     menu 'select a drive' drive ${drives[@]}
 
-    if ls $drive* | grep -q "$drive.\{1\}$|$drive.\{2\}$"; then
+    if ls $drive* | grep -Eq "$drive.{1}$|$drive.{2}$"; then
         partitions=($(ls $drive*))
-        menu 'select a root partition or use the complete drive ' partition ${partitions[@]}
+        menu 'select a root partition or use the complete drive' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
             root_drive=$partition
-            partitions=($(ls $drive* | grep -v $drive | grep -v $partition | grep "$drive.\{1\}$"))
+            partitions=($(ls $drive* | grep -E "$drive.{1}$" | grep -v $partition))
             menu 'select a boot partition to mount ' partition ${partitions[@]}
             boot_drive=$partition
         fi
@@ -612,10 +610,10 @@ set_zfs() {
     echo ">>> setting ZFS pool as rootfs"
     zpool set bootfs=$pool $pool
     echo ">>> setting ZFS cache"
-    mkdir -p /mnt/etc/zfs
+    mkdir -m 755 -p /mnt/etc/zfs/
     cp /etc/zfs/zpool.cache /mnt/etc/zfs/zpool.cache
     echo ">>> adding ZFS options"
-    mkdir -p /mnt/etc/modprobe.d/
+    mkdir -m 755 -p /mnt/etc/modprobe.d/
     echo "options zfs l2arc_noprefetch=0" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs l2arc_write_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs l2arc_write_boost=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
@@ -656,7 +654,7 @@ mount_root() {
     fi
 
     if [ ! -d /mnt/boot/ ]; then
-        mkdir -p /mnt/boot/
+        mkdir -m 755 -p /mnt/boot/
     fi
 
 }
@@ -666,7 +664,7 @@ mount_boot() {
     echo ">>> mounting boot drive"
     mount $boot_drive /mnt/boot/
     if [ ! -d /mnt/boot/EFI/ ]; then
-        mkdir -p /mnt/boot/EFI/
+        mkdir -m 755 -p /mnt/boot/EFI/
     fi
 
 }
@@ -868,6 +866,10 @@ create_user() {
     echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user $user
     usermod -aG input,audio,video,netdev,usb,disk,lp,adm $user
 
+    if grep -q zfs /root/list; then
+        zfs allow $user create,mount,mountpoint,snapshot $pool
+    fi
+
 }
 
 setup_desktop() {
@@ -958,8 +960,8 @@ enable_services() {
         rc-update add postfix default
         rc-update add dovecot default
         rc-update add opendkim default
-        mkdir /var/mysql && chown -R mysql:mysql /var/mysql
-        mkdir /var/log/mysql && chown -R mysql:mysql /var/log/mysql
+        mkdir -m 755 /var/mysql && chown -R mysql:mysql /var/mysql
+        mkdir -m 755 /var/log/mysql && chown -R mysql:mysql /var/log/mysql
     fi
 
     rc-update add mount-ro shutdown
@@ -1024,7 +1026,7 @@ EOF
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
 
     if [ ! -d /home/$user/.config/ ]; then
-        mkdir /home/$user/.config/
+        mkdir -m 755 /home/$user/.config/
     fi
 
     if grep -q kde /root/list; then
@@ -1076,10 +1078,11 @@ make_initramfs() {
         modules+=(ext4)
     fi
 
-    if ! grep -q VirtualBox /root/list; then
-        modules+=(i915 intel_agp)
-        modules+=(amdgpu)
-        modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+    if grep -q VirtualBox /root/list; then
+        modules+=(vboxvideo virtio-gp vmwgfx)
+    else
+        modules+=(i915)
+        modules+=(amdgpu radeon)
     fi
 
     list=''
@@ -1091,21 +1094,28 @@ make_initramfs() {
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
-    #kernel_lts=$(apk search -e linux-lts | sed 's|-r.*||')
-    #kernel_edge=$(apk search -e linux-edge | sed 's|-r.*||')
+    kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
+    kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
+    kernel_virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
 
-    if ! grep -q VirtualBox /root/list; then
-        if [ ! -d /lib/modules/$kernel_edge ]; then
-            mkdir /lib/modules/$kernel_edge
+    if grep -q VirtualBox /root/list; then
+        if [ ! -d /lib/modules/$kernel_virt ]; then
+            mkdir -m 755 /lib/modules/$kernel_virt
         fi
+        echo ">>> building linux VirtualMachine initial ramdisk"
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-virt $kernel_virt
+    else
+        if [ ! -d /lib/modules/$kernel_edge ]; then
+            mkdir -m 755 /lib/modules/$kernel_edge
+        fi
+        if [ ! -d  /lib/modules/$kernel_lts ]; then
+            mkdir -m 755 /lib/modules/$kernel_lts
+        fi
+        echo ">>> building linux LTS initial ramdisk"
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-lts $kernel_lts
         echo ">>> building linux edge initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-edge $kernel_edge
     fi
-    if [ ! -d  /lib/modules/$kernel_lts ]; then
-        mkdir /lib/modules/$kernel_lts
-    fi
-    echo ">>> building linux LTS initial ramdisk"
-    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-lts $kernel_lts
 
 }
 
@@ -1149,6 +1159,12 @@ setup_bootloader() {
         find_windows
     fi
 
+    if grep -q zfs /root/list; then
+        disk="root=zfs=$pool rootfstype=$filesystem"
+    else
+        disk="root=$(blkid $root_drive -o export | grep ^UUID=) rootfstype=$filesystem"
+    fi
+
     if grep -q rEFInd /root/list; then
         if ! grep -q alpine /boot/EFI/refind/refind.conf; then
             install_refind
@@ -1174,38 +1190,43 @@ setup_bootloader() {
 find_windows() {
 
     echo ">>> looking for Windows"
-    drives=($(ls /dev/ | grep '^nvme.\{3\}$\|^sd.\{1\}$'))
+    drives=($(ls /dev/ | grep -E '^nvme.{3}|^sd.{1}'))
 
     if [ ! -d /windows/ ]; then
-        mkdir /windows/
+        mkdir -m 755 /windows/
     fi
 
-    for drive in ${drives[@]}; do
-        drive="/dev/$drive"
-        if ls $drive* | grep -q "$drive.\{1\}$|$drive.\{2\}$"; then
-            partitions=($(ls $drive* | grep -v $drive))
+    for d in ${drives[@]}; do
+        drive="/dev/$d"
+        partitions=($(ls $drive* | grep -E '$drive.{1}|$drive.{2}'))
+        i=0
+        if [[ $partitions ]]; then
             for partition in ${!partitions[@]}; do
+                i=i+1
                 mount $partition /windows/
-                if [ -f /EFI/Microsoft/Boot/BCD ]; then
+                if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
                     echo ">>> copying Windows Boot Manager"
                     cp -rlf /windows/* /boot/
                     windows_drive=$drive
                     windows_boot=$partition
+                    echo "windows_drive=$drive" >> /root/list
                     echo "windows_boot=$partition" >> /root/list
-                elif [ -f /windows/Windows/boot/EFI/bootmgfw.efi ]; then
+                elif [ -f /windows/Windows/Boot/EFI/bootmgfw.efi ]; then
                     windows_partition=$partition
-                    echo "windows_partition=$partition" >> /root/list
+                    echo "windows_ntfs=$partition" >> /root/list
                 fi
                 umount /windows/
             done
         fi
     done
 
+    rm -r /windows/
+
     if [[ $windows_drive ]]; then
         echo ">>> creating efi records"
-        efibootmgr -c -d $windows_drive -p 1 -t 0 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
-        efibootmgr -c -d $windows_drive -p 1 -t 0 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
-        efibootmgr -c -d $windows_drive -p 2 -t 0 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
+        efibootmgr -c -d $windows_drive -p $i -t 0 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
+        efibootmgr -c -d $windows_drive -p $i -t 0 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
+        efibootmgr -c -d $windows_drive -p $i -t 0 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
     fi
 
 }
@@ -1214,9 +1235,55 @@ install_syslinux() {
 
     echo ">>> installing syslinux bootloader"
     apk add syslinux
-    dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/gptmbr.bin of=$drive
-    mkdir -p /boot/extlinux/
-    extlinux --install /boot/extlinux/
+
+    mkdir -m 755 -p /boot/EFI/syslinux/
+    cp /usr/share/syslinux/efi64/* /boot/EFI/syslinux/
+    mv /boot/EFI/syslinux/syslinux.efi /boot/EFI/syslinux/bootx64.efi
+
+    if grep -q VirtualBox /root/list; then
+        cat > /boot/EFI/syslinux/syslinux.cfg <<EOF
+PROMPT 0
+TIMEOUT 0
+DEFAULT 'alpine Linux VirtualMachine'
+
+LABEL 'alpine Linux VirtualMachine'
+	LINUX ../vmlinuz-virt
+	APPEND $disk rw
+	INITRD ../initramfs-virt
+
+EOF
+    else
+        cat > /boot/EFI/syslinux/syslinux.cfg <<EOF
+PROMPT 1
+TIMEOUT 1
+DEFAULT 'alpine Linux LTS'
+
+LABEL 'alpine Linux LTS'
+	LINUX ../vmlinuz-lts
+	APPEND $disk rw quite splash mitigations=off
+	INITRD ../initramfs-lts
+    INITRD ../amd-ucode.img
+    INITRD ../intel-ucode.img
+
+LABEL 'alpine Linux edge'
+	LINUX ../vmlinuz-edge
+	APPEND $disk rw quite splash mitigations=off
+	INITRD ../initramfs-edge
+    INITRD ../amd-ucode.img
+    INITRD ../intel-ucode.img
+
+EOF
+
+    if [[ $windows_drive ]]; then
+        cat >> /boot/EFI/syslinux/syslinux.cfg <<EOF
+LABEL 'Windows 11'
+	MENU LABEL Windows
+	COM32 chain.c32
+	APPEND root=$(blkid $windows_drive -o export | grep ^UUID=)
+
+EOF
+
+    efibootmgr -c -d $drive -p 1 -t 0 -L "alpineLinux" -l '\EFI\syslinux\bootx64.efi'
 
 }
 
@@ -1273,7 +1340,7 @@ install_grub() {
     grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id="alpine linux" $drive
 
     if [ ! -d /boot/grub/themes/ ]; then
-        mkdir /boot/grub/themes
+        mkdir -m 755 /boot/grub/themes
     fi
 
     if [ ! -d /boot/grub/themes/grub-theme/ ]; then
@@ -1330,13 +1397,7 @@ install_EFIstub() {
     echo ">>> installing EFIstub"
     apk add efi-mkuki gummiboot-efistub 
 
-    if grep -q zfs /root/lis; then
-        disk="root=zfs=$pool"
-    else
-        disk="root=$(blkid $root_drive -o export | grep ^UUID=)"
-    fi
-
-    unicode="$disk rootfstype=$filesystem add_efi_memmap rw quiet mitigations=off loglevel=3"
+    unicode="$disk add_efi_memmap rw quiet mitigations=off loglevel=3"
 
     if grep -q VirtualBox /root/list; then
         efibootmgr -c -d $drive -p 1 -t 0 -L "alpine Linux VirtualMachine" -l '\vmlinuz-virt' -u "$unicode initrd=\initramfs-virt"
@@ -1354,12 +1415,12 @@ install_gummiboot() {
     echo ">>> installing gummiboot"
     apk add gummiboot
 
-    mkdir /boot/EFI/alpineLinux/
+    mkdir -m 755 /boot/EFI/alpineLinux/
     cp /usr/lib/gummiboot/gummibootx64.efi	/boot/EFI/alpineLinux/bootx64.efi
 
-    efibootmgr -c -d $drive -p 1 -t 0 -L "alpineLinux" -l '\efi\alpineLinux\bootx64.efi'
+    efibootmgr -c -d $drive -p 1 -t 0 -L "alpineLinux" -l '\EFI\alpineLinux\bootx64.efi'
 
-    mkdir -p /boot/loader/entries/
+    mkdir -m 755 -p /boot/loader/entries/
 
     echo ">>> configuring gummiboot"
     cat > /boot/loader/loader.conf <<EOF
@@ -1367,12 +1428,6 @@ default linux-lts.conf
 timeout 1
 console-mode auto
 EOF
-
-    if grep -q zfs /etc/fstab; then
-        disk="root=zfs=$pool boot=zfs"
-    else
-        disk="root=UUID=$(blkid $root_drive -o export | grep ^UUID=)"
-    fi
 
     echo ">>> adding entries to gummiboot"
     cat > /boot/loader/entries/linux-edge.conf <<EOF
@@ -1394,7 +1449,7 @@ EOF
 
     if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
         echo ">>> adding fwupd to gummiboot"
-        mkdir -p /boot/EFI/fwupd/
+        mkdir -m 755 -p /boot/EFI/fwupd/
         cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/EFI/fwupd/
         cat > /boot/loader/entries/fwupd.conf <<EOF
 title   firmware update
@@ -1416,7 +1471,7 @@ install_refind() {
     fi
 
     if [ ! -d /boot/EFI/refind/drivers_x64/ ]; then
-        mkdir -p /boot/EFI/refind/drivers_x64/
+        mkdir -m 755 -p /boot/EFI/refind/drivers_x64/
         echo ">>> copying rEFInd drivers"
         cp /usr/share/refind/drivers_x86_64/*.efi /boot/EFI/refind/drivers_x64/
         echo ">>> downloading efifs drivers"
@@ -1429,67 +1484,67 @@ install_refind() {
     echo ">>> configuring rEFInd bootloader"
 
     if [[ $windows_drive ]]; then
+        uuid=$(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
         cat >> /boot/EFI/refind/refind.conf <<EOF
 
 menuentry "Windows Boot Manager" {
     icon \EFI\refind\icons\os_win8.png
-    volume $(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
+    volume $uuid
     loader \EFI\Boot\BOOTX64.EFI
     options ''
 }
 menuentry "Windows Boot" {
     icon \EFI\refind\icons\os_win8.png
-    volume $(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
+    volume $uuid
     loader \EFI\Microsoft\Boot\BOOTMGFW.EFI
     options ''
 }
 menuentry "Windows 11" {
     icon \EFI\refind\icons\os_win8.png
-    volume $(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
+    volume $uuid
     loader \Windows\Boot\EFI\bootmgfw.efi
     options ''
 }
-
 EOF
     fi
+
+    uuid=$(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
 
     if grep -q VirtualBox /root/list; then
         cat >> /boot/EFI/refind/refind.conf <<EOF
 
 menuentry "alpine Linux VirtualMachine" {
     icon /EFI/refind/icons/os_linux.png
-    volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
+    volume $uuid
     loader /vmlinuz-virt
     initrd /initramfs-virt
     options 'root= initrd=/initramfs-lts'
 }
-
 EOF
     else
         cat >> /boot/EFI/refind/refind.conf <<EOF
 
 menuentry "alpine Linux edge" {
     icon /EFI/refind/icons/os_linux.png
-    volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
+    volume $uuid
     loader /vmlinuz-edge
     initrd /initramfs-edge
-    options 'root= initrd=/amd-ucode.img initrd=/intel-ucode.img'
+    options 'root= initrd=/amd-ucode.img initrd=/intel-ucode.img rw quiet mitigations=off'
 }
 menuentry "alpine Linux LTS" {
     icon /EFI/refind/icons/os_linux.png
-    volume $(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
+    volume $uuid
     loader /vmlinuz-lts
     initrd /initramfs-lts
-    options 'root= initrd=/amd-ucode.img initrd=/intel-ucode.img'
+    options 'root= initrd=/amd-ucode.img initrd=/intel-ucode.img rw quiet mitigations=off'
 }
-
 EOF
     fi
 
     if grep -q zfs /root/list; then
-        sed -i "s|root=|root=zfs=$pool rw quiet mitigations=off|g" /boot/EFI/refind/refind.conf
+        sed -i "s|root=|root=zfs=$pool|g" /boot/EFI/refind/refind.conf
     else
-        sed -i "s|root=|root=$(blkid $root_drive -o export | grep ^UUID=) rw quiet mitigations=off|g" /boot/EFI/refind/refind.conf
+        sed -i "s|root=|root=$(blkid $root_drive -o export | grep ^UUID=)|g" /boot/EFI/refind/refind.conf
     fi
 
     sed -i 's|timeout 20|timeout 2|' /boot/EFI/refind/refind.conf
