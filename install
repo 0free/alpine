@@ -1282,6 +1282,7 @@ LABEL 'Windows 11'
 	APPEND root=$(blkid $windows_drive -o export | grep ^UUID=)
 
 EOF
+    fi
 
     efibootmgr -c -d $drive -p 1 -t 0 -L "alpineLinux" -l '\EFI\syslinux\bootx64.efi'
 
