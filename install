@@ -610,10 +610,10 @@ set_zfs() {
     echo ">>> setting ZFS pool as rootfs"
     zpool set bootfs=$pool $pool
     echo ">>> setting ZFS cache"
-    mkdir -m 755 -p /mnt/etc/zfs/
+    mkdir -p /mnt/etc/zfs/
     cp /etc/zfs/zpool.cache /mnt/etc/zfs/zpool.cache
     echo ">>> adding ZFS options"
-    mkdir -m 755 -p /mnt/etc/modprobe.d/
+    mkdir -p /mnt/etc/modprobe.d/
     echo "options zfs l2arc_noprefetch=0" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs l2arc_write_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
     echo "options zfs l2arc_write_boost=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
@@ -654,7 +654,7 @@ mount_root() {
     fi
 
     if [ ! -d /mnt/boot/ ]; then
-        mkdir -m 755 -p /mnt/boot/
+        mkdir -p /mnt/boot/
     fi
 
 }
@@ -664,7 +664,7 @@ mount_boot() {
     echo ">>> mounting boot drive"
     mount $boot_drive /mnt/boot/
     if [ ! -d /mnt/boot/EFI/ ]; then
-        mkdir -m 755 -p /mnt/boot/EFI/
+        mkdir -p /mnt/boot/EFI/
     fi
 
 }
@@ -960,8 +960,8 @@ enable_services() {
         rc-update add postfix default
         rc-update add dovecot default
         rc-update add opendkim default
-        mkdir -m 755 /var/mysql && chown -R mysql:mysql /var/mysql
-        mkdir -m 755 /var/log/mysql && chown -R mysql:mysql /var/log/mysql
+        mkdir /var/mysql && chown -R mysql:mysql /var/mysql
+        mkdir /var/log/mysql && chown -R mysql:mysql /var/log/mysql
     fi
 
     rc-update add mount-ro shutdown
@@ -1026,7 +1026,7 @@ EOF
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
 
     if [ ! -d /home/$user/.config/ ]; then
-        mkdir -m 755 /home/$user/.config/
+        mkdir /home/$user/.config/
     fi
 
     if grep -q kde /root/list; then
@@ -1100,16 +1100,16 @@ make_initramfs() {
 
     if grep -q VirtualBox /root/list; then
         if [ ! -d /lib/modules/$kernel_virt ]; then
-            mkdir -m 755 /lib/modules/$kernel_virt
+            mkdir /lib/modules/$kernel_virt
         fi
         echo ">>> building linux VirtualMachine initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-virt $kernel_virt
     else
         if [ ! -d /lib/modules/$kernel_edge ]; then
-            mkdir -m 755 /lib/modules/$kernel_edge
+            mkdir /lib/modules/$kernel_edge
         fi
         if [ ! -d  /lib/modules/$kernel_lts ]; then
-            mkdir -m 755 /lib/modules/$kernel_lts
+            mkdir /lib/modules/$kernel_lts
         fi
         echo ">>> building linux LTS initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-lts $kernel_lts
@@ -1193,7 +1193,7 @@ find_windows() {
     drives=($(ls /dev/ | grep -E '^nvme.{3}$|^sd.{1}$'))
 
     if [ ! -d /windows/ ]; then
-        mkdir -m 755 /windows/
+        mkdir /windows/
     fi
 
     for d in ${drives[@]}; do
@@ -1236,7 +1236,7 @@ install_syslinux() {
     echo ">>> installing syslinux bootloader"
     apk add syslinux
 
-    mkdir -m 755 -p /boot/EFI/syslinux/
+    mkdir -p /boot/EFI/syslinux/
     cp /usr/share/syslinux/efi64/* /boot/EFI/syslinux/
     mv /boot/EFI/syslinux/syslinux.efi /boot/EFI/syslinux/bootx64.efi
 
@@ -1342,7 +1342,7 @@ install_grub() {
     grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id="alpine linux" $drive
 
     if [ ! -d /boot/grub/themes/ ]; then
-        mkdir -m 755 /boot/grub/themes
+        mkdir /boot/grub/themes
     fi
 
     if [ ! -d /boot/grub/themes/grub-theme/ ]; then
@@ -1417,12 +1417,12 @@ install_gummiboot() {
     echo ">>> installing gummiboot"
     apk add gummiboot
 
-    mkdir -m 755 /boot/EFI/alpineLinux/
+    mkdir /boot/EFI/alpineLinux/
     cp /usr/lib/gummiboot/gummibootx64.efi	/boot/EFI/alpineLinux/bootx64.efi
 
     efibootmgr -c -d $drive -p 1 -t 0 -L "alpineLinux" -l '\EFI\alpineLinux\bootx64.efi'
 
-    mkdir -m 755 -p /boot/loader/entries/
+    mkdir -p /boot/loader/entries/
 
     echo ">>> configuring gummiboot"
     cat > /boot/loader/loader.conf <<EOF
@@ -1451,7 +1451,7 @@ EOF
 
     if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
         echo ">>> adding fwupd to gummiboot"
-        mkdir -m 755 -p /boot/EFI/fwupd/
+        mkdir -p /boot/EFI/fwupd/
         cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/EFI/fwupd/
         cat > /boot/loader/entries/fwupd.conf <<EOF
 title   firmware update
@@ -1473,7 +1473,7 @@ install_refind() {
     fi
 
     if [ ! -d /boot/EFI/refind/drivers_x64/ ]; then
-        mkdir -m 755 -p /boot/EFI/refind/drivers_x64/
+        mkdir -p /boot/EFI/refind/drivers_x64/
         echo ">>> copying rEFInd drivers"
         cp /usr/share/refind/drivers_x86_64/*.efi /boot/EFI/refind/drivers_x64/
         echo ">>> downloading efifs drivers"
