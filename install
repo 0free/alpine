@@ -491,7 +491,7 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    bootloaders=(EFIstub grub rEFInd gummiboot limine syslinux clover)
+    bootloaders=(gummiboot syslinux grub rEFInd limine clover)
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     echo -e "\n"
@@ -663,8 +663,8 @@ mount_boot() {
 
     echo ">>> mounting boot drive"
     mount $boot_drive /mnt/boot/
-    if [ ! -d /mnt/boot/EFI/ ]; then
-        mkdir -p /mnt/boot/EFI/
+    if [ ! -d /mnt/boot/efi/ ]; then
+        mkdir -p /mnt/boot/efi/
     fi
 
 }
@@ -1160,13 +1160,13 @@ setup_bootloader() {
     fi
 
     if grep -q zfs /root/list; then
-        disk="root=zfs=$pool rootfstype=$filesystem"
+        disk="root=$pool rootfstype=$filesystem"
     else
         disk="root=$(blkid $root_drive -o export | grep ^UUID=) rootfstype=$filesystem"
     fi
 
     if grep -q rEFInd /root/list; then
-        if ! grep -q alpine /boot/EFI/refind/refind.conf; then
+        if ! grep -q alpine /boot/efi/refind/refind.conf; then
             install_refind
         fi
     elif grep -q syslinux /root/list; then
@@ -1175,8 +1175,6 @@ setup_bootloader() {
         install_clover
     elif grep -q grub /root/list; then
         install_grub
-    elif grep -q EFIstub /root/list; then
-        install_EFIstub
     elif grep -q gummiboot /root/list; then
         install_gummiboot
     elif grep -q limine /root/list; then
@@ -1236,12 +1234,12 @@ install_syslinux() {
     echo ">>> installing syslinux bootloader"
     apk add syslinux
 
-    mkdir -p /boot/EFI/syslinux/
-    cp /usr/share/syslinux/efi64/* /boot/EFI/syslinux/
-    mv /boot/EFI/syslinux/syslinux.efi /boot/EFI/syslinux/bootx64.efi
+    mkdir -p /boot/efi/syslinux/
+    cp /usr/share/syslinux/efi64/* /boot/efi/syslinux/
+    mv /boot/efi/syslinux/syslinux.efi /boot/efi/syslinux/bootx64.efi
 
     if grep -q VirtualBox /root/list; then
-        cat > /boot/EFI/syslinux/syslinux.cfg <<EOF
+        cat > /boot/efi/syslinux/syslinux.cfg <<EOF
 PROMPT 0
 TIMEOUT 0
 DEFAULT 'alpine Linux VirtualMachine'
@@ -1253,7 +1251,7 @@ LABEL 'alpine Linux VirtualMachine'
 
 EOF
     else
-        cat > /boot/EFI/syslinux/syslinux.cfg <<EOF
+        cat > /boot/efi/syslinux/syslinux.cfg <<EOF
 PROMPT 1
 TIMEOUT 1
 DEFAULT 'alpine Linux LTS'
@@ -1276,7 +1274,7 @@ EOF
     fi
 
     if [[ $windows_drive ]]; then
-        cat >> /boot/EFI/syslinux/syslinux.cfg <<EOF
+        cat >> /boot/efi/syslinux/syslinux.cfg <<EOF
 LABEL 'Windows 11'
 	MENU LABEL Windows
 	COM32 chain.c32
@@ -1394,33 +1392,15 @@ EOF
 
 }
 
-install_EFIstub() {
-
-    echo ">>> installing EFIstub"
-    apk add efi-mkuki gummiboot-efistub 
-
-    unicode="$disk add_efi_memmap rw quiet mitigations=off loglevel=3"
-
-    if grep -q VirtualBox /root/list; then
-        efibootmgr -c -d $drive -p 1 -t 0 -L "alpine Linux VirtualMachine" -l '\vmlinuz-virt' -u "$unicode initrd=\initramfs-virt"
-    else
-        efibootmgr -c -d $drive -p 1 -t 0 -L "alpine Linux LTS" -l '\vmlinuz-lts' -u "$unicode initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-lts"
-        efibootmgr -c -d $drive -p 1 -t 0 -L "alpine Linux edge" -l '\vmlinuz-edge' -u "$unicode initrd=\intel-ucode.img initrd=\amd-ucode.img initrd=\initramfs-edge"
-    fi
-
-    #efi-mkuki -o /boot/vmlinuz.efi -r /etc/os-release -s /splash-image -S /boot/linux_x64.efi.stub 
-
-}
-
 install_gummiboot() {
 
     echo ">>> installing gummiboot"
     apk add gummiboot
 
-    mkdir /boot/EFI/alpineLinux/
-    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/EFI/alpineLinux/bootx64.efi
+    mkdir /boot/efi/alpineLinux/
+    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
 
-    efibootmgr -c -d $drive -p 1 -t 0 -L "alpineLinux" -l '\EFI\alpineLinux\bootx64.efi'
+    efibootmgr -c -d $drive -p 1 -t 0 -L 'alpineLinux' -l '\EFI\alpineLinux\bootx64.efi'
 
     mkdir -p /boot/loader/entries/
 
@@ -1451,8 +1431,8 @@ EOF
 
     if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
         echo ">>> adding fwupd to gummiboot"
-        mkdir -p /boot/EFI/fwupd/
-        cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/EFI/fwupd/
+        mkdir -p /boot/efi/fwupd/
+        cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/efi/fwupd/
         cat > /boot/loader/entries/fwupd.conf <<EOF
 title   firmware update
 efi     /fwupd/fwupdx64.efi
@@ -1468,26 +1448,26 @@ install_refind() {
 
     refind-install --root /boot
 
-    if [ -f /boot/EFI/refind/refind_x64.efi ]; then
-        cp /boot/EFI/refind/refind_x64.efi /boot/EFI/refind/bootx64.efi
+    if [ -f /boot/efi/refind/refind_x64.efi ]; then
+        cp /boot/efi/refind/refind_x64.efi /boot/efi/refind/bootx64.efi
     fi
 
-    if [ ! -d /boot/EFI/refind/drivers_x64/ ]; then
-        mkdir -p /boot/EFI/refind/drivers_x64/
+    if [ ! -d /boot/efi/refind/drivers_x64/ ]; then
+        mkdir -p /boot/efi/refind/drivers_x64/
         echo ">>> copying rEFInd drivers"
-        cp /usr/share/refind/drivers_x86_64/*.efi /boot/EFI/refind/drivers_x64/
+        cp /usr/share/refind/drivers_x86_64/*.efi /boot/efi/refind/drivers_x64/
         echo ">>> downloading efifs drivers"
         curl -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
         curl -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
-        mv xfs_x64.efi /boot/EFI/refind/drivers_x64/
-        mv zfs_x64.efi /boot/EFI/refind/drivers_x64/
+        mv xfs_x64.efi /boot/efi/refind/drivers_x64/
+        mv zfs_x64.efi /boot/efi/refind/drivers_x64/
     fi
 
     echo ">>> configuring rEFInd bootloader"
 
     if [[ $windows_drive ]]; then
         uuid=$(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
-        cat >> /boot/EFI/refind/refind.conf <<EOF
+        cat >> /boot/efi/refind/refind.conf <<EOF
 
 menuentry "Windows Boot Manager" {
     icon \EFI\refind\icons\os_win8.png
@@ -1513,7 +1493,7 @@ EOF
     uuid=$(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
 
     if grep -q VirtualBox /root/list; then
-        cat >> /boot/EFI/refind/refind.conf <<EOF
+        cat >> /boot/efi/refind/refind.conf <<EOF
 
 menuentry "alpine Linux VirtualMachine" {
     icon /EFI/refind/icons/os_linux.png
@@ -1524,7 +1504,7 @@ menuentry "alpine Linux VirtualMachine" {
 }
 EOF
     else
-        cat >> /boot/EFI/refind/refind.conf <<EOF
+        cat >> /boot/efi/refind/refind.conf <<EOF
 
 menuentry "alpine Linux edge" {
     icon /EFI/refind/icons/os_linux.png
@@ -1544,20 +1524,20 @@ EOF
     fi
 
     if grep -q zfs /root/list; then
-        sed -i "s|root=|root=zfs=$pool|g" /boot/EFI/refind/refind.conf
+        sed -i "s|root=|root=zfs=$pool|g" /boot/efi/refind/refind.conf
     else
-        sed -i "s|root=|root=$(blkid $root_drive -o export | grep ^UUID=)|g" /boot/EFI/refind/refind.conf
+        sed -i "s|root=|root=$(blkid $root_drive -o export | grep ^UUID=)|g" /boot/efi/refind/refind.conf
     fi
 
-    sed -i 's|timeout 20|timeout 2|' /boot/EFI/refind/refind.conf
-    sed -i 's|#loglevel 1|loglevel 0|' /boot/EFI/refind/refind.conf
-    sed -i 's|#enable_mouse|enable_mouse|' /boot/EFI/refind/refind.conf
-    sed -i 's|#mouse_size 16|mouse_size 16|' /boot/EFI/refind/refind.conf
-    sed -i 's|#mouse_speed 4|mouse_speed 4|' /boot/EFI/refind/refind.conf
-    sed -i 's|#use_graphics_for .*|use_graphics_for osx,linux,windows|' /boot/EFI/refind/refind.conf
-    sed -i 's|#scan_driver_dirs .*|scan_driver_dirs EFI/refind/drivers_x64|' /boot/EFI/refind/refind.conf
-    sed -i 's|#scanfor|scanfor|' /boot/EFI/refind/refind.conf
-    sed -i 's|#extra_kernel_version_strings |extra_kernel_version_strings linux-edge,linux-virt,|' /boot/EFI/refind/refind.conf
+    sed -i 's|timeout 20|timeout 2|' /boot/efi/refind/refind.conf
+    sed -i 's|#loglevel 1|loglevel 0|' /boot/efi/refind/refind.conf
+    sed -i 's|#enable_mouse|enable_mouse|' /boot/efi/refind/refind.conf
+    sed -i 's|#mouse_size 16|mouse_size 16|' /boot/efi/refind/refind.conf
+    sed -i 's|#mouse_speed 4|mouse_speed 4|' /boot/efi/refind/refind.conf
+    sed -i 's|#use_graphics_for .*|use_graphics_for osx,linux,windows|' /boot/efi/refind/refind.conf
+    sed -i 's|#scan_driver_dirs .*|scan_driver_dirs EFI/refind/drivers_x64|' /boot/efi/refind/refind.conf
+    sed -i 's|#scanfor|scanfor|' /boot/efi/refind/refind.conf
+    sed -i 's|#extra_kernel_version_strings |extra_kernel_version_strings linux-edge,linux-virt,|' /boot/efi/refind/refind.conf
 
 }
 
