@@ -1190,7 +1190,7 @@ setup_bootloader() {
 find_windows() {
 
     echo ">>> looking for Windows"
-    drives=($(ls /dev/ | grep -E '^nvme.{3}|^sd.{1}'))
+    drives=($(ls /dev/ | grep -E '^nvme.{3}$|^sd.{1}$'))
 
     if [ ! -d /windows/ ]; then
         mkdir -m 755 /windows/
