@@ -85,10 +85,7 @@ rc_add iwd boot
 
 rc_add spl boot
 rc_add zfs boot
-rc_add zcommon boot
-rc_add zzstd boot
-
-rc_add efivars
+rc_add efivars boot
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
