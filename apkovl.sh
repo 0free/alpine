@@ -47,16 +47,48 @@ EOF
 mkdir -p "$tmp"/etc/apk
 
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
-         alpine-base iwd dbus curl bash bash-completion nano
-         sfdisk sgdisk zfs
-         util-linux coreutils usbutils
-         e2fsprogs e2fsprogs-extra
-         dosfstools mtools lvm2
-         btrfs-progs btrfs-progs-extra
-         xfsprogs xfsprogs-extra
-         exfatprogs
-         nfs-utils ntfs-3g ntfs-3g-progs
-         f2fs-tools
+alpine-base apk-tools
+alsa-lib alsa-plugins-pulse
+bash bash-completion
+attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
+brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
+btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
+busybox busybox-binsh busybox-mdev-openrc busybox-openrc
+chromium
+colord colord-bash-completion colord-gtk
+dbus dbus-openrc dbus-x11
+dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
+efibootmgr syslinux
+elogind elogind-bash-completion elogind-openrc
+ethtool ethtool-bash-completion
+eudev eudev-libs eudev-openrc
+git git-bash-completion
+grub grub-bash-completion grub-efi
+ibus ibus-bash-completion
+iproute2 iptables iptables-openrc
+iwd iwd-openrc
+linux-pam linux-lts
+mesa-dri-gallium
+musl musl-locales
+networkmanager
+openrc openrc-bash-completion
+polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
+    gdm gdm-openrc mutter mutter-schemas
+    gnome-desktop gnome-desktop-lang
+    gnome-session gnome-shell gnome-shell-extensions gnome-menus
+    gnome-control-center gnome-control-center-bash-completion
+    gnome-tweaks gnome-colors-common gsettings-desktop-schemas
+    tracker tracker-bash-completion
+    pinentry-gnome
+    gnome-keyring gnome-terminal gnome-disk-utility gnome-system-monitor
+    nautilus gedit py3-cairo file-roller
+    network-manager-applet gufw
+tzdata
+udev-init-scripts udev-init-scripts-openrc
+ufw ufw-bash-completion ufw-openrc
+util-linux util-linux-bash-completion util-linux-login util-linux-openrc
+xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
+xorg-server
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
