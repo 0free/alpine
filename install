@@ -612,6 +612,8 @@ set_zfs() {
     echo ">>> setting ZFS cache"
     mkdir -p /mnt/etc/zfs/
     cp /etc/zfs/zpool.cache /mnt/etc/zfs/zpool.cache
+    chmod a-w /mnt/etc/zfs/zpool.cache
+    chattr +i /mnt/etc/zfs/zpool.cache
     echo ">>> adding ZFS options"
     mkdir -p /mnt/etc/modprobe.d/
     echo "options zfs l2arc_noprefetch=0" >> /mnt/etc/modprobe.d/zfs.conf
@@ -720,7 +722,7 @@ set_fstab() {
     echo ">>> setting fstab"
 
     if grep -q zfs /root/list; then
-        echo "$pool / $filesystem rw,nodev,noauto,xattr,posixacl 0 0" > /mnt/etc/fstab
+        echo "$pool / $filesystem rw,nodev,noauto,xattr,zfsutil,posixacl 0 0" > /mnt/etc/fstab
     elif grep -q btrfs /root/list; then
         echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem rw,ssd,nofail,discard,noatime 0 0" > /mnt/etc/fstab
     else
@@ -915,7 +917,7 @@ enable_services() {
 
     if grep -q zfs /root/list; then
         rc-update add zfs-import boot
-        rc-update add zfs-mount boot
+        rc-update add zfs-mount sysinit
         rc-update add zfs-share boot
         rc-update add zfs-zed boot
         rc-update add zfs-load-key boot
@@ -1371,6 +1373,8 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
+        sed -i "s|rpool=.*|rpool=$pool|" /etc/grub.d/10_linux
+        sed -i 's|stat -f -c %T /|echo zfs|' /usr/sbin/grub-mkconfig
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
