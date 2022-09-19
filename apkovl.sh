@@ -125,7 +125,8 @@ rc_add dbus sysinit
 rc_add udev-settle sysinit
 rc_add udev-postmount sysinit
 
-rc_add gdm default
+rc_add iwd default
+rc_add rsyncd default
 rc_add elogind default
 rc_add polkit default
 rc_add networkmanager default
@@ -133,6 +134,7 @@ rc_add networkmanager-dispatcher default
 rc_add bluealsa default
 rc_add bluetooth default
 rc_add ufw default
+rc_add gdm default
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
