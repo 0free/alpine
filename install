@@ -1159,10 +1159,12 @@ setup_bootloader() {
         find_windows
     fi
 
+    param="rootfstype=$filesystem rw loglevel=1 quiet mitigations=off modules=sd-mod,usb-storage"
+
     if grep -q zfs /root/list; then
-        disk="root=$pool rootfstype=$filesystem"
+        disk="root=$pool $param"
     else
-        disk="root=$(blkid $root_drive -o export | grep ^UUID=) rootfstype=$filesystem"
+        disk="root=$(blkid $root_drive -o export | grep ^UUID=) $param"
     fi
 
     if grep -q rEFInd /root/list; then
@@ -1254,18 +1256,18 @@ EOF
         cat > /boot/efi/syslinux/syslinux.cfg <<EOF
 PROMPT 1
 TIMEOUT 1
-DEFAULT 'alpine Linux LTS'
+DEFAULT 'alpine Linux edge'
 
 LABEL 'alpine Linux LTS'
 	LINUX ../vmlinuz-lts
-	APPEND $disk rw quite splash mitigations=off
+	APPEND $disk
 	INITRD ../initramfs-lts
     INITRD ../amd-ucode.img
     INITRD ../intel-ucode.img
 
 LABEL 'alpine Linux edge'
 	LINUX ../vmlinuz-edge
-	APPEND $disk rw quite splash mitigations=off
+	APPEND $disk
 	INITRD ../initramfs-edge
     INITRD ../amd-ucode.img
     INITRD ../intel-ucode.img
@@ -1283,7 +1285,7 @@ LABEL 'Windows 11'
 EOF
     fi
 
-    efibootmgr -c -d $drive -p 1 -t 0 -L "alpineLinux" -l '\EFI\syslinux\bootx64.efi'
+    efibootmgr -c -d $drive -p 1 -t 0 -L 'alpineLinux' -l '\EFI\syslinux\bootx64.efi'
 
 }
 
@@ -1299,22 +1301,16 @@ TIMEOUT=1
 :alpine Linux edge
 PROTOCOL=linux
 KERNEL_PATH=boot:///vmlinuz-edge
-CMDLINE=root=
+CMDLINE=$disk
 MODULE_PATH=boot:///initramfs-edge
 
 :alpine Linux LTS
 PROTOCOL=linux
 KERNEL_PATH=boot:///vmlinuz-lts
-CMDLINE=root=
+CMDLINE=$disk
 MODULE_PATH=boot:///initramfs-lts
 
 EOF
-
-    if grep -q zfs /root/list; then
-        sed -i "s|CMDLINE=root=|CMDLINE=root=zfs=$pool rw loglevel=1 quiet mitigations=off|" /boot/limine.cfg
-    else
-        sed -i "s|CMDLINE=root=|CMDLINE=root=$(blkid $root_drive -o export | grep ^UUID=) rw loglevel=1 quiet mitigations=off|" /boot/limine.cfg
-    fi
 
 }
 
@@ -1362,10 +1358,12 @@ GRUB_DISABLE_RECOVERY=true
 GRUB_THEME="/boot/grub/themes/grub-theme/theme.txt"
 GRUB_DISABLE_OS_PROBER=false
 GRUB_DISABLE_SUBMENU=y
-GRUB_CMDLINE_LINUX_DEFAULT="rw rootfstype=$filesystem modules=sd-mod,usb-storage quiet splash=silent mitigations=off"
+GRUB_CMDLINE_LINUX_DEFAULT=""
 GRUB_CMDLINE_LINUX=""
 GRUB_GFXMODE=1280x720,1920x1080,auto
 EOF
+
+    sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"$disk\"|" /etc/default/grub
 
     list='search'
     list+=' msdospart part_msdos part_gpt part_apple'
@@ -1375,9 +1373,6 @@ EOF
 
     if grep -q zfs /root/list; then
         list+=' zfs zfscrypt zfsinfo'
-        sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=zfs=$pool\"|" /etc/default/grub
-    else
-        sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=$(blkid $root_drive -o export | grep ^UUID=)\"|" /etc/default/grub
     fi
 
     echo "GRUB_PRELOAD_MODULES=\"$list\"" >> /etc/default/grub
@@ -1418,7 +1413,7 @@ linux       /vmlinuz-edge
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
 initrd      /initramfs-edge
-options     $disk rw quiet splash mitigations=off modules=sd-mod,usb-storage loglevel=3
+options     $disk
 EOF
     cat > /boot/loader/entries/linux-lts.conf <<EOF
 title       alpine Linux LTS
@@ -1426,7 +1421,7 @@ linux       /vmlinuz-lts
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
 initrd      /initramfs-lts
-options     $disk rw quiet splash mitigations=off modules=sd-mod,usb-storage loglevel=3
+options     $disk
 EOF
 
     if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
@@ -1500,7 +1495,7 @@ menuentry "alpine Linux VirtualMachine" {
     volume $uuid
     loader /vmlinuz-virt
     initrd /initramfs-virt
-    options 'root= initrd=/initramfs-lts'
+    options '$disk initrd=/initramfs-lts'
 }
 EOF
     else
@@ -1511,22 +1506,16 @@ menuentry "alpine Linux edge" {
     volume $uuid
     loader /vmlinuz-edge
     initrd /initramfs-edge
-    options 'root= initrd=/amd-ucode.img initrd=/intel-ucode.img rw quiet mitigations=off'
+    options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
 }
 menuentry "alpine Linux LTS" {
     icon /EFI/refind/icons/os_linux.png
     volume $uuid
     loader /vmlinuz-lts
     initrd /initramfs-lts
-    options 'root= initrd=/amd-ucode.img initrd=/intel-ucode.img rw quiet mitigations=off'
+    options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
 }
 EOF
-    fi
-
-    if grep -q zfs /root/list; then
-        sed -i "s|root=|root=zfs=$pool|g" /boot/efi/refind/refind.conf
-    else
-        sed -i "s|root=|root=$(blkid $root_drive -o export | grep ^UUID=)|g" /boot/efi/refind/refind.conf
     fi
 
     sed -i 's|timeout 20|timeout 2|' /boot/efi/refind/refind.conf
