@@ -87,6 +87,21 @@ rc_add spl boot
 rc_add zfs boot
 rc_add efivars boot
 
+rc_add udev sysinit
+rc_add udev-trigger sysinit
+rc_add dbus sysinit
+rc_add udev-settle sysinit
+rc_add udev-postmount sysinit
+
+rc_add gdm default
+rc_add elogind default
+rc_add polkit default
+rc_add networkmanager default
+rc_add networkmanager-dispatcher default
+rc_add bluealsa default
+rc_add bluetooth default
+rc_add ufw default
+
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
 rc_add savecache shutdown
