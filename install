@@ -471,12 +471,12 @@ setup_drive() {
 
     menu 'select a drive' drive ${drives[@]}
 
-    if ls $drive* | grep -Eq "$drive.{1}$|$drive.{2}$"; then
+    if ls $drive* | grep -Eq "$drive.{1}|$drive.{2}"; then
         partitions=($(ls $drive*))
         menu 'select a root partition or use the complete drive' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
             root_drive=$partition
-            partitions=($(ls $drive* | grep -E "$drive.{1}$" | grep -v $partition))
+            partitions=($(ls $drive* | grep -E "$drive.{1}" | grep -v $partition))
             menu 'select a boot partition to mount ' partition ${partitions[@]}
             boot_drive=$partition
         fi
@@ -1198,7 +1198,7 @@ find_windows() {
 
     for d in ${drives[@]}; do
         drive="/dev/$d"
-        partitions=($(ls $drive* | grep -E "$drive.{1}$|$drive.{2}$"))
+        partitions=($(ls $drive* | grep -E "$drive.{1}|$drive.{2}"))
         i=0
         if [[ $partitions ]]; then
             for partition in ${partitions[@]}; do
