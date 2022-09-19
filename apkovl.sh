@@ -86,7 +86,7 @@ polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
 tzdata
 udev-init-scripts udev-init-scripts-openrc
 ufw ufw-bash-completion ufw-openrc
-util-linux util-linux-bash-completion util-linux-login util-linux-openrc
+util-linux util-linux-bash-completion util-linux-login
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 xorg-server
 EOF
