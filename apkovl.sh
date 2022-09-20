@@ -91,7 +91,6 @@ polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
     network-manager-applet
     networkmanager networkmanager-bash-completion networkmanager-bluetooth networkmanager-common networkmanager-elogind networkmanager-initrd-generator networkmanager-openrc networkmanager-openvpn networkmanager-wifi networkmanager-wwan
     adwaita-icon-theme hicolor-icon-theme
-nvidia-src
 tzdata
 udev-init-scripts udev-init-scripts-openrc
 ufw ufw-bash-completion ufw-openrc gufw
