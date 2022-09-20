@@ -1201,7 +1201,7 @@ find_windows() {
             drive="/dev/$d"
             partition=($(ls $drive* | grep -E "$drive"1"|$drive"p1""))
             if [[ $partition ]]; then
-                mount -t auto -o force $partition /windows/
+                mount -r $partition /windows/
                 if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
                     echo ">>> copying Windows Boot Manager"
                     cp -rlf /windows/* /boot/
