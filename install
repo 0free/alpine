@@ -1155,10 +1155,6 @@ EOF
 
 setup_bootloader() {
 
-    if [[ ! $windows_boot ]]; then
-        find_windows
-    fi
-
     param="rootfstype=$filesystem rw loglevel=1 quiet mitigations=off modules=sd-mod,usb-storage"
 
     if grep -q zfs /root/list; then
