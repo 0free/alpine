@@ -1196,13 +1196,11 @@ find_windows() {
         mkdir /windows/
     fi
 
-    for d in ${drives[@]}; do
-        drive="/dev/$d"
-        partitions=($(ls $drive* | grep -E "$drive.{1}|$drive.{2}"))
-        i=0
-        if [[ $partitions ]]; then
-            for partition in ${partitions[@]}; do
-                i=i+1
+    while true; do     
+        for d in ${drives[@]}; do
+            drive="/dev/$d"
+            partition=($(ls $drive* | grep -E "$drive"1"|$drive"p1""))
+            if [[ $partition ]]; then
                 mount $partition /windows/
                 if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
                     echo ">>> copying Windows Boot Manager"
@@ -1211,23 +1209,18 @@ find_windows() {
                     windows_boot=$partition
                     echo "windows_drive=$drive" >> /root/list
                     echo "windows_boot=$partition" >> /root/list
-                elif [ -f /windows/Windows/Boot/EFI/bootmgfw.efi ]; then
-                    windows_partition=$partition
-                    echo "windows_ntfs=$partition" >> /root/list
+                    echo ">>> creating Windows efi record"
+                    efibootmgr -c -d $windows_drive -p 1 -t 0 -L "Windows" -l '\EFI\Boot\BOOTX64.EFI'
+                    break
                 fi
-                umount /windows/
-            done
-        fi
+            fi
+        done
     done
 
-    rm -r /windows/
-
-    if [[ $windows_drive ]]; then
-        echo ">>> creating efi records"
-        efibootmgr -c -d $windows_drive -p $i -t 0 -L "Windows Boot" -l '\EFI\Boot\BOOTX64.EFI'
-        efibootmgr -c -d $windows_drive -p $i -t 0 -L "Windows Boot Firmware" -l '\EFI\Microsoft\Boot\BOOTMGFW.EFI'
-        efibootmgr -c -d $windows_drive -p $i -t 0 -L "Windows 11" -l '\Windows\Boot\EFI\bootmgfw.efi'
+    if mountpoint -q /windows; then
+        umount /windows/
     fi
+    rm -r /windows/
 
 }
 
