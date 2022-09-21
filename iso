@@ -89,7 +89,7 @@ profile_linux() {
         gnome-session
         gnome-shell gnome-shell-extensions gnome-shell-schemas
         gnome-control-center gnome-control-center-bash-completion
-        gnome-menus gnome-tweaks gnome-colors-common gsettings-desktop-schemas
+        gnome-tweaks gnome-colors-common gsettings-desktop-schemas
         tracker tracker-bash-completion
         pinentry-gnome
         gnome-keyring gnome-terminal gnome-disk-utility gnome-system-monitor
