@@ -38,6 +38,7 @@ auto lo
 iface lo inet loopback
 EOF
 
+mkdir -p "$tmp"/etc/NetworkManager
 makefile root:root 0644 "$tmp"/etc/NetworkManager/NetworkManager.conf <<EOF
 [main]
 dhcp=internal
