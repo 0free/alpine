@@ -110,6 +110,14 @@ https://dl-cdn.alpinelinux.org/alpine/edge/community
 https://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
+mkdir -p "$tmp"/gdm
+makefile root:root 0644 "$tmp"/gdm/custom.conf <<EOF
+[daemon]
+AutomaticLogin=root
+AutomaticLoginEnable=true
+WaylandEnable=true
+EOF
+
 mkdir -p "$tmp"/etc/profile.d
 makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
 #!/bin/bash
