@@ -988,8 +988,10 @@ configure_alpine() {
     sed -i 's|rc_tty_number=12|rc_tty_number=24|' /etc/rc.conf
 
     echo ">>> setting locales"
-    echo 'LANG=en_US.UTF-8' > /etc/locale.conf
-    echo 'LANG=ar_OM.UTF-8' >> /etc/locale.conf
+    cat > /etc/locale.conf <<EOF
+LANG=en_US.UTF-8
+LANG=ar_OM.UTF-8
+EOF
 
     cat >> /etc/default/libc-locales <<EOF
 en_US.UTF-8 UTF-8
@@ -1046,6 +1048,13 @@ EOF
 
 }
 
+install_nvidia() {
+
+    CURL -LO https://us.download.nvidia.com/XFree86/Linux-x86_64/515.76/NVIDIA-Linux-x86_64-515.76.run
+
+
+}
+
 configure_lightdm() {
 
     echo ">>> configuring lightdm"
@@ -1079,10 +1088,11 @@ make_initramfs() {
     fi
 
     if grep -q VirtualBox /root/list; then
-        modules+=(vboxvideo virtio-gp vmwgfx)
+        modules+=(vboxvideo virtio-gpu vmvga vmwgfx)
     else
         modules+=(i915)
-        modules+=(amdgpu radeon)
+        modules+=(amdgpu)
+        modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
     fi
 
     list=''
