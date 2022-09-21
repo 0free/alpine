@@ -70,7 +70,7 @@ packages_list() {
         ufw ufw-openrc ufw-bash-completion
         iptables iptables-openrc
         # sound
-        alsa-plugins-pulse alsa-lib
+        alsa-plugins-pulse alsa-lib alsa-utils alsa-utils-openrc
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
         # browser
@@ -929,6 +929,7 @@ enable_services() {
     rc-update add networkmanager default
     rc-update add networkmanager-dispatcher default
 
+    rc-update add alsa default
     rc-update add bluealsa default
     rc-update add bluetooth default
     rc-update add ufw default
@@ -944,6 +945,7 @@ enable_services() {
 
     if grep -q gnome /root/list; then
         rc-update add gdm default
+        rc-update add agetty default
     fi
 
     if grep -q kde /root/list; then
