@@ -87,11 +87,11 @@ gnome-desktop gnome-desktop-lang
 gnome-session
 gnome-shell gnome-shell-extensions gnome-shell-schemas
 gnome-control-center gnome-control-center-bash-completion
-gnome-menus gnome-tweaks gnome-colors-common gsettings-desktop-schemas
+gnome-tweaks gnome-colors-common gsettings-desktop-schemas
 tracker tracker-bash-completion
 pinentry-gnome
 gnome-keyring gnome-terminal gnome-disk-utility gnome-system-monitor
-nautilus gedit gedit-plugins py3-cairo file-roller
+nautilus gedit py3-cairo file-roller
 network-manager-applet
 networkmanager networkmanager-bash-completion networkmanager-bluetooth networkmanager-common networkmanager-elogind networkmanager-initrd-generator networkmanager-openrc networkmanager-wifi networkmanager-wwan
 adwaita-icon-theme hicolor-icon-theme
