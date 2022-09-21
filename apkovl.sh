@@ -110,6 +110,7 @@ https://dl-cdn.alpinelinux.org/alpine/edge/community
 https://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
+mkdir -p "$tmp"/etc/profile.d
 makefile root:root 0644 "$tmp"/etc/profile.d/custom.sh <<EOF
 PS1='\[\033[35;1m\]\u\[\033[0m\]@\[\033[31;1m\]\h \[\033[32;1m\]$PWD\[\033[0m\] [\[\033[35m\]\#\[\033[0m\]]\[\033[31m\]\$\[\033[0m\] '
 alias update='apk update && apk upgrade'
