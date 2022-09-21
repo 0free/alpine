@@ -50,7 +50,6 @@ wifi.backend=iwd
 EOF
 
 mkdir -p "$tmp"/etc/apk
-
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
 amd-ucode
@@ -109,6 +108,10 @@ makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
 https://dl-cdn.alpinelinux.org/alpine/edge/main
 https://dl-cdn.alpinelinux.org/alpine/edge/community
 https://dl-cdn.alpinelinux.org/alpine/edge/testing
+EOF
+
+makefile root:root 0644 "$tmp"/etc/profile.d/custom.sh <<EOF
+alias alpine='curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install'
 EOF
 
 rc_add devfs sysinit
