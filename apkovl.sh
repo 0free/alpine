@@ -110,8 +110,10 @@ https://dl-cdn.alpinelinux.org/alpine/edge/community
 https://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
-makefile root:root 0644 "$tmp"/etc/profile.d/custom.sh <<EOF
-alias alpine='curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install'
+makefile root:root 0644 "$tmp"/root/.profile <<EOF
+PS1='\[\033[35;1m\]\u\[\033[0m\]@\[\033[31;1m\]\h \[\033[32;1m\]$PWD\[\033[0m\] [\[\033[35m\]\#\[\033[0m\]]\[\033[31m\]\$\[\033[0m\] '
+alias update="apk update && apk upgrade"
+alias alpine="curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install"
 EOF
 
 rc_add devfs sysinit
