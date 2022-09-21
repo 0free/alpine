@@ -38,6 +38,16 @@ auto lo
 iface lo inet loopback
 EOF
 
+makefile root:root 0644 "$tmp"/etc/NetworkManager/NetworkManager.conf <<EOF
+[main]
+dhcp=internal
+plugins=ifupdown,keyfile
+[ifupdown]
+managed=true
+[device]
+wifi.backend=iwd
+EOF
+
 mkdir -p "$tmp"/etc/apk
 
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
