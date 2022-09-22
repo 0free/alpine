@@ -108,8 +108,8 @@ https://dl-cdn.alpinelinux.org/alpine/edge/community
 https://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
-mkdir -p "$tmp"/gdm
-makefile root:root 0644 "$tmp"/gdm/custom.conf <<EOF
+mkdir -p "$tmp"/etc/gdm
+makefile root:root 0644 "$tmp"/etc/gdm/custom.conf <<EOF
 [daemon]
 AutomaticLogin=root
 AutomaticLoginEnable=true
