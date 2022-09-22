@@ -110,6 +110,7 @@ chmod 700 ~/aports/scripts/mkimg.linux.sh
 sed -i 's|linux-firmware|linux-firmware-none|' ~/aports/scripts/mkimg.base.sh
 sed -i 's|wireless-regdb||' ~/aports/scripts/mkimg.base.sh
 
+sed -i 's|ln -s /bin/busybox|ln -s /bin/bash|' ~/aports/main/busybox/APKBUILD
 sed -i 's|/bin/ash|/bin/bash|' ~/aports/main/alpine-baselayout/passwd
 
 sh ~/aports/scripts/mkimage.sh \
