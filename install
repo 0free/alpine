@@ -1008,11 +1008,6 @@ LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=
 EOF
 
-    cat >> /etc/default/libc-locales <<EOF
-en_US.UTF-8 UTF-8
-en_US ISO-8859-1
-EOF
-
     if [ -d /etc/NetworkManager/ ]; then
         cat > /etc/NetworkManager/NetworkManager.conf <<EOF
 [main]
