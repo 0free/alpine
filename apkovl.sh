@@ -93,7 +93,6 @@ networkmanager networkmanager-bash-completion networkmanager-bluetooth networkma
 adwaita-icon-theme hicolor-icon-theme
 tzdata
 udev-init-scripts udev-init-scripts-openrc
-ufw ufw-bash-completion ufw-openrc
 util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
 vulkan-loader vulkan-tools
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
@@ -169,7 +168,6 @@ rc_add networkmanager default
 rc_add networkmanager-dispatcher default
 rc_add bluealsa default
 rc_add bluetooth default
-rc_add ufw default
 rc_add gdm default
 
 rc_add mount-ro shutdown
