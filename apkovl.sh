@@ -58,7 +58,6 @@ bash bash-completion
 attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
 brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
 btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
-chromium
 colord colord-bash-completion colord-gtk
 dbus dbus-libs dbus-openrc dbus-x11
 dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
