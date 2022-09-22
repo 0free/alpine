@@ -127,6 +127,7 @@ EOF
 mkdir -p "$tmp"/root/.config/.config
 mkdir -p "$tmp"/root/.config/.local
 git clone https://github.com/0free/alpineLinux-Gnome-ISO.git
+pwd
 mv /alpineLinux-Gnome-ISO/config/config/* "$tmp"/root/.config/.config/
 mv /alpineLinux-Gnome-ISO/config/local/* "$tmp"/root/.config/.local/
 chown -R root:root "$tmp"/root/
