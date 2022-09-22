@@ -94,7 +94,7 @@ networkmanager networkmanager-bash-completion networkmanager-bluetooth networkma
 adwaita-icon-theme hicolor-icon-theme
 tzdata
 udev-init-scripts udev-init-scripts-openrc
-ufw ufw-bash-completion ufw-openrc gufw
+ufw ufw-bash-completion ufw-openrc
 util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
 vulkan-loader vulkan-tools
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
