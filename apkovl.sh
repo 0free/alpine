@@ -85,7 +85,6 @@ gnome-desktop gnome-desktop-lang
 gnome-session gnome-shell gnome-shell-schemas
 gnome-control-center gnome-control-center-bash-completion
 gsettings-desktop-schemas
-tracker tracker-bash-completion
 pinentry-gnome
 gnome-terminal gnome-disk-utility gnome-system-monitor gedit
 nautilus
