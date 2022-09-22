@@ -87,7 +87,7 @@ gnome-control-center gnome-control-center-bash-completion
 gsettings-desktop-schemas
 tracker tracker-bash-completion
 pinentry-gnome
-gnome-terminal gnome-disk-utility gnome-system-monitor
+gnome-terminal gnome-disk-utility gnome-system-monitor gedit
 nautilus
 network-manager-applet
 networkmanager networkmanager-bash-completion networkmanager-bluetooth networkmanager-common networkmanager-elogind networkmanager-initrd-generator networkmanager-openrc networkmanager-wifi networkmanager-wwan
@@ -118,6 +118,9 @@ EOF
 mkdir -p "$tmp"/etc/profile.d
 makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
 PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
+ln -s /bin/bash /bin/sh
+ln -s /bin/bash /bin/ash
+usermod -s /bin/bash root
 curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && /bin/bash install
 EOF
 
