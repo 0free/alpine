@@ -60,8 +60,6 @@ profile_linux() {
         attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
         brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
         btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
-        busybox busybox-binsh busybox-mdev-openrc busybox-openrc
-        chromium
         colord colord-bash-completion colord-gtk
         dbus dbus-libs dbus-openrc dbus-x11
         dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
@@ -113,7 +111,8 @@ chmod 700 ~/aports/scripts/mkimg.linux.sh
 sed -i 's|linux-firmware||' ~/aports/scripts/mkimg.base.sh
 sed -i 's|wireless-regdb||' ~/aports/scripts/mkimg.base.sh
 
-sed -i 's|ln -s /bin/busybox|ln -s /bin/bash|' ~/aports/main/busybox/APKBUILD
+sed -i 's|/bin/ash|/bin/bash|' ~/aports/main/alpine-baselayout/APKBUILD
+sed -i 's|/bin/ash|/bin/bash|' ~/aports/main/alpine-baselayout/passwd
 
 sh ~/aports/scripts/mkimage.sh \
 --profile linux \
