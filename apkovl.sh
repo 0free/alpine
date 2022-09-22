@@ -116,8 +116,8 @@ AutomaticLoginEnable=true
 WaylandEnable=true
 EOF
 
-mkdir -p "$tmp"/root
-makefile root:root 0755 "$tmp"/root/.bashrc <<EOF
+mkdir -p "$tmp"/etc/profile.d
+makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
 PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\]\w\[\e[m\]\[\e[31m\]\[\e[m\]\$ '
 alias update='apk update && apk upgrade'
 alias alpine='curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install'
