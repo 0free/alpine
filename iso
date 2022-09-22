@@ -76,7 +76,7 @@ profile_linux() {
         iptables iptables-openrc
         iwd iwd-openrc wireless-regdb
         linux-lts linux-pam
-        linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-none linux-firmware-nvidia linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
+        linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-nvidia linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
         mesa mesa-dri-gallium mesa-egl mesa-gbm mesa-gl mesa-glapi mesa-gles mesa-va-gallium mesa-vdpau-gallium mesa-vulkan-intel mesa-vulkan-layers
         musl musl-locales musl-utils
         networkmanager
@@ -84,20 +84,19 @@ profile_linux() {
         polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
         gdm gdm-openrc mutter mutter-schemas
         gnome-desktop gnome-desktop-lang
-        gnome-session
-        gnome-shell gnome-shell-extensions gnome-shell-schemas
+        gnome-session gnome-shell gnome-shell-schemas
         gnome-control-center gnome-control-center-bash-completion
-        gnome-tweaks gnome-colors-common gsettings-desktop-schemas
+        gsettings-desktop-schemas
         tracker tracker-bash-completion
         pinentry-gnome
-        gnome-keyring gnome-terminal gnome-disk-utility gnome-system-monitor
-        nautilus gedit gedit-plugins py3-cairo file-roller
+        gnome-terminal gnome-disk-utility gnome-system-monitor
+        nautilus
         network-manager-applet
         networkmanager networkmanager-bash-completion networkmanager-bluetooth networkmanager-common networkmanager-elogind networkmanager-initrd-generator networkmanager-openrc networkmanager-wifi networkmanager-wwan
         adwaita-icon-theme hicolor-icon-theme
         tzdata
         udev-init-scripts udev-init-scripts-openrc
-        ufw ufw-bash-completion ufw-openrc gufw
+        ufw ufw-bash-completion ufw-openrc
         util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
         vulkan-loader vulkan-tools
         xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
@@ -108,7 +107,7 @@ EOF
 
 chmod 700 ~/aports/scripts/mkimg.linux.sh
 
-sed -i 's|linux-firmware||' ~/aports/scripts/mkimg.base.sh
+sed -i 's|linux-firmware|linux-firmware-none|' ~/aports/scripts/mkimg.base.sh
 sed -i 's|wireless-regdb||' ~/aports/scripts/mkimg.base.sh
 
 sed -i 's|/bin/ash|/bin/bash|' ~/aports/main/alpine-baselayout/APKBUILD
