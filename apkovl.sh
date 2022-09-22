@@ -122,8 +122,8 @@ mkdir -p "$tmp"/etc/profile.d
 makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
 #!/bin/sh
 PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\]\w\[\e[m\]\[\e[31m\]\[\e[m\]\$ '
-alias update='apk update && apk upgrade'
-alias alpine='curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install'
+update() { apk update && apk upgrade; }
+alpine() { curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install; }
 EOF
 
 rc_add devfs sysinit
