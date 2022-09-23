@@ -87,7 +87,6 @@ profile_linux() {
         gnome-session gnome-shell gnome-shell-schemas
         gnome-control-center gnome-control-center-bash-completion
         gsettings-desktop-schemas
-        tracker tracker-bash-completion
         pinentry-gnome
         gnome-terminal gnome-disk-utility gnome-system-monitor
         nautilus
@@ -96,7 +95,6 @@ profile_linux() {
         adwaita-icon-theme hicolor-icon-theme
         tzdata
         udev-init-scripts udev-init-scripts-openrc
-        ufw ufw-bash-completion ufw-openrc
         util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
         vulkan-loader vulkan-tools
         xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
@@ -109,7 +107,7 @@ chmod 700 ~/aports/scripts/mkimg.linux.sh
 
 sed -i 's|linux-firmware |linux-firmware-none |' ~/aports/scripts/mkimg.base.sh
 sed -i 's|wireless-regdb||' ~/aports/scripts/mkimg.base.sh
-sed -i 's|-volid "alpine-${profile_abbrev:-$PROFILE} $RELEASE $ARCH"|-volid "alpineLinux"|g' ~/aports/scripts/mkimg.base.sh
+sed -i 's|"alpine-${profile_abbrev:-$PROFILE} $RELEASE $ARCH"|"alpineLinux"|g' ~/aports/scripts/mkimg.base.sh
 
 sed -i 's|ln -s /bin/busybox|ln -s /bin/bash|' ~/aports/main/busybox/APKBUILD
 sed -i 's|/bin/ash|/bin/bash|' ~/aports/main/alpine-baselayout/passwd
