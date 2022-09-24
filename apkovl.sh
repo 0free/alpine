@@ -113,22 +113,21 @@ AutomaticLoginEnable=true
 WaylandEnable=true
 EOF
 
-mkdir -p "$tmp"/etc/profile.d
+mkdir -p "$tmp"/home/user/
+curl -LO https://github.com/0free/alpine/raw/1/dconf-settings.ini
+mv dconf-settings.ini "$tmp"/home/user/
+chown -R root:root "$tmp"/home/user/
+chmod -R 0777 "$tmp"/home/user/
+
+mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
-dconf load / < /root/dconf-settings.ini
-setfont /usr/share/fonts/OTF/SourceCodePro-Regular.otf
+dconf load / < /home/user/dconf-settings.ini
 PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
 ln -s /bin/bash /bin/sh
 ln -s /bin/bash /bin/ash
 usermod -s /bin/bash root
 curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && /bin/bash install
 EOF
-
-mkdir -p "$tmp"/root/
-curl -LO https://github.com/0free/alpine/raw/1/dconf-settings.ini
-mv dconf-settings.ini "$tmp"/root/
-chown -R root:root "$tmp"/root/
-chmod -R 0777 "$tmp"/root/
 
 rc_add devfs sysinit
 rc_add dmesg sysinit
