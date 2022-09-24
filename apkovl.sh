@@ -115,6 +115,7 @@ EOF
 
 mkdir -p "$tmp"/etc/profile.d
 makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
+dconf load / < /root/dconf-settings.ini
 setfont /usr/share/fonts/OTF/SourceCodePro-Regular.otf
 PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
 ln -s /bin/bash /bin/sh
@@ -123,8 +124,9 @@ usermod -s /bin/bash root
 curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && /bin/bash install
 EOF
 
-mkdir -p "$tmp"/root/.config/.config
-mkdir -p "$tmp"/root/.config/.local
+mkdir -p "$tmp"/root/
+curl -LO https://github.com/0free/alpine/raw/1/dconf-settings.ini
+mv dconf-settings.ini "$tmp"/root/
 chown -R root:root "$tmp"/root/
 chmod -R 0777 "$tmp"/root/
 
