@@ -121,11 +121,12 @@ chmod -R 0777 "$tmp"/home/user/
 
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
-dconf load / < /home/user/dconf-settings.ini
-PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
 ln -s /bin/bash /bin/sh
 ln -s /bin/bash /bin/ash
+exec -l bash -l
 usermod -s /bin/bash root
+dconf load / < /home/user/dconf-settings.ini
+PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
 curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && /bin/bash install
 EOF
 
