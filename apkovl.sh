@@ -113,9 +113,9 @@ AutomaticLoginEnable=true
 WaylandEnable=true
 EOF
 
-mkdir -p "$tmp"/
-curl -LO https://github.com/0free/alpine/raw/1/dconf-settings.ini
-mv dconf-settings.ini "$tmp"/
+mkdir -p "$tmp"/tmp/
+https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+mv dconf-settings.ini "$tmp"/tmp/
 
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
