@@ -88,7 +88,7 @@ profile_linux() {
         gnome-control-center gnome-control-center-bash-completion
         gsettings-desktop-schemas
         pinentry-gnome
-        gnome-terminal gnome-disk-utility gnome-system-monitor
+        gnome-terminal gnome-disk-utility gnome-system-monitor gedit
         nautilus
         network-manager-applet
         networkmanager networkmanager-bash-completion networkmanager-bluetooth networkmanager-common networkmanager-elogind networkmanager-initrd-generator networkmanager-openrc networkmanager-wifi networkmanager-wwan
@@ -108,6 +108,8 @@ chmod 700 ~/aports/scripts/mkimg.linux.sh
 sed -i 's|linux-firmware |linux-firmware-none |' ~/aports/scripts/mkimg.base.sh
 sed -i 's|wireless-regdb||' ~/aports/scripts/mkimg.base.sh
 sed -i 's|"alpine-${profile_abbrev:-$PROFILE} $RELEASE $ARCH"|"alpineLinux"|g' ~/aports/scripts/mkimg.base.sh
+
+sed -i 's|/bin/busybox|/bin/bash|g' ~/aports/scripts/genrootfs.sh
 
 sed -i 's|ln -s /bin/busybox|ln -s /bin/bash|' ~/aports/main/busybox/APKBUILD
 sed -i 's|/bin/ash|/bin/bash|' ~/aports/main/alpine-baselayout/passwd
