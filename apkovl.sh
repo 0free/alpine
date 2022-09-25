@@ -116,8 +116,6 @@ EOF
 mkdir -p "$tmp"/
 curl -LO https://github.com/0free/alpine/raw/1/dconf-settings.ini
 mv dconf-settings.ini "$tmp"/
-chown -R root:root "$tmp"/home/user/
-chmod -R 0777 "$tmp"/home/user/
 
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
