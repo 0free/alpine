@@ -122,7 +122,7 @@ makefile root:root 0755 "$tmp"/etc/profile.d/custom.sh <<EOF
 usermod -s /bin/bash root
 ln -s /bin/bash /bin/sh
 ln -s /bin/bash /bin/ash
-dconf load / < /dconf-settings.ini
+dconf load / < /tmp/dconf-settings.ini
 PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
 curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install
 EOF
