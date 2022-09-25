@@ -114,7 +114,7 @@ WaylandEnable=true
 EOF
 
 mkdir -p "$tmp"/etc/
-https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+curl -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
 mv dconf-settings.ini "$tmp"/etc/
 
 mkdir -p "$tmp"/etc/profile.d/
