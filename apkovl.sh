@@ -119,17 +119,14 @@ mv dconf-settings.ini "$tmp"/etc/
 
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/bash.sh <<EOF
-if [[ "${SHELL}" == "/bin/ash" ]];then
+if [ \"${SHELL}\" == "/bin/ash" ];then
 	usermod -s /bin/bash root
 	ln -s /bin/bash /bin/sh
 	ln -s /bin/bash /bin/ash
 	dconf load / < /ect/dconf-settings.ini
-	killall -3 gnome-shell
-	#exec bash
+	exec bash
 fi
-EOF
-makefile root:root 0755 "$tmp"/etc/profile.d/install.sh <<EOF
-if [[ "${SHELL}" == "/bin/bash" ]];then
+if [ \"${SHELL}\" == "/bin/bash" ];then
     PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
     curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install
 fi
