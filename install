@@ -1087,6 +1087,7 @@ install_nvidia() {
     cd /usr/src/nvidia-*/
     make modules -j$(nproc)
     make modules_install -j$(nproc)
+    cd /root/
 
     echo ">>> installing musl-fts"
     apk add musl-fts
