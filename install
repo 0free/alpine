@@ -1082,6 +1082,7 @@ EOF
 
 install_nvidia() {
 
+    echo ">>> installing nVidia driver"
     curl -LO https://us.download.nvidia.com/XFree86/Linux-x86_64/515.76/NVIDIA-Linux-x86_64-515.76.run
     chmod +x *.run
     ./*.run
@@ -1091,6 +1092,7 @@ install_nvidia() {
 
 install_miner() {
 
+    echo ">>> downloading t-rex"
     curl -LO https://github.com/trexminer/T-Rex/releases/download/0.26.5/t-rex-0.26.5-linux.tar.gz
     tar -xvf t-rex-0.26.5-linux.tar.gz
     rm t-rex-0.26.5-linux.tar.gz
