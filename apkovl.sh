@@ -65,7 +65,7 @@ efibootmgr syslinux
 elogind elogind-bash-completion elogind-openrc
 ethtool ethtool-bash-completion
 eudev eudev-libs eudev-openrc
-font-hack font-noto-arabic
+font-noto-arabic
 git git-bash-completion
 hwids-net hwids-pci hwids-udev hwids-usb
 ibus ibus-bash-completion
