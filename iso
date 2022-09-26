@@ -117,6 +117,8 @@ sed -i 's|/bin/ash|/bin/bash|' ~/aports/main/alpine-baselayout/passwd
 sed -i 's|/bin/ash|/bin/bash|' ~/aports/community/shadow/useradd-defaults.patch
 sed -i 's|/bin/ash|/bin/bash|' ~/aports/community/apk-deploy-tool/apk-deploy-tool.pre-install
 
+sed -i 's|timeout=1|timeout=0|' ~/aports/main/syslinux/update-extlinux.conf
+
 sh ~/aports/scripts/mkimage.sh \
 --profile linux \
 --arch x86_64 \
