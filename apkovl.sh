@@ -67,7 +67,6 @@ ethtool ethtool-bash-completion
 eudev eudev-libs eudev-openrc
 font-hack font-noto-arabic
 git git-bash-completion
-grub grub-bash-completion grub-efi
 hwids-net hwids-pci hwids-udev hwids-usb
 ibus ibus-bash-completion
 intel-media-driver intel-ucode
