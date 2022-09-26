@@ -1028,7 +1028,7 @@ EOF
         echo snd_seq >> /etc/modules
     fi
 
-    if [ ! -d windows-11-icons/ ]; then
+    if [ ! -d /usr/share/icons/windows-11-icons/ ]; then
         echo ">>> cloning Windows-11-icons"
         git clone https://github.com/0free/windows-11-icons.git
         rm -r windows-11-icons/.git
