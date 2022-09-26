@@ -114,6 +114,9 @@ sed -i 's|/bin/busybox|/bin/bash|g' ~/aports/scripts/genrootfs.sh
 sed -i 's|ln -s /bin/busybox|ln -s /bin/bash|' ~/aports/main/busybox/APKBUILD
 sed -i 's|/bin/ash|/bin/bash|' ~/aports/main/alpine-baselayout/passwd
 
+sed -i 's|/bin/ash|/bin/bash|' ~/aports/community/shadow/useradd-defaults.patch
+sed -i 's|/bin/ash|/bin/bash|' ~/aports/community/apk-deploy-tool/apk-deploy-tool.pre-install
+
 sh ~/aports/scripts/mkimage.sh \
 --profile linux \
 --arch x86_64 \
