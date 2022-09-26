@@ -485,7 +485,7 @@ setup_drive() {
     filesystems=(btrfs zfs xfs ext4 exfat ntfs)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
-    computers=(minimal workstation server VirtualBox)
+    computers=(minimal miner server VirtualBox workstation)
     menu 'select a computer' computer ${computers[@]}
 
     desktops=(gnome kde none)
@@ -876,6 +876,12 @@ setup_desktop() {
 
     enable_services
     configure_alpine
+    install_nvidia
+
+    if grep -q miner /root/list; then
+        install_miner
+    fi
+
     make_initramfs
     add_commands
     setup_bootloader
@@ -1041,6 +1047,16 @@ EOF
         mkdir /home/$user/.config/
     fi
 
+    if grep -q gnome /root/list; then
+        curl -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+        mv dconf-settings.ini /home/$user/
+        cat > /etc/profile.d/gnome.sh <<EOF
+if [ -f ~/dconf-settings.ini ]; then
+    dconf load / < ~/dconf-settings.ini
+    rm ~/dconf-settings.ini
+fi
+EOF
+
     if grep -q kde /root/list; then
         if [ ! -d kde/ ]; then
             echo ">>> configuring kde"
@@ -1048,6 +1064,11 @@ EOF
             cp -rlf /kde/config/* /home/$user/.config/
             rm -r kde/
         fi
+        cat > /etc/sddm.conf.d/autologin.conf <<EOF
+[Autologin]
+User=$user
+Session=/usr/share/wayland-sessions/plasma.desktop
+EOF
     fi
 
     echo ">>> setting ~/"
@@ -1061,7 +1082,28 @@ EOF
 install_nvidia() {
 
     CURL -LO https://us.download.nvidia.com/XFree86/Linux-x86_64/515.76/NVIDIA-Linux-x86_64-515.76.run
+    chmod +x *.run
+    ./*.run
 
+}
+
+install_miner() {
+
+    curl -LO https://github.com/trexminer/T-Rex/releases/download/0.26.5/t-rex-0.26.5-linux.tar.gz
+    tar -xvf t-rex-0.26.5-linux.tar.gz
+    rm t-rex-0.26.5-linux.tar.gz
+    mv t-rex-0.26.5-linux/t-rex /usr/bin/
+    rm -r t-rex-0.26.5-linux/
+
+    cat > /etc/profile.d/t-rex.sh << EOF
+#!/bin/bash
+if [ ! -f ~/config ]; then
+    cd ~
+    curl -LO https://raw.githubusercontent.com/0free/t-rex/0.26.5/config
+fi
+/usr/bin/t-rex -c ~/config
+open http://127.0.0.1:8080
+EOF
 
 }
 
@@ -1100,7 +1142,7 @@ make_initramfs() {
     if grep -q VirtualBox /root/list; then
         modules+=(vboxvideo virtio-gpu vmvga vmwgfx)
     else
-        modules+=(i915)
+        modules+=(intel_agp i915)
         modules+=(amdgpu)
         modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
     fi
