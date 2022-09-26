@@ -1085,7 +1085,9 @@ install_nvidia() {
     echo ">>> installing musl-fts"
     apk add musl-fts
     echo ">>> installing nVidia driver"
-    curl -LO https://us.download.nvidia.com/XFree86/Linux-x86_64/515.76/NVIDIA-Linux-x86_64-515.76.run
+    if [ ! -f *.run ]; then
+        curl -LO https://us.download.nvidia.com/XFree86/Linux-x86_64/515.76/NVIDIA-Linux-x86_64-515.76.run
+    fi
     chmod +x *.run
     ./*.run
     rm *.run
