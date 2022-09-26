@@ -124,6 +124,8 @@ if [[ "${SHELL}" == "/bin/ash" ]];then
 	ln -s /bin/bash /bin/sh
 	ln -s /bin/bash /bin/ash
 	dconf load / < /ect/dconf-settings.ini
+	killall -3 gnome-shell
+	#exec bash
 fi
 EOF
 makefile root:root 0755 "$tmp"/etc/profile.d/install.sh <<EOF
