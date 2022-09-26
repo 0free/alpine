@@ -1084,6 +1084,7 @@ install_nvidia() {
     CURL -LO https://us.download.nvidia.com/XFree86/Linux-x86_64/515.76/NVIDIA-Linux-x86_64-515.76.run
     chmod +x *.run
     ./*.run
+    rm *.run
 
 }
 
