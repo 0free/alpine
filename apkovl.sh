@@ -121,10 +121,10 @@ makefile root:root 0755 "$tmp"/etc/profile.d/bash.sh <<EOF
 sed -i 's|/bin/ash|/bin/bash|' /etc/passwd
 ln -sf /bin/bash /bin/sh
 ln -sf /bin/bash /bin/ash
-  if [ -f /etc/dconf-settings.ini ]; then 
-    dconf load / < /etc/dconf-settings.ini
-    rm /etc/dconf-settings.ini
-  fi
+if [ -f /etc/dconf-settings.ini ]; then 
+  dconf load / < /etc/dconf-settings.ini
+  rm /etc/dconf-settings.ini
+fi
 PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
 if ping -q -c1 alpinelinux.org &>/dev/null; then
     curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install
