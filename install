@@ -1081,23 +1081,13 @@ EOF
 install_nvidia() {
 
     echo ">>> installing nvidia-src"
-    apk add nvidia-src
-
-    echo ">>> building nvidia kernel modules"
-    cd /usr/src/nvidia-*/
-    make modules -j$(nproc)
-    make modules_install -j$(nproc)
-    cd /root/
-
-    echo ">>> installing musl-fts"
-    apk add musl-fts
-    echo ">>> installing nVidia driver"
-    if [ ! -f *.run ]; then
-        curl -LO https://us.download.nvidia.com/XFree86/Linux-x86_64/515.76/NVIDIA-Linux-x86_64-515.76.run
-    fi
-    chmod +x *.run
-    ./*.run
-    rm *.run
+    apk add akms nvidia-src
+    echo ">>> building nvidia kernel modules for Linux-LTS"
+    akms install --kernel $kernel_lts /usr/src/nvidia-*/
+    echo ">>> building nvidia kernel modules for Linux-edge"
+    akms install --kernel $kernel_edge /usr/src/nvidia-*/
+    echo ">>> removing nvidia-src"
+    apk del nvidia-src
 
 }
 
@@ -1159,7 +1149,7 @@ make_initramfs() {
     else
         modules+=(intel_agp i915)
         modules+=(amdgpu)
-        modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+        modules+=(nvidia nvidia_modeset nvidia_uvm nvidia_drm nvidia_peermem)
     fi
 
     list=''
