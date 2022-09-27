@@ -1089,7 +1089,7 @@ install_nvidia() {
     echo ">>> installing nvidia-src"
     apk add bubblewrap akms nvidia-src
     echo ">>> kernel unprivileged user namespace"
-
+    bwrap --ro-bind /usr /usr --symlink usr/lib /lib --proc /proc --dev /dev --unshare-pid bash
     echo ">>> building nvidia kernel modules for Linux-LTS"
     akms install --kernel $kernel_lts all
     echo ">>> building nvidia kernel modules for Linux-edge"
