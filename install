@@ -1083,9 +1083,9 @@ install_nvidia() {
     echo ">>> installing nvidia-src"
     apk add akms nvidia-src
     echo ">>> building nvidia kernel modules for Linux-LTS"
-    akms install --kernel $kernel_lts /usr/src/nvidia-*/
+    akms install --kernel $kernel_lts all
     echo ">>> building nvidia kernel modules for Linux-edge"
-    akms install --kernel $kernel_edge /usr/src/nvidia-*/
+    akms install --kernel $kernel_edge all
     echo ">>> removing nvidia-src"
     apk del nvidia-src
     if [ -d /usr/src/nvidia-*/ ]; then
