@@ -1,7 +1,7 @@
 #!/bin/bash
 
 bootSize='199MiB'
-swapSize='4096MiB'
+swapSize='4000MiB'
 timezone='Asia/Muscat'
 mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
@@ -1101,12 +1101,12 @@ if ping -q -c1 alpinelinux.org &>/dev/null; then
     sudo apk update
     sudo apk upgrade
     sudo apk add nvidia-src
-    if apk search -e nvidia-src | grep -q /etc/profile.d/nvidia.sh ; then
+    if grep -q "\$(apk search -e nvidia-src)" /etc/profile.d/nvidia.sh ; then
         echo "nvidia driver is up-to-date"
     else
         echo ">>> building nvidia kernel modules"
         sudo akms install all
-        sudo sed -i "s|nvidia_src_version=.*|nvidia_src_version=$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
+        sudo sed -i "s|nvidia_src_version=.*|nvidia_src_version=\$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
     fi
     if [ -d /usr/src/nvidia-*/ ]; then
         rm -r /usr/src/nvidia-*/
@@ -1133,7 +1133,7 @@ if [ ! -f ~/config ]; then
     curl -LO https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
 fi
 /usr/bin/t-rex -c ~/config
-open http://127.0.0.1:8080
+#http://127.0.0.1:8080
 EOF
 
 }
