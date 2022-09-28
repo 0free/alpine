@@ -1122,12 +1122,9 @@ install_miner() {
     echo ">>> downloading T-Rex $trex_version"
     curl -LO https://github.com/trexminer/T-Rex/releases/download/$trex_version/t-rex-$trex_version-linux.tar.gz
     echo ">>> extracting T-Rex $trex_version"
-    mkdir /root/t-rex-$trex_version/
-    tar -zxf t-rex-$trex_version-linux.tar.gz -C /root/t-rex-$trex_version/
-    mv /root/t-rex-$trex_version/t-rex /usr/bin/
+    tar -vzxf t-rex-$trex_version-linux.tar.gz t-rex -C /usr/bin/
     echo ">>> deleting T-Rex files"
     rm t-rex-$trex_version-linux.tar.gz
-    rm -r /root/t-rex-$trex_version/
 
     cat > /etc/profile.d/t-rex.sh << EOF
 #!/bin/bash
