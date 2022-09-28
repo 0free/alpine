@@ -768,7 +768,6 @@ install_linux() {
         list+=' linux-firmware-amd'
         list+=' linux-firmware-amd-ucode'
         list+=' linux-firmware-amdgpu'
-        list+=' linux-firmware-nvidia'
         list+=' linux-firmware-other'
         list+=' linux-firmware-rtlwifi'
         list+=' linux-firmware-rtl_bt'
@@ -1097,21 +1096,29 @@ install_nvidia() {
         cat > /etc/profile.d/nvidia.sh <<EOF
 #!/bin/bash
 nvidia_src_version=$nvidia_src_version
-if ping -q -c1 alpinelinux.org &>/dev/null; then
-    sudo apk update
-    sudo apk upgrade
-    sudo apk add nvidia-src
-    if grep -q "\$(apk search -e nvidia-src)" /etc/profile.d/nvidia.sh ; then
-        echo "nvidia driver is up-to-date"
+nvidia() {
+    if find /lib/modules/ -type f -name 'nvidia.ko.gz' | grep -q nvidia; then
+        if wget -q --spider alpinelinux.org &>/dev/null; then
+            if grep -q "\$(apk search -e nvidia-src)" /etc/profile.d/nvidia.sh ; then
+                echo "nvidia driver is up-to-date"
+            else
+                install_modules
+            fi
+        fi
     else
-        echo ">>> building nvidia kernel modules"
-        sudo akms install all
-        sudo sed -i "s|nvidia_src_version=.*|nvidia_src_version=\$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
+        install_modules
     fi
+}
+install_modules() {
+    sudo apk fix nvidia-src
+    echo ">>> building nvidia kernel modules"
+    sudo akms install all
+    sudo sed -i "s|nvidia_src_version=.*|nvidia_src_version=\$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
     if [ -d /usr/src/nvidia-*/ ]; then
         rm -r /usr/src/nvidia-*/
     fi
-fi
+}
+nvidia
 EOF
     fi
 
@@ -1135,6 +1142,13 @@ fi
 /usr/bin/t-rex -c ~/config
 #http://127.0.0.1:8080
 EOF
+
+}
+
+install_google_chrome() {
+
+    curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    dpkg -i google-chrome-stable_current_amd64.deb
 
 }
 
