@@ -1087,18 +1087,29 @@ EOF
 install_nvidia() {
 
     echo ">>> installing nvidia-src"
+    nvidia_src_version=$(apk search -e nvidia-src)
     apk add bubblewrap akms nvidia-src
-    echo ">>> kernel unprivileged user namespace"
-    bwrap --userns 5 --uid 0 --gid 0 akms install --kernel $kernel_lts all
-    bwrap --userns 5 --uid 0 --gid 0 akms install --kernel $kernel_edge all
-    echo ">>> building nvidia kernel modules for Linux-LTS"
-    akms install --kernel $kernel_lts all
-    echo ">>> building nvidia kernel modules for Linux-edge"
-    akms install --kernel $kernel_edge all
-    echo ">>> removing nvidia-src"
-    apk del nvidia-src
+
+    if ! grep -q VirtualBox /root/list; then
+        cat > /etc/profile.d/nvidia.sh <<EOF
+#!/bin/bash
+nvidia_src_version=$nvidia_src_version
+if ping -q -c1 alpinelinux.org &>/dev/null; then
+    sudo apk update
+    sudo apk upgrade
+    sudo apk add nvidia-src
+    if apk search -e nvidia-src | grep -q /etc/profile.d/nvidia.sh ; then
+        echo "nvidia driver is up-to-date"
+    else
+        echo ">>> building nvidia kernel modules"
+        sudo akms install all
+        sudo sed -i "s|nvidia_src_version=.*|nvidia_src_version=$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
+    fi
     if [ -d /usr/src/nvidia-*/ ]; then
         rm -r /usr/src/nvidia-*/
+    fi
+fi
+EOF
     fi
 
 }
