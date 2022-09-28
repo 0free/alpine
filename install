@@ -1135,12 +1135,17 @@ install_miner() {
 
     cat > /etc/profile.d/t-rex.sh << EOF
 #!/bin/bash
-if [ ! -f ~/config ]; then
-    cd ~
-    curl -LO https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
-fi
-/usr/bin/t-rex -c ~/config
-#http://127.0.0.1:8080
+trex() {
+    if wget -q --spider alpinelinux.org &>/dev/null; then
+        if [ ! -f ~/config ]; then
+            cd ~
+            curl -LO https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
+        fi
+        /usr/bin/t-rex -c ~/config
+        chromium-browser http://127.0.0.1:8080
+    fi
+}
+trex
 EOF
 
 }
