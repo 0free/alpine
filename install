@@ -11,6 +11,7 @@ pool='rpool'
 hostname='linux'
 user='user'
 password='0000'
+trex_version='0.26.5'
 
 kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
 kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
@@ -881,7 +882,9 @@ setup_desktop() {
     install_nvidia
 
     if grep -q miner /root/list; then
-        install_miner
+        if [ ! -f /etc/profile.d/t-rex.sh ]; then
+            install_miner
+        fi
     fi
 
     make_initramfs
@@ -1116,18 +1119,21 @@ EOF
 
 install_miner() {
 
-    echo ">>> downloading t-rex"
-    curl -LO https://github.com/trexminer/T-Rex/releases/download/0.26.5/t-rex-0.26.5-linux.tar.gz
-    tar -xvf t-rex-0.26.5-linux.tar.gz
-    rm t-rex-0.26.5-linux.tar.gz
-    mv t-rex-0.26.5-linux/t-rex /usr/bin/
-    rm -r t-rex-0.26.5-linux/
+    echo ">>> downloading T-Rex $trex_version"
+    curl -LO https://github.com/trexminer/T-Rex/releases/download/$trex_version/t-rex-$trex_version-linux.tar.gz
+    echo ">>> extracting T-Rex $trex_version"
+    mkdir /root/t-rex-$trex_version/
+    tar -zxf t-rex-$trex_version-linux.tar.gz -C /root/t-rex-$trex_version/
+    mv /root/t-rex-$trex_version/t-rex /usr/bin/
+    echo ">>> deleting T-Rex files"
+    rm t-rex-$trex_version-linux.tar.gz
+    rm -r /root/t-rex-$trex_version/
 
     cat > /etc/profile.d/t-rex.sh << EOF
 #!/bin/bash
 if [ ! -f ~/config ]; then
     cd ~
-    curl -LO https://raw.githubusercontent.com/0free/t-rex/0.26.5/config
+    curl -LO https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
 fi
 /usr/bin/t-rex -c ~/config
 open http://127.0.0.1:8080
