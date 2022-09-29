@@ -1092,9 +1092,14 @@ install_glibc() {
     echo ">>> downloading glibc-$glibc_version for alpine"
     wget -q -P /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
     wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-$glibc_version.apk
+    wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-bin-$glibc_version.apk
+    wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-i18n-$glibc_version.apk
     echo ">>> installing glibc-$glibc_version"
-    apk add /root/glibc-$glibc_version.apk
+    apk add --force-overwrite /root/glibc-$glibc_version.apk
+    apk add /root/glibc-bin-$glibc_version.apk
+    apk add /root/glibc-i18n-$glibc_version.apk
     rm /root/glibc-$glibc_version.apk
+    apk fix --force-overwrite alpine-baselayout-data
 
 }
 
