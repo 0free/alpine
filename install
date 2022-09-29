@@ -999,6 +999,9 @@ configure_alpine() {
     sed -i 's|#rc_send_sigkill="YES"|rc_send_sigkill="YES"|' /etc/rc.conf
     sed -i 's|rc_tty_number=12|rc_tty_number=0|' /etc/rc.conf
 
+    mv /etc/profile.d/color_prompt.sh.disabled /etc/profile.d/color_prompt.sh
+    sed -i 's|LANG=C.UTF-8|LANG=en_US.UTF-8|' /etc/profile.d/locale.sh
+
     echo ">>> setting locales"
     cat > /etc/locale.conf <<EOF
 LANG=en_US.UTF-8
@@ -1016,6 +1019,10 @@ LC_TELEPHONE="en_US.UTF-8"
 LC_MEASUREMENT="en_US.UTF-8"
 LC_IDENTIFICATION="en_US.UTF-8"
 LC_ALL=
+EOF
+
+    cat > /etc/default/locale <<EOF
+LANG=en_US.UTF-8
 EOF
 
     if [ -d /etc/NetworkManager/ ]; then
