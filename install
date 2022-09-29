@@ -11,6 +11,7 @@ pool='rpool'
 hostname='linux'
 user='user'
 password='0000'
+glibc_version='2.35-r0'
 trex_version='0.26.5'
 
 kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
@@ -30,8 +31,6 @@ packages_list() {
         busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
         # musl
         musl musl-utils musl-locales
-        # GNU libc
-        gcompat
         # dbus
         dbus dbus-openrc dbus-libs dbus-x11
         # ibus
@@ -78,8 +77,6 @@ packages_list() {
         alsa-plugins-pulse alsa-lib alsa-utils alsa-utils-openrc
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
-        # browser
-        chromium-chromedriver
         # fonts
         font-hack font-adobe-source-code-pro
         font-noto-arabic
@@ -878,7 +875,10 @@ setup_desktop() {
 
     enable_services
     configure_alpine
+    install_glibc
     install_nvidia
+    install_flatpak
+    install_google_chrome
 
     if grep -q miner /root/list; then
         if [ ! -f /etc/profile.d/t-rex.sh ]; then
@@ -997,7 +997,7 @@ configure_alpine() {
     sed -i 's|#rc_send_sighup="NO"|rc_send_sighup="YES"|' /etc/rc.conf
     sed -i 's|#rc_timeout_stopsec="90"|rc_timeout_Stopsec="0"|' /etc/rc.conf
     sed -i 's|#rc_send_sigkill="YES"|rc_send_sigkill="YES"|' /etc/rc.conf
-    sed -i 's|rc_tty_number=12|rc_tty_number=24|' /etc/rc.conf
+    sed -i 's|rc_tty_number=12|rc_tty_number=0|' /etc/rc.conf
 
     echo ">>> setting locales"
     cat > /etc/locale.conf <<EOF
@@ -1053,7 +1053,8 @@ EOF
 
     if grep -q gnome /root/list; then
         if [ ! -f /etc/profile.d/gnome.sh ]; then
-            curl -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+            echo ">>> downloading gnome dconf-settings"
+            wget -q -O /home/$user/ https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
             mv dconf-settings.ini /home/$user/
             cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
@@ -1083,6 +1084,17 @@ EOF
     chown -R $user:wheel /home/$user/.config/
     chmod -R 700 /home/$user/
     chmod -R 700 /home/$user/.config/
+
+}
+
+install_glibc() {
+
+    echo ">>> downloading glibc-$glibc_version for alpine"
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+    wget -q -O /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-$glibc_version.apk
+    echo ">>> installing glibc-$glibc_version"
+    apk add /root/glibc-$glibc_version.apk
+    rm /root/glibc-$glibc_version.apk
 
 }
 
@@ -1118,42 +1130,52 @@ install_modules() {
         rm -r /usr/src/nvidia-*/
     fi
 }
-nvidia
 EOF
     fi
+
+}
+
+install_flatpak() {
+
+    echo ">>> installing flatpak"
+    apk add flatpak
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+}
+
+install_google_chrome() {
+
+    echo ">>> installing Google-Chrome dependencies"
+    apk add dpkg ca-certificates font-liberation wget xdg-util glib gtk+3.0 cairo cups-libs dbus-libs libcurl libdrm libexpat libglibutil nspr nss pango re2 wayland-libs-client libatk-1.0 libatk-bridge-2.0 libx11 libxcb libxcomposite libxdamage libxect libxfixes libxkbcommmon libxrandr
+    echo ">>> downloading Google-Chrome (.deb)"
+    wget -q -O /root/ https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    echo ">>> installing Google-Chrome (.deb)"
+    dpkg -i --force-all /root/google-chrome-stable_current_amd64.deb
 
 }
 
 install_miner() {
 
     echo ">>> downloading T-Rex $trex_version"
-    curl -LO https://github.com/trexminer/T-Rex/releases/download/$trex_version/t-rex-$trex_version-linux.tar.gz
+    wget -q -O /root/ https://github.com/trexminer/T-Rex/releases/download/$trex_version/t-rex-$trex_version-linux.tar.gz
     echo ">>> extracting T-Rex $trex_version"
     tar -vzxf t-rex-$trex_version-linux.tar.gz t-rex -C /usr/bin/
     echo ">>> deleting T-Rex files"
-    rm t-rex-$trex_version-linux.tar.gz
+    rm /root/t-rex-$trex_version-linux.tar.gz
 
     cat > /etc/profile.d/t-rex.sh << EOF
 #!/bin/bash
 trex() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
         if [ ! -f ~/config ]; then
-            cd ~
-            curl -LO https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
+            echo ">>> downloading t-rex config file"
+            wget -q -O ~/ https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
         fi
         /usr/bin/t-rex -c ~/config
-        chromium-browser http://127.0.0.1:8080
+        xdg-open http://127.0.0.1:8080
     fi
 }
-trex
 EOF
-
-}
-
-install_google_chrome() {
-
-    curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    dpkg -i google-chrome-stable_current_amd64.deb
 
 }
 
@@ -1550,10 +1572,8 @@ install_refind() {
         echo ">>> copying rEFInd drivers"
         cp /usr/share/refind/drivers_x86_64/*.efi /boot/efi/refind/drivers_x64/
         echo ">>> downloading efifs drivers"
-        curl -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
-        curl -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
-        mv xfs_x64.efi /boot/efi/refind/drivers_x64/
-        mv zfs_x64.efi /boot/efi/refind/drivers_x64/
+        wget -q -O /boot/efi/refind/drivers_x64/ github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
+        wget -q -O /boot/efi/refind/drivers_x64/ github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
     fi
 
     echo ">>> configuring rEFInd bootloader"
