@@ -1054,7 +1054,7 @@ EOF
     if grep -q gnome /root/list; then
         if [ ! -f /etc/profile.d/gnome.sh ]; then
             echo ">>> downloading gnome dconf-settings"
-            wget -q -O /home/$user/ https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+            wget -q -P /home/$user/ https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
             mv dconf-settings.ini /home/$user/
             cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
@@ -1090,8 +1090,8 @@ EOF
 install_glibc() {
 
     echo ">>> downloading glibc-$glibc_version for alpine"
-    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-    wget -q -O /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-$glibc_version.apk
+    wget -q -P /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+    wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-$glibc_version.apk
     echo ">>> installing glibc-$glibc_version"
     apk add /root/glibc-$glibc_version.apk
     rm /root/glibc-$glibc_version.apk
@@ -1148,7 +1148,7 @@ install_google_chrome() {
     echo ">>> installing Google-Chrome dependencies"
     apk add dpkg ca-certificates font-liberation wget xdg-util glib gtk+3.0 cairo cups-libs dbus-libs libcurl libdrm libexpat libglibutil nspr nss pango re2 wayland-libs-client libatk-1.0 libatk-bridge-2.0 libx11 libxcb libxcomposite libxdamage libxect libxfixes libxkbcommmon libxrandr
     echo ">>> downloading Google-Chrome (.deb)"
-    wget -q -O /root/ https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    wget -q -P /root/ https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
     echo ">>> installing Google-Chrome (.deb)"
     dpkg -i --force-all /root/google-chrome-stable_current_amd64.deb
 
@@ -1157,7 +1157,7 @@ install_google_chrome() {
 install_miner() {
 
     echo ">>> downloading T-Rex $trex_version"
-    wget -q -O /root/ https://github.com/trexminer/T-Rex/releases/download/$trex_version/t-rex-$trex_version-linux.tar.gz
+    wget -q -P /root/ https://github.com/trexminer/T-Rex/releases/download/$trex_version/t-rex-$trex_version-linux.tar.gz
     echo ">>> extracting T-Rex $trex_version"
     tar -vzxf t-rex-$trex_version-linux.tar.gz t-rex -C /usr/bin/
     echo ">>> deleting T-Rex files"
@@ -1169,7 +1169,7 @@ trex() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
         if [ ! -f ~/config ]; then
             echo ">>> downloading t-rex config file"
-            wget -q -O ~/ https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
+            wget -q -P ~/ https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
         fi
         /usr/bin/t-rex -c ~/config
         xdg-open http://127.0.0.1:8080
@@ -1572,8 +1572,8 @@ install_refind() {
         echo ">>> copying rEFInd drivers"
         cp /usr/share/refind/drivers_x86_64/*.efi /boot/efi/refind/drivers_x64/
         echo ">>> downloading efifs drivers"
-        wget -q -O /boot/efi/refind/drivers_x64/ github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
-        wget -q -O /boot/efi/refind/drivers_x64/ github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
+        wget -q -P /boot/efi/refind/drivers_x64/ github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
+        wget -q -P /boot/efi/refind/drivers_x64/ github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
     fi
 
     echo ">>> configuring rEFInd bootloader"
