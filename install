@@ -1117,7 +1117,6 @@ install_glibc() {
 install_nvidia() {
 
     echo ">>> installing nvidia-src"
-    nvidia_src_version=$(apk search -e nvidia-src)
     apk add bubblewrap akms nvidia-src
 
     echo ">>> building nvidia kernel modules"
@@ -1128,7 +1127,7 @@ install_nvidia() {
 
     cat > /etc/profile.d/nvidia.sh <<EOF
 #!/bin/bash
-nvidia_src_version=$nvidia_src_version
+version="$(apk search -e nvidia-src)"
 nvidia() {
     if find /lib/modules/ -type f -name 'nvidia.ko.gz' | grep -q nvidia; then
         if wget -q --spider alpinelinux.org &>/dev/null; then
@@ -1146,7 +1145,7 @@ install_modules() {
     sudo apk fix nvidia-src
     echo ">>> building nvidia kernel modules"
     sudo akms install all
-    sudo sed -i "s|nvidia_src_version=.*|nvidia_src_version=\$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
+    sudo sed -i "s|version=.*|version=\$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
     if [ -d /usr/src/nvidia-*/ ]; then
         rm -r /usr/src/nvidia-*/
     fi
@@ -1321,18 +1320,18 @@ setup_bootloader() {
         disk="root=$(blkid $root_drive -o export | grep ^UUID=) $param"
     fi
 
-    if grep -q rEFInd /root/list; then
-        if ! grep -q alpine /boot/efi/refind/refind.conf; then
-            install_refind
-        fi
+    if grep -q gummiboot /root/list; then
+        install_gummiboot
     elif grep -q clover /root/list; then
         install_clover
     elif grep -q grub /root/list; then
         install_grub
-    elif grep -q gummiboot /root/list; then
-        install_gummiboot
     elif grep -q limine /root/list; then
         install_limine
+    elif grep -q rEFInd /root/list; then
+        if ! grep -q alpine /boot/efi/refind/refind.conf; then
+            install_refind
+        fi
     fi
 
     finish
@@ -1372,6 +1371,70 @@ find_windows() {
     if mountpoint -q /windows; then
         umount /windows/
     fi
+
+}
+
+install_gummiboot() {
+
+    echo ">>> installing gummiboot"
+    apk add gummiboot
+
+    mkdir /boot/efi/alpineLinux/
+    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
+
+    efibootmgr -c -d $drive -p 1 -t 0 -L 'alpineLinux' -l '\EFI\alpineLinux\bootx64.efi'
+
+    mkdir -p /boot/loader/entries/
+
+    echo ">>> configuring gummiboot"
+    cat > /boot/loader/loader.conf <<EOF
+default linux-lts.conf
+timeout 1
+console-mode auto
+EOF
+
+    echo ">>> adding entries to gummiboot"
+    cat > /boot/loader/entries/linux-edge.conf <<EOF
+title       alpine Linux edge
+linux       /vmlinuz-edge
+initrd      /amd-ucode.img
+initrd      /intel-ucode.img
+initrd      /initramfs-edge
+options     $disk
+EOF
+    cat > /boot/loader/entries/linux-lts.conf <<EOF
+title       alpine Linux LTS
+linux       /vmlinuz-lts
+initrd      /amd-ucode.img
+initrd      /intel-ucode.img
+initrd      /initramfs-lts
+options     $disk
+EOF
+
+    if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
+        echo ">>> adding fwupd to gummiboot"
+        mkdir -p /boot/efi/fwupd/
+        cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/efi/fwupd/
+        cat > /boot/loader/entries/fwupd.conf <<EOF
+title   firmware update
+efi     /fwupd/fwupdx64.efi
+EOF
+    fi
+
+    cat > /etc/profile.d/gummiboot.sh <<EOF
+#!/bin/bash
+version="$(apk search -e gummiboot)"
+gummiboot() {
+    if wget -q --spider alpinelinux.org &>/dev/null; then
+        if grep -q \$(apk search -e gummiboot) etc/profile.d/gummiboot.sh; then
+            echo "gummiboot is up-to-date"
+        else
+            sudo apk update gummiboot
+            sudo cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
+        fi
+    fi
+}
+EOF
 
 }
 
@@ -1472,55 +1535,6 @@ EOF
     grub-probe /
     grub-probe -t fs -d $root_drive
     grub-probe -t fs_label -d $root_drive
-
-}
-
-install_gummiboot() {
-
-    echo ">>> installing gummiboot"
-    apk add gummiboot
-
-    mkdir /boot/efi/alpineLinux/
-    cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
-
-    efibootmgr -c -d $drive -p 1 -t 0 -L 'alpineLinux' -l '\EFI\alpineLinux\bootx64.efi'
-
-    mkdir -p /boot/loader/entries/
-
-    echo ">>> configuring gummiboot"
-    cat > /boot/loader/loader.conf <<EOF
-default linux-lts.conf
-timeout 1
-console-mode auto
-EOF
-
-    echo ">>> adding entries to gummiboot"
-    cat > /boot/loader/entries/linux-edge.conf <<EOF
-title       alpine Linux edge
-linux       /vmlinuz-edge
-initrd      /amd-ucode.img
-initrd      /intel-ucode.img
-initrd      /initramfs-edge
-options     $disk
-EOF
-    cat > /boot/loader/entries/linux-lts.conf <<EOF
-title       alpine Linux LTS
-linux       /vmlinuz-lts
-initrd      /amd-ucode.img
-initrd      /intel-ucode.img
-initrd      /initramfs-lts
-options     $disk
-EOF
-
-    if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
-        echo ">>> adding fwupd to gummiboot"
-        mkdir -p /boot/efi/fwupd/
-        cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/efi/fwupd/
-        cat > /boot/loader/entries/fwupd.conf <<EOF
-title   firmware update
-efi     /fwupd/fwupdx64.efi
-EOF
-    fi
 
 }
 
