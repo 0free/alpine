@@ -491,7 +491,7 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    bootloaders=(gummiboot syslinux grub rEFInd limine clover)
+    bootloaders=(gummiboot grub rEFInd limine clover)
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     echo -e "\n"
@@ -1325,8 +1325,6 @@ setup_bootloader() {
         if ! grep -q alpine /boot/efi/refind/refind.conf; then
             install_refind
         fi
-    elif grep -q syslinux /root/list; then
-        install_syslinux
     elif grep -q clover /root/list; then
         install_clover
     elif grep -q grub /root/list; then
@@ -1374,64 +1372,6 @@ find_windows() {
     if mountpoint -q /windows; then
         umount /windows/
     fi
-
-}
-
-install_syslinux() {
-
-    echo ">>> installing syslinux bootloader"
-    apk add syslinux
-
-    mkdir -p /boot/efi/syslinux/
-    cp /usr/share/syslinux/efi64/* /boot/efi/syslinux/
-    mv /boot/efi/syslinux/syslinux.efi /boot/efi/syslinux/bootx64.efi
-
-    if grep -q VirtualBox /root/list; then
-        cat > /boot/efi/syslinux/syslinux.cfg <<EOF
-PROMPT 0
-TIMEOUT 0
-DEFAULT 'alpine Linux VirtualMachine'
-
-LABEL 'alpine Linux VirtualMachine'
-	LINUX ../vmlinuz-virt
-	APPEND $disk rw
-	INITRD ../initramfs-virt
-
-EOF
-    else
-        cat > /boot/efi/syslinux/syslinux.cfg <<EOF
-PROMPT 1
-TIMEOUT 1
-DEFAULT 'alpine Linux edge'
-
-LABEL 'alpine Linux LTS'
-	LINUX ../vmlinuz-lts
-	APPEND $disk
-	INITRD ../initramfs-lts
-    INITRD ../amd-ucode.img
-    INITRD ../intel-ucode.img
-
-LABEL 'alpine Linux edge'
-	LINUX ../vmlinuz-edge
-	APPEND $disk
-	INITRD ../initramfs-edge
-    INITRD ../amd-ucode.img
-    INITRD ../intel-ucode.img
-
-EOF
-    fi
-
-    if [[ $windows_drive ]]; then
-        cat >> /boot/efi/syslinux/syslinux.cfg <<EOF
-LABEL 'Windows 11'
-	MENU LABEL Windows
-	COM32 chain.c32
-	APPEND root=$(blkid $windows_drive -o export | grep ^UUID=)
-
-EOF
-    fi
-
-    efibootmgr -c -d $drive -p 1 -t 0 -L 'alpineLinux' -l '\EFI\syslinux\bootx64.efi'
 
 }
 
