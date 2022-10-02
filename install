@@ -1,6 +1,6 @@
 #!/bin/bash
 
-bootSize='199MiB'
+bootSize='190MiB'
 swapSize='4000MiB'
 timezone='Asia/Muscat'
 mirror='https://dl-cdn.alpinelinux.org/alpine'
@@ -231,7 +231,7 @@ packages_list() {
                 plasma-systemmonitor plasma-firewall
                 plasma-camera plasma-videoplayer plasma-phonebook
                 # kde
-                kactivities kactivities-stats kactivitymanagerd
+                kactivities kactivities-stats kactivitymanagerd ksystemstats
                 shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool krename kcolorchooser kunitconversion
                 # widgets
                 kconfigwidgets
@@ -1158,16 +1158,18 @@ EOF
 install_flatpak() {
 
     echo ">>> installing flatpak"
-    apk add flatpak
+    apk add flatpak flatpak-bash-completion xdg-user-dirs
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     adduser $user flatpak
+    echo -e $password | su $user -c xdg-user-dirs-update
 
 }
 
 install_google_chrome() {
 
     echo ">>> installing google-chrome from flatpak"
-    echo -e $password | su $user -c flatpak install --user com.google.Chrome
+    echo -e $password | su $user -c flatpak install -y --user com.google.Chrome
+    echo -e $password | su $user -c flatpak override -y com.google.Chrome --filesystem=/home/$user/
 
     echo ">>> installing google-chrome dependencies"
     apk add dpkg ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip musl nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib
@@ -1284,10 +1286,10 @@ update() {
 sudo apk fix
 sudo apk update
 sudo apk upgrade
-sudo flatpak update
+sudo flatpak update -y
 }
 
-aliad clean='sudo flatpak uninstall --unused'
+aliad clean='sudo flatpak uninstall -y --unused'
 
 alias search='sudo apk search'
 alias install='sudo apk add'
