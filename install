@@ -12,7 +12,7 @@ hostname='linux'
 user='user'
 password='0000'
 glibc_version='2.35-r0'
-trex_version='0.26.5'
+trex_version='0.26.6'
 
 kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
 kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
@@ -1129,8 +1129,8 @@ install_nvidia() {
 #!/bin/bash
 version="$(apk search -e nvidia-src)"
 nvidia() {
-    if find /lib/modules/ -type f -name 'nvidia.ko.gz' | grep -q nvidia; then
-        if wget -q --spider alpinelinux.org &>/dev/null; then
+    if wget -q --spider alpinelinux.org &>/dev/null; then
+        if find /lib/modules/ -type f -name 'nvidia.ko.gz' | grep -q nvidia; then
             if grep -q "\$(apk search -e nvidia-src)" /etc/profile.d/nvidia.sh ; then
                 echo "nvidia driver is up-to-date"
             else
@@ -1178,7 +1178,7 @@ install_google_chrome() {
 install_miner() {
 
     echo ">>> downloading T-Rex $trex_version"
-    wget -q -P /root/ https://github.com/trexminer/T-Rex/releases/download/$trex_version/t-rex-$trex_version-linux.tar.gz
+    wget -q -P /root/ https://trex-miner.com/download/t-rex-$trex_version-linux.tar.gz
     echo ">>> extracting T-Rex $trex_version"
     tar -vzxf t-rex-$trex_version-linux.tar.gz t-rex -C /usr/bin/
     echo ">>> deleting T-Rex files"
@@ -1186,6 +1186,7 @@ install_miner() {
 
     cat > /etc/profile.d/t-rex.sh << EOF
 #!/bin/bash
+version=$trex_version
 trex() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
         if [ ! -f ~/config ]; then
@@ -1195,6 +1196,23 @@ trex() {
         /usr/bin/t-rex -c ~/config
         xdg-open http://127.0.0.1:8080
     fi
+}
+update_trex() {
+    latest="0."$(calc ${version:0-4}+0.1)
+    if wget -q --spider https://trex-miner.com/download/t-rex-$latest-linux.tar.gz
+        echo ">>> downloading T-Rex $latest"
+        wget -q -P ~/ https://trex-miner.com/download/t-rex-$latest-linux.tar.gz
+        echo ">>> extracting T-Rex $latest"
+        sudo tar -vzxf t-rex-$latest-linux.tar.gz t-rex -C /usr/bin/
+        sudo sed -i 's|version=.*|version=$latest|' /etc/prfile.d/trex.sh
+        echo ">>> deleting T-Rex files"
+        rm ~/t-rex-$latest-linux.tar.gz
+    else
+        echo ">>> t-rex is up-to-date"
+    fi
+}
+cal() {
+    printf "%s\n" "$@" | bc -l;
 }
 EOF
 
@@ -1282,13 +1300,14 @@ export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
 
 update() {
-sudo apk fix
-sudo apk update
-sudo apk upgrade
-sudo flatpak update -y
+    sudo apk fix
+    sudo apk update
+    sudo apk upgrade
+    sudo flatpak update -y
+    sudo flatpak uninstall -y --unused
+    nvidia
+    gummiboot
 }
-
-aliad clean='sudo flatpak uninstall -y --unused'
 
 alias search='sudo apk search'
 alias install='sudo apk add'
@@ -1296,12 +1315,15 @@ alias remove='sudo apk del'
 alias c='clear'
 
 disk() {
-lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
+    lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
 }
 
 fwupd() {
-fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update'
-alias youtube='yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 00:00:00\"
+    fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update
+}
+
+youtube() {
+    yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 03:00:00\"
 }
 
 PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
