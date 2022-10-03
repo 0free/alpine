@@ -14,6 +14,9 @@ password='0000'
 glibc_version='2.35-r0'
 trex_version='0.26.6'
 
+kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
+kernel='6.0'
+
 kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
 kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
 kernel_virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
@@ -55,7 +58,7 @@ packages_list() {
         # input
         xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
         # base
-        sudo bash bash-completion build-base fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep pciutils usbutils binutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
+        sudo bash bash-completion binutils file fortify-headers g++ gcc libc-dev patch remake-make fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep pciutils usbutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
         # util-linux
         util-linux util-linux-openrc util-linux-login util-linux-misc util-linux-bash-completion
         # utilities
@@ -1180,7 +1183,7 @@ install_miner() {
     echo ">>> downloading T-Rex $trex_version"
     wget -q -P /root/ https://trex-miner.com/download/t-rex-$trex_version-linux.tar.gz
     echo ">>> extracting T-Rex $trex_version"
-    tar -vzxf t-rex-$trex_version-linux.tar.gz t-rex -C /usr/bin/
+    tar -zxf t-rex-$trex_version-linux.tar.gz t-rex -C /usr/bin/
     echo ">>> deleting T-Rex files"
     rm /root/t-rex-$trex_version-linux.tar.gz
 
@@ -1203,7 +1206,7 @@ update_trex() {
         echo ">>> downloading T-Rex $latest"
         wget -q -P ~/ https://trex-miner.com/download/t-rex-$latest-linux.tar.gz
         echo ">>> extracting T-Rex $latest"
-        sudo tar -vzxf t-rex-$latest-linux.tar.gz t-rex -C /usr/bin/
+        sudo tar -zxf t-rex-$latest-linux.tar.gz t-rex -C /usr/bin/
         sudo sed -i 's|version=.*|version=$latest|' /etc/prfile.d/trex.sh
         echo ">>> deleting T-Rex files"
         rm ~/t-rex-$latest-linux.tar.gz
@@ -1649,6 +1652,58 @@ EOF
     sed -i 's|#scan_driver_dirs .*|scan_driver_dirs EFI/refind/drivers_x64|' /boot/efi/refind/refind.conf
     sed -i 's|#scanfor|scanfor|' /boot/efi/refind/refind.conf
     sed -i 's|#extra_kernel_version_strings |extra_kernel_version_strings linux-edge,linux-virt,|' /boot/efi/refind/refind.conf
+
+}
+
+build_zfs() {
+
+    echo ">>> installing required packages to build ZFS"
+    apk add installkernel git fakeroot binutils file fortify-headers g++ gcc libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev linux-headers-generic python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging git libcurl4-openssl-dev
+
+    echo ">>> cloning zfs-2.1.6"
+    cd /root/
+    git clone git clone -b zfs-2.1.6-staging https://github.com/openzfs/zfs
+    cd /root/zfs/ && sh autogen.sh
+    cd /root/zfs/ && ./configure
+    cd /root/zfs/ && make -s -j$(nproc)
+    cd /root/zfs/ && make install
+    cd /root/zfs/ && ldconfig
+    cd /root/zfs/ && depmod
+
+}
+
+build_kernel() {
+
+    echo ">>> installing required packages to build Linux kernel"
+    apk add git fakeroot binutils file fortify-headers g++ gcc libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison
+    echo ">>> downloading Linux kernel source"
+    wget -q -P /root/ $kernel_url"linux-$kernel.tar.xz"
+    echo ">>> extracting Linux kernel source"
+    tar -xf /root/linux-$kernel.tar.xz -C /root/
+    echo ">>> deleting *.tar.xz"
+    rm /root/*.tar.xz
+    echo ">>> copying Linux kernel configuration"
+    if [ -f /boot/config-virt ]; then
+        cp /boot/config-virt /root/linux-$kernel/.config
+    elif [ -f /boot/config-edge ]; then
+        cp /boot/config-edge /root/linux-$kernel/.config
+    else
+        cp /boot/config-lts /root/linux-$kernel/.config
+    fi
+    echo ">>> configuring Linux kernel"
+    cd /root/linux-$kernel/ && make menuconfig
+    echo ">>> making Linux kernel"
+    cd /root/linux-$kernel/ && make
+    echo ">>> installing modules"
+    cd /root/linux-$kernel/ && make modules_install
+    echo ">>> installing Linux kernel"
+    cd /root/linux-$kernel/ && make install
+    echo ">>> building linux edge initial ramdisk"
+    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs $kernel
+    echo ">>> installing Linux kernel to alpine"
+    installkernel 6.0 /boot/vmlinuz /boot/System.map /boot/
+    echo ">>> deleting Linux kernel source"
+    rm -r /root/Linux-$kernel/
 
 }
 
