@@ -1153,11 +1153,11 @@ build_kernel() {
     sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' /root/linux-$kernel/.config
     sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' /root/linux-$kernel/.config
     echo ">>> configuring Linux kernel"
-    cd /root/linux-$kernel/ && make menuconfig
+    cd /root/linux-$kernel/ && make $(nproc) menuconfig
     echo ">>> making Linux kernel"
-    cd /root/linux-$kernel/ && make
+    cd /root/linux-$kernel/ && make $(nproc)
     echo ">>> installing modules"
-    cd /root/linux-$kernel/ && make modules_install
+    cd /root/linux-$kernel/ && make $(nproc) modules_install
     echo ">>> installing Linux kernel"
     #cd /root/linux-$kernel/ && make install
     installkernel 6.0 /root/linux-$kernel/arch/x86_64/boot/bzImage /root/linux-$kernel/System.map /boot/
