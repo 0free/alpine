@@ -499,7 +499,7 @@ setup_drive() {
     elif [[ $filesystem == btrfs ]]; then
         bootloaders=(gummiboot grub rEFInd clover)
     else
-        bootloaders=(gummiboot limine grub rEFInd clover)
+        bootloaders=(gummiboot grub rEFInd clover)
     fi
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
@@ -1383,8 +1383,12 @@ update() {
     sudo apk upgrade
     sudo flatpak update -y
     sudo flatpak uninstall -y --unused
-    nvidia
-    gummiboot
+    if [ -f /etc/profile.d/nvidia.sh ]; then
+        nvidia
+    fi
+    if [ -f /etc/profile.d/gummiboot.sh ]; then
+        gummiboot
+    fi
 }
 
 alias search='sudo apk search'
@@ -1435,16 +1439,14 @@ setup_bootloader() {
 
     if grep -q gummiboot /root/list; then
         install_gummiboot
-    elif grep -q clover /root/list; then
-        install_clover
     elif grep -q grub /root/list; then
         install_grub
-    elif grep -q limine /root/list; then
-        install_limine
     elif grep -q rEFInd /root/list; then
         if ! grep -q alpine /boot/efi/refind/refind.conf; then
             install_refind
         fi
+    elif grep -q clover /root/list; then
+        install_clover
     fi
 
     finish
@@ -1507,7 +1509,7 @@ console-mode auto
 EOF
 
     echo ">>> adding entries to gummiboot"
-    if [ -f /boot/vmlinuz ]; then
+    if [ -f /boot/initramfs ]; then
         cat > /boot/loader/entries/linux.conf <<EOF
 title       Linux-$kernel
 linux       /vmlinuz
@@ -1517,7 +1519,7 @@ initrd      /initramfs
 options     $disk
 EOF
     fi
-    if [ -f /boot/vmlinuz-edge ]; then
+    if [ -f /boot/initramfs-edge ]; then
         cat > /boot/loader/entries/linux-edge.conf <<EOF
 title       alpine Linux edge
 linux       /vmlinuz-edge
@@ -1527,7 +1529,7 @@ initrd      /initramfs-edge
 options     $disk
 EOF
     fi
-    if [ -f /boot/vmlinuz-lts ]; then
+    if [ -f /boot/initramfs-lts ]; then
         cat > /boot/loader/entries/linux-lts.conf <<EOF
 title       alpine Linux LTS
 linux       /vmlinuz-lts
@@ -1562,49 +1564,6 @@ gummiboot() {
     fi
 }
 EOF
-
-}
-
-install_limine() {
-
-    echo ">>> installing limine bootloader"
-    apk add limine limine-64
-    cp /usr/share/limine/BOOTX64.EFI /boot/EFI
-
-    cat > /boot/limine.cfg <<EOF
-TIMEOUT=1
-
-:alpine Linux edge
-PROTOCOL=linux
-KERNEL_PATH=boot:///vmlinuz-edge
-CMDLINE=$disk
-MODULE_PATH=boot:///initramfs-edge
-
-:alpine Linux LTS
-PROTOCOL=linux
-KERNEL_PATH=boot:///vmlinuz-lts
-CMDLINE=$disk
-MODULE_PATH=boot:///initramfs-lts
-
-EOF
-
-}
-
-install_clover() {
-
-    if [ ! -d CloverBootLoader/ ]; then
-        echo ">>> cloning CloverBootLoader"
-        git clone https://github.com/0free/CloverBootLoader.git
-        rm -r CloverBootLoader/.git/
-        echo ">>> copying clover bootloader"
-        cp -rlf CloverBootLoader/* /boot/
-        rm -r CloverBootLoader/
-        echo ">>> downloading efifs drivers"
-        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/btrfs_x64.efi
-        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/ntfs_x64.efi
-        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
-        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
-    fi
 
 }
 
@@ -1695,7 +1654,6 @@ install_refind() {
     if [[ $windows_drive ]]; then
         uuid=$(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
         cat >> /boot/efi/refind/refind.conf <<EOF
-
 menuentry "Windows Boot Manager" {
     icon \EFI\refind\icons\os_win8.png
     volume $uuid
@@ -1719,20 +1677,31 @@ EOF
 
     uuid=$(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
 
-    if grep -q VirtualBox /root/list; then
+    if [ -f /boot/initramfs-virt ]; then
         cat >> /boot/efi/refind/refind.conf <<EOF
-
 menuentry "alpine Linux VirtualMachine" {
     icon /EFI/refind/icons/os_linux.png
     volume $uuid
     loader /vmlinuz-virt
     initrd /initramfs-virt
-    options '$disk initrd=/initramfs-lts'
+    options '$disk'
 }
 EOF
-    else
-        cat >> /boot/efi/refind/refind.conf <<EOF
+    fi
 
+    if [ -f /boot/initramfs ]; then
+        cat >> /boot/efi/refind/refind.conf <<EOF
+menuentry "alpine Linux edge" {
+    icon /EFI/refind/icons/os_linux.png
+    volume $uuid
+    loader /vmlinuz
+    initrd /initramfs
+    options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
+}
+EOF
+
+    if [ -f /boot/initramfs-edge ]; then
+        cat >> /boot/efi/refind/refind.conf <<EOF
 menuentry "alpine Linux edge" {
     icon /EFI/refind/icons/os_linux.png
     volume $uuid
@@ -1740,6 +1709,10 @@ menuentry "alpine Linux edge" {
     initrd /initramfs-edge
     options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
 }
+EOF
+
+    if [ -f /boot/initramfs-lts ]; then
+        cat >> /boot/efi/refind/refind.conf <<EOF
 menuentry "alpine Linux LTS" {
     icon /EFI/refind/icons/os_linux.png
     volume $uuid
@@ -1759,6 +1732,24 @@ EOF
     sed -i 's|#scan_driver_dirs .*|scan_driver_dirs EFI/refind/drivers_x64|' /boot/efi/refind/refind.conf
     sed -i 's|#scanfor|scanfor|' /boot/efi/refind/refind.conf
     sed -i 's|#extra_kernel_version_strings |extra_kernel_version_strings linux-edge,linux-virt,|' /boot/efi/refind/refind.conf
+
+}
+
+install_clover() {
+
+    if [ ! -d CloverBootLoader/ ]; then
+        echo ">>> cloning CloverBootLoader"
+        git clone https://github.com/0free/CloverBootLoader.git
+        rm -r CloverBootLoader/.git/
+        echo ">>> copying clover bootloader"
+        cp -rlf CloverBootLoader/* /boot/
+        rm -r CloverBootLoader/
+        echo ">>> downloading efifs drivers"
+        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/btrfs_x64.efi
+        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/ntfs_x64.efi
+        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
+        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
+    fi
 
 }
 
