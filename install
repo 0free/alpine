@@ -58,7 +58,7 @@ packages_list() {
         # input
         xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
         # base
-        sudo bash bash-completion binutils file fortify-headers g++ gcc libc-dev patch remake-make fakeroot shadow rsyslog rsyslog-openrc sed attr dialog which grep pciutils usbutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
+        sudo bash bash-completion binutils fakeroot file fortify-headers g++ gcc libc-dev patch remake-make shadow rsyslog rsyslog-openrc sed attr dialog which grep pciutils usbutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
         # util-linux
         util-linux util-linux-openrc util-linux-login util-linux-misc util-linux-bash-completion
         # utilities
@@ -494,8 +494,17 @@ setup_drive() {
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
 
-    bootloaders=(gummiboot grub rEFInd limine clover)
+    if [[ $filesystem == zfs ]]; then
+        bootloaders=(gummiboot grub)
+    elif [[ $filesystem == btrfs ]]; then
+        bootloaders=(gummiboot grub rEFInd clover)
+    else
+        bootloaders=(gummiboot limine grub rEFInd clover)
+    fi
     menu 'select a bootloader' bootloader ${bootloaders[@]}
+
+    kernels=(no "Linux-$kernel")
+    menu 'do you want to build a custom kernel?' kernel ${kernels[@]}
 
     echo -e "\n"
 
@@ -580,6 +589,7 @@ setup_drive() {
     echo "computer=$computer" >> /root/list
     echo "desktop=$desktop" >> /root/list
     echo "bootloader=$bootloader" >> /root/list
+    echo "kernel=$kernel" /root/list
 
     mount_root
     mount_boot
@@ -881,8 +891,10 @@ setup_desktop() {
     install_glibc
 
     if ! grep -q VirtualBox /root/list; then
-        build_kernel
-        build_zfs
+        if grep -q Linux-$kernel /root/list; then
+            build_kernel
+            build_zfs
+        fi
         install_nvidia
     fi
 
@@ -1114,7 +1126,7 @@ install_glibc() {
     apk add --force-overwrite /root/glibc-$glibc_version.apk
     apk add /root/glibc-bin-$glibc_version.apk
     apk add /root/glibc-i18n-$glibc_version.apk
-    rm /root/glibc-$glibc_version.apk
+    rm /root/glibc-*.apk
     apk fix --force-overwrite alpine-baselayout-data
 
 }
@@ -1122,7 +1134,8 @@ install_glibc() {
 build_kernel() {
 
     echo ">>> installing required packages to build Linux kernel"
-    apk add git bash bc binutils file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole util-linux e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio
+    depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
+    apk add $depend
     echo ">>> downloading Linux kernel source"
     wget -q -P /root/ $kernel_url"linux-$kernel.tar.xz"
     echo ">>> extracting Linux kernel source"
@@ -1137,6 +1150,8 @@ build_kernel() {
     else
         cp /boot/config-lts /root/linux-$kernel/.config
     fi
+    sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' /root/linux-$kernel/.config
+    sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' /root/linux-$kernel/.config
     echo ">>> configuring Linux kernel"
     cd /root/linux-$kernel/ && make menuconfig
     echo ">>> making Linux kernel"
@@ -1150,13 +1165,16 @@ build_kernel() {
     mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs $kernel
     echo ">>> deleting Linux kernel source"
     rm -r /root/Linux-$kernel/
+    echo ">>> deleting un-needed dependencies"
+    apk del $depend
 
 }
 
 build_zfs() {
 
     echo ">>> installing required packages to build ZFS"
-    apk add installkernel git fakeroot binutils file fortify-headers g++ gcc libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev linux-headers-generic python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging git libcurl4-openssl-dev
+    depend='installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev linux-headers-generic python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging git libcurl4-openssl-dev'
+    apk add $depend
 
     echo ">>> cloning zfs-2.1.6"
     cd /root/
@@ -1167,6 +1185,9 @@ build_zfs() {
     cd /root/zfs/ && make install
     cd /root/zfs/ && ldconfig
     cd /root/zfs/ && depmod
+
+    echo ">>> deleting un-needed dependencies"
+    apk del $depend
 
 }
 
@@ -1227,7 +1248,8 @@ install_google_chrome() {
     echo -e $password | su $user -c flatpak override -y com.google.Chrome --filesystem=/home/$user/
 
     echo ">>> installing google-chrome dependencies"
-    apk add dpkg ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip musl nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib
+    depend='ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip musl nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib'
+    apk add $depend
 
 }
 
@@ -1384,6 +1406,19 @@ youtube() {
 
 PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
 
+openwrt() {
+    if [ -d ~/openwrt ]; then
+        cd ~/openwrt && git pull
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        make menuconfig
+        make -j$(nproc)
+    else
+        git clone -b master https://git.openwrt.org/openwrt/openwrt.git
+        openwrt
+    fi
+}
+
 EOF
 
 }
@@ -1466,13 +1501,24 @@ install_gummiboot() {
 
     echo ">>> configuring gummiboot"
     cat > /boot/loader/loader.conf <<EOF
-default linux-lts.conf
+default linux.conf
 timeout 1
 console-mode auto
 EOF
 
     echo ">>> adding entries to gummiboot"
-    cat > /boot/loader/entries/linux-edge.conf <<EOF
+    if [ -f /boot/vmlinuz ]; then
+        cat > /boot/loader/entries/linux.conf <<EOF
+title       Linux-$kernel
+linux       /vmlinuz
+initrd      /amd-ucode.img
+initrd      /intel-ucode.img
+initrd      /initramfs
+options     $disk
+EOF
+    fi
+    if [ -f /boot/vmlinuz-edge ]; then
+        cat > /boot/loader/entries/linux-edge.conf <<EOF
 title       alpine Linux edge
 linux       /vmlinuz-edge
 initrd      /amd-ucode.img
@@ -1480,7 +1526,9 @@ initrd      /intel-ucode.img
 initrd      /initramfs-edge
 options     $disk
 EOF
-    cat > /boot/loader/entries/linux-lts.conf <<EOF
+    fi
+    if [ -f /boot/vmlinuz-lts ]; then
+        cat > /boot/loader/entries/linux-lts.conf <<EOF
 title       alpine Linux LTS
 linux       /vmlinuz-lts
 initrd      /amd-ucode.img
@@ -1488,13 +1536,14 @@ initrd      /intel-ucode.img
 initrd      /initramfs-lts
 options     $disk
 EOF
+    fi
 
     if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
         echo ">>> adding fwupd to gummiboot"
         mkdir -p /boot/efi/fwupd/
         cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/efi/fwupd/
         cat > /boot/loader/entries/fwupd.conf <<EOF
-title   firmware update
+title   update firmware
 efi     /fwupd/fwupdx64.efi
 EOF
     fi
@@ -1546,10 +1595,15 @@ install_clover() {
     if [ ! -d CloverBootLoader/ ]; then
         echo ">>> cloning CloverBootLoader"
         git clone https://github.com/0free/CloverBootLoader.git
-        rm -r CloverBoorLoader/.git/
+        rm -r CloverBootLoader/.git/
         echo ">>> copying clover bootloader"
         cp -rlf CloverBootLoader/* /boot/
         rm -r CloverBootLoader/
+        echo ">>> downloading efifs drivers"
+        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/btrfs_x64.efi
+        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/ntfs_x64.efi
+        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
+        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
     fi
 
 }
@@ -1746,6 +1800,7 @@ elif [ -f /mnt/root/chroot ]; then
 else
     if [ -f /root/list ]; then
         drive=$(. /root/list; echo $drive)
+        kernel=$(. /root/list; echo $kernel)
         filesystem=$(. /root/list; echo $filesystem)
         boot_drive=$(. /root/list; echo $boot_drive)
         swap_drive=$(. /root/list; echo $swap_drive)
