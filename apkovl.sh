@@ -73,7 +73,7 @@ intel-media-driver intel-ucode
 iptables iptables-openrc
 iwd iwd-openrc wireless-regdb
 linux-lts linux-pam
-linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-nvidia linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
+linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
 mesa mesa-dri-gallium mesa-egl mesa-gbm mesa-gl mesa-glapi mesa-gles mesa-va-gallium mesa-vdpau-gallium mesa-vulkan-intel mesa-vulkan-layers
 musl musl-locales musl-utils
 networkmanager
