@@ -678,9 +678,7 @@ mount_boot() {
 
     echo ">>> mounting boot drive"
     mount $boot_drive /mnt/boot/
-    if [ ! -d /mnt/boot/efi/ ]; then
-        mkdir -p /mnt/boot/efi/
-    fi
+    mkdir /mnt/boot/
 
 }
 
@@ -908,7 +906,6 @@ setup_desktop() {
     fi
 
     make_initramfs
-    add_commands
     setup_bootloader
 
 }
@@ -1113,12 +1110,71 @@ EOF
     chmod -R 700 /home/$user/
     chmod -R 700 /home/$user/.config/
 
+    cat > /etc/profile.d/custom.sh <<EOF
+
+export QT_IM_MODULE=ibus
+export GTK_IM_MODULE=ibus
+export XMODIFIERS=@im=ibus
+
+update() {
+    sudo apk fix
+    sudo apk update
+    sudo apk upgrade
+    sudo flatpak update -y
+    sudo flatpak uninstall -y --unused
+    if [ -f /etc/profile.d/nvidia.sh ]; then
+        nvidia
+    fi
+    if [ -f /etc/profile.d/gummiboot.sh ]; then
+        gummiboot
+    fi
+}
+
+alias search='sudo apk search'
+alias install='sudo apk add'
+alias remove='sudo apk del'
+alias c='clear'
+
+disk() {
+    lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
+}
+
+fwupd() {
+    fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update
+}
+
+youtube() {
+    yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 03:00:00\"
+}
+
+PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
+
+openwrt() {
+    sudo apk add gcc g++ argp-standalone musl-fts-dev musl-obstack-dev musl-libintl
+    if [ -d ~/openwrt ]; then
+        cd ~/openwrt && git pull
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        make menuconfig
+        make -j$(nproc)
+    else
+        git clone -b master https://git.openwrt.org/openwrt/openwrt.git
+        cat > ~/openwrt/feeds.conf <<EOF
+src-git-full packages https://git.openwrt.org/feed/packages.git
+src-git-full luci https://git.openwrt.org/project/luci.git
+\EOF 
+        openwrt
+    fi
+}
+
+EOF
+
 }
 
 install_glibc() {
 
     echo ">>> downloading glibc-$glibc_version for alpine"
-    wget -q -P /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+    wget -q -P /etc/apk/keys/ https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
     wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-$glibc_version.apk
     wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-bin-$glibc_version.apk
     wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-i18n-$glibc_version.apk
@@ -1160,9 +1216,7 @@ build_kernel() {
     cd /root/linux-$kernel/ && make $(nproc) modules_install
     echo ">>> installing Linux kernel"
     #cd /root/linux-$kernel/ && make install
-    installkernel 6.0 /root/linux-$kernel/arch/x86_64/boot/bzImage /root/linux-$kernel/System.map /boot/
-    echo ">>> building linux edge initial ramdisk"
-    mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs $kernel
+    installkernel $kernel /root/linux-$kernel/arch/x86/boot/bzImage /root/linux-$kernel/System.map /boot/
     echo ">>> deleting Linux kernel source"
     rm -r /root/Linux-$kernel/
     echo ">>> deleting un-needed dependencies"
@@ -1248,7 +1302,7 @@ install_google_chrome() {
     echo -e $password | su $user -c flatpak override -y com.google.Chrome --filesystem=/home/$user/
 
     echo ">>> installing google-chrome dependencies"
-    depend='ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip musl nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib'
+    depend='ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib'
     apk add $depend
 
 }
@@ -1345,89 +1399,34 @@ make_initramfs() {
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
-    if grep -q VirtualBox /root/list; then
-        if [ ! -d /lib/modules/$kernel_virt ]; then
-            mkdir /lib/modules/$kernel_virt
-        fi
+    if [ ! -d /lib/modules/$kernel_virt ]; then
+        mkdir /lib/modules/$kernel_virt
+    fi
+    if [ ! -d /lib/modules/$kernel_edge ]; then
+        mkdir /lib/modules/$kernel_edge
+    fi
+    if [ ! -d  /lib/modules/$kernel_lts ]; then
+        mkdir /lib/modules/$kernel_lts
+    fi
+
+    if [ -f /boot/vmlinuz ]; then
+        echo ">>> building linux-$kernel initial ramdisk"
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs $kernel
+    fi
+    if [ -f /boot/vmlinuz-virt ]; then
         echo ">>> building linux VirtualMachine initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-virt $kernel_virt
-    else
-        if [ ! -d /lib/modules/$kernel_edge ]; then
-            mkdir /lib/modules/$kernel_edge
-        fi
-        if [ ! -d  /lib/modules/$kernel_lts ]; then
-            mkdir /lib/modules/$kernel_lts
-        fi
+    fi
+    if [ -f /boot/vmlinuz-lts ]; then
         echo ">>> building linux LTS initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-lts $kernel_lts
+    fi
+    if [ -f /boot/vmlinuz-edge ]; then
         echo ">>> building linux edge initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-edge $kernel_edge
     fi
 
-}
-
-add_commands() {
-
-    echo ">>> adding bashrc"
-    echo "" > /home/$user/.bashrc
-
-    cat >> /home/$user/.bashrc <<EOF
-
-export QT_IM_MODULE=ibus
-export GTK_IM_MODULE=ibus
-export XMODIFIERS=@im=ibus
-
-update() {
-    sudo apk fix
-    sudo apk update
-    sudo apk upgrade
-    sudo flatpak update -y
-    sudo flatpak uninstall -y --unused
-    if [ -f /etc/profile.d/nvidia.sh ]; then
-        nvidia
-    fi
-    if [ -f /etc/profile.d/gummiboot.sh ]; then
-        gummiboot
-    fi
-}
-
-alias search='sudo apk search'
-alias install='sudo apk add'
-alias remove='sudo apk del'
-alias c='clear'
-
-disk() {
-    lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
-}
-
-fwupd() {
-    fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update
-}
-
-youtube() {
-    yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 03:00:00\"
-}
-
-PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
-
-openwrt() {
-    if [ -d ~/openwrt ]; then
-        cd ~/openwrt && git pull
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        make menuconfig
-        make -j$(nproc)
-    else
-        git clone -b master https://git.openwrt.org/openwrt/openwrt.git
-        cat > ~/openwrt/feeds.conf <<EOF
-src-git-full packages https://git.openwrt.org/feed/packages.git
-src-git-full luci https://git.openwrt.org/project/luci.git
-\EOF 
-        openwrt
-    fi
-}
-
-EOF
+    mkdir /mnt/boot/efi/
 
 }
 
@@ -1446,9 +1445,7 @@ setup_bootloader() {
     elif grep -q grub /root/list; then
         install_grub
     elif grep -q rEFInd /root/list; then
-        if ! grep -q alpine /boot/efi/refind/refind.conf; then
-            install_refind
-        fi
+        install_refind
     elif grep -q clover /root/list; then
         install_clover
     fi
@@ -1520,6 +1517,16 @@ linux       /vmlinuz
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
 initrd      /initramfs
+options     $disk
+EOF
+    fi
+    if [ -f /boot/initramfs-virt ]; then
+        cat > /boot/loader/entries/linux-virt.conf <<EOF
+title       alpine Linux virt
+linux       /vmlinuz-virt
+initrd      /amd-ucode.img
+initrd      /intel-ucode.img
+initrd      /initramfs-virt
 options     $disk
 EOF
     fi
@@ -1704,6 +1711,17 @@ menuentry "alpine Linux edge" {
 }
 EOF
 
+    if [ -f /boot/initramfs-virt ]; then
+        cat >> /boot/efi/refind/refind.conf <<EOF
+menuentry "alpine Linux virt" {
+    icon /EFI/refind/icons/os_linux.png
+    volume $uuid
+    loader /vmlinuz-virt
+    initrd /initramfs-virt
+    options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
+}
+EOF
+
     if [ -f /boot/initramfs-edge ]; then
         cat >> /boot/efi/refind/refind.conf <<EOF
 menuentry "alpine Linux edge" {
@@ -1805,7 +1823,7 @@ else
         windows_partition=$(. /root/list; echo $windows_partition)
     fi
     if [ -f /root/chroot ]; then
-        if [ -f /home/$user/.bashrc ]; then
+        if [ -d /boot/efi/ ]; then
             setup_bootloader
         elif [[ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]]; then
             user=$(ls /home)
