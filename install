@@ -589,7 +589,6 @@ setup_drive() {
     echo "computer=$computer" >> /root/list
     echo "desktop=$desktop" >> /root/list
     echo "bootloader=$bootloader" >> /root/list
-    echo "kernel=$kernel" /root/list
 
     mount_root
     mount_boot
@@ -1018,10 +1017,9 @@ configure_alpine() {
     sed -i 's|rc_tty_number=12|rc_tty_number=0|' /etc/rc.conf
 
     mv /etc/profile.d/color_prompt.sh.disabled /etc/profile.d/color_prompt.sh
-    sed -i 's|LANG=C.UTF-8|LANG=en_US.UTF-8|' /etc/profile.d/locale.sh
 
     echo ">>> setting locales"
-    cat > /etc/locale.conf <<EOF
+    cat > /etc/profile.d/locale.sh <<EOF
 LANG=en_US.UTF-8
 LANGUAGE=en_US:en
 LC_CTYPE="en_US.UTF-8"
@@ -1055,7 +1053,7 @@ wifi.backend=iwd
 EOF
     fi
 
-    if ! grep -q "snd_seq" /etc/modules; then
+    if ! grep -q snd_seq /etc/modules; then
         echo snd_seq >> /etc/modules
     fi
 
@@ -1112,6 +1110,8 @@ EOF
 
     cat > /etc/profile.d/custom.sh <<EOF
 
+PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
+
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
@@ -1130,10 +1130,10 @@ update() {
     fi
 }
 
-alias search='sudo apk search'
-alias install='sudo apk add'
-alias remove='sudo apk del'
-alias c='clear'
+search(){sudo apk search;}
+install(){sudo apk add;}
+remove(){sudo apk del;}
+c(){clear;}
 
 disk() {
     lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
@@ -1146,8 +1146,6 @@ fwupd() {
 youtube() {
     yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 03:00:00\"
 }
-
-PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
 
 openwrt() {
     sudo apk add gcc g++ argp-standalone musl-fts-dev musl-obstack-dev musl-libintl
@@ -1257,7 +1255,6 @@ install_nvidia() {
     fi
 
     cat > /etc/profile.d/nvidia.sh <<EOF
-#!/bin/bash
 version="$(apk search -e nvidia-src)"
 nvidia() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
@@ -1317,7 +1314,6 @@ install_miner() {
     rm /root/t-rex-$trex_version-linux.tar.gz
 
     cat > /etc/profile.d/t-rex.sh << EOF
-#!/bin/bash
 version=$trex_version
 trex() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
@@ -1343,7 +1339,7 @@ update_trex() {
         echo ">>> t-rex is up-to-date"
     fi
 }
-cal() {
+calc() {
     printf "%s\n" "$@" | bc -l;
 }
 EOF
@@ -1813,7 +1809,6 @@ elif [ -f /mnt/root/chroot ]; then
 else
     if [ -f /root/list ]; then
         drive=$(. /root/list; echo $drive)
-        kernel=$(. /root/list; echo $kernel)
         filesystem=$(. /root/list; echo $filesystem)
         boot_drive=$(. /root/list; echo $boot_drive)
         swap_drive=$(. /root/list; echo $swap_drive)
