@@ -869,10 +869,17 @@ create_user() {
     chmod 0400 /etc/sudoers.d/wheel
     echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user $user
     usermod -aG input,audio,video,netdev,usb,disk,lp,adm $user
-
     if grep -q zfs /root/list; then
         zfs allow $user create,mount,mountpoint,snapshot $pool
     fi
+
+}
+
+login_suer() {
+
+    echo ">>> login as $user"
+    su -u $user
+    echo -e $password | sudo -s
 
 }
 
@@ -1190,16 +1197,16 @@ install_glibc() {
 
 build_kernel() {
 
-    echo ">>> installing required packages to build Linux kernel"
+    echo ">>> installing required packages to build Linux-$kernel"
     depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
     apk add $depend
-    echo ">>> downloading Linux kernel source"
+    echo ">>> downloading Linux-$kernel source"
     wget -q -P /root/ $kernel_url"linux-$kernel.tar.xz"
-    echo ">>> extracting Linux kernel source"
+    echo ">>> extracting Linux-$kernel source"
     tar -xf /root/linux-$kernel.tar.xz -C /root/
     echo ">>> deleting *.tar.xz"
     rm /root/*.tar.xz
-    echo ">>> copying Linux kernel configuration"
+    echo ">>> copying Linux-$kernel configuration"
     if [ -f /boot/config-virt ]; then
         cp /boot/config-virt /root/linux-$kernel/.config
     elif [ -f /boot/config-edge ]; then
@@ -1252,7 +1259,7 @@ install_nvidia() {
     apk add bubblewrap akms nvidia-src
 
     echo ">>> building nvidia kernel modules"
-    echo -e $password | su $user -c akms install all
+    sudo akms install all
     if [ -d /usr/src/nvidia-*/ ]; then
         rm -r /usr/src/nvidia-*/
     fi
@@ -1291,15 +1298,15 @@ install_flatpak() {
     apk add flatpak flatpak-bash-completion xdg-user-dirs
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     adduser $user flatpak
-    echo -e $password | su $user -c xdg-user-dirs-update
+    xdg-user-dirs-update
 
 }
 
 install_google_chrome() {
 
     echo ">>> installing google-chrome from flatpak"
-    echo -e $password | su $user -c flatpak install -y --user com.google.Chrome
-    echo -e $password | su $user -c flatpak override -y com.google.Chrome --filesystem=/home/$user/
+    flatpak install -y --user com.google.Chrome
+    flatpak override -y com.google.Chrome --filesystem=/home/$user/
 
     echo ">>> installing google-chrome dependencies"
     depend='ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib'
