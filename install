@@ -662,14 +662,10 @@ mount_root() {
         echo ">>> mounting root drive"
         mount $root_drive /mnt/
     fi
-
     if ! mountpoint -q /mnt; then
         exit
     fi
-
-    if [ ! -d /mnt/boot/ ]; then
-        mkdir -p /mnt/boot/
-    fi
+    mkdir -p /mnt/boot/
 
 }
 
