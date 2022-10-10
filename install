@@ -1252,7 +1252,7 @@ install_nvidia() {
     apk add bubblewrap akms nvidia-src
 
     echo ">>> building nvidia kernel modules"
-    sudo -iu $user -c akms install all
+    sudo -u $user akms install all
     if [ -d /usr/src/nvidia-*/ ]; then
         rm -r /usr/src/nvidia-*/
     fi
