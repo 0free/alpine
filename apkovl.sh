@@ -83,6 +83,7 @@ gdm gdm-openrc mutter mutter-schemas
 gnome-desktop gnome-desktop-lang
 gnome-session gnome-shell gnome-shell-schemas
 gnome-control-center gnome-control-center-bash-completion
+gnome-tweaks gnome-shell-extensions arc-dark-gnome
 gsettings-desktop-schemas
 pinentry-gnome
 gnome-terminal gnome-disk-utility gnome-system-monitor gedit
