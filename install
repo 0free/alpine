@@ -842,6 +842,7 @@ configure() {
 
     disable_root
     create_user
+    login_user
     setup_desktop
 
 }
@@ -875,7 +876,7 @@ create_user() {
 
 }
 
-login_suer() {
+login_user() {
 
     echo ">>> login as $user"
     su -u $user
