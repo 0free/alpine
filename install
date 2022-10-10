@@ -1074,7 +1074,6 @@ EOF
         if [ ! -f /etc/profile.d/gnome.sh ]; then
             echo ">>> downloading gnome dconf-settings"
             wget -q -P /home/$user/ https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
-            mv dconf-settings.ini /home/$user/
             cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
     dconf load / < ~/dconf-settings.ini
