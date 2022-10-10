@@ -885,7 +885,8 @@ setup_desktop() {
 
     enable_services
     configure_alpine
-    install_glibc
+    patch_gcc
+    #install_glibc
 
     if ! grep -q VirtualBox /root/list; then
         if grep -q Linux-$kernel /root/list; then
@@ -1166,6 +1167,12 @@ src-git-full luci https://git.openwrt.org/project/luci.git
 }
 
 EOF
+
+}
+
+patch_gcc() {
+
+    sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
 
 }
 
@@ -1558,7 +1565,6 @@ EOF
     fi
 
     cat > /etc/profile.d/gummiboot.sh <<EOF
-#!/bin/bash
 version="$(apk search -e gummiboot)"
 gummiboot() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
@@ -1706,6 +1712,7 @@ menuentry "alpine Linux edge" {
     options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
 }
 EOF
+    fi
 
     if [ -f /boot/initramfs-virt ]; then
         cat >> /boot/efi/refind/refind.conf <<EOF
@@ -1717,6 +1724,7 @@ menuentry "alpine Linux virt" {
     options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
 }
 EOF
+    fi
 
     if [ -f /boot/initramfs-edge ]; then
         cat >> /boot/efi/refind/refind.conf <<EOF
@@ -1728,6 +1736,7 @@ menuentry "alpine Linux edge" {
     options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
 }
 EOF
+    fi
 
     if [ -f /boot/initramfs-lts ]; then
         cat >> /boot/efi/refind/refind.conf <<EOF
