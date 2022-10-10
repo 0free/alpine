@@ -677,7 +677,6 @@ mount_boot() {
 
     echo ">>> mounting boot drive"
     mount $boot_drive /mnt/boot/
-    mkdir /mnt/boot/
 
 }
 
