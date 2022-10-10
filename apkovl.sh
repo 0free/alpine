@@ -127,9 +127,13 @@ if [ -f /etc/dconf-settings.ini ]; then
   rm /etc/dconf-settings.ini
 fi
 PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
-if ping -q -c1 alpinelinux.org &>/dev/null; then
-    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install
-fi
+install() {
+	if ping -q -c1 alpinelinux.org &>/dev/null; then
+	    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install
+    else
+        echo "no internet"
+	fi
+}
 EOF
 
 rc_add devfs sysinit
