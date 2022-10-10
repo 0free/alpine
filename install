@@ -1147,10 +1147,13 @@ disk() {
     lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
 }
 fwupd() {
-    fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update
+    fwupdmgr get-devices
+    fwupdmgr refresh
+    fwupdmgr get-updates
+    fwupdmgr update
 }
 youtube() {
-    yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 03:00:00\"
+    yt-dlp -o "~/%(title)s.%(ext)s" -f "bv[vcodec~="^((he|a)vc|h26[45])"][height<=1080][fps<=60]+ba" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:"-ss 00:00:00 -to 03:00:00"
 }
 openwrt() {
     sudo apk add gcc g++ argp-standalone musl-fts-dev musl-obstack-dev musl-libintl
@@ -1162,10 +1165,8 @@ openwrt() {
         make -j$(nproc)
     else
         git clone -b master https://git.openwrt.org/openwrt/openwrt.git
-        cat > ~/openwrt/feeds.conf <<EOF
-src-git-full packages https://git.openwrt.org/feed/packages.git
-src-git-full luci https://git.openwrt.org/project/luci.git
-\EOF 
+        echo "src-git-full packages https://git.openwrt.org/feed/packages.git" > ~/openwrt/feeds.conf
+        echo "src-git-full luci https://git.openwrt.org/project/luci.git" >> ~/openwrt/feeds.conf
         openwrt
     fi
 }
