@@ -503,8 +503,8 @@ setup_drive() {
     fi
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
-    kernels=(no "Linux-$kernel")
-    menu 'do you want to build a custom kernel?' kernel ${kernels[@]}
+    kernels=(no 'Linux-$kernel')
+    menu 'build a custom kernel' kernel ${kernels[@]}
 
     echo -e "\n"
 
@@ -589,6 +589,7 @@ setup_drive() {
     echo "computer=$computer" >> /root/list
     echo "desktop=$desktop" >> /root/list
     echo "bootloader=$bootloader" >> /root/list
+    echo "kernel=Linux-$kernel" >> /root/list
 
     mount_root
     mount_boot
@@ -1113,13 +1114,10 @@ EOF
     chmod -R 700 /home/$user/.config/
 
     cat > /etc/profile.d/custom.sh <<EOF
-
 PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
-
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
-
 update() {
     sudo apk fix
     sudo apk update
@@ -1133,7 +1131,6 @@ update() {
         gummiboot
     fi
 }
-
 search() {
     apk search
 }
@@ -1146,19 +1143,15 @@ remove() {
 c() {
     clear
 }
-
 disk() {
     lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
 }
-
 fwupd() {
     fwupdmgr get-devices && fwupdmgr refresh && fwupdmgr get-updates && fwupdmgr update
 }
-
 youtube() {
     yt-dlp -o \"~/%(title)s.%(ext)s\" -f \"bv[vcodec~=\"^((he|a)vc|h26[45])\"][height<=1080][fps<=60]+ba\" --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:\"-ss 00:00:00 -to 03:00:00\"
 }
-
 openwrt() {
     sudo apk add gcc g++ argp-standalone musl-fts-dev musl-obstack-dev musl-libintl
     if [ -d ~/openwrt ]; then
@@ -1176,7 +1169,6 @@ src-git-full luci https://git.openwrt.org/project/luci.git
         openwrt
     fi
 }
-
 EOF
 
 }
