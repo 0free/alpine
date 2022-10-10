@@ -843,7 +843,6 @@ configure() {
 
     disable_root
     create_user
-    login_user
     setup_desktop
 
 }
@@ -874,13 +873,6 @@ create_user() {
     if grep -q zfs /root/list; then
         zfs allow $user create,mount,mountpoint,snapshot $pool
     fi
-
-}
-
-login_user() {
-
-    echo ">>> login as $user"
-    sudo -iu $user
 
 }
 
@@ -1260,7 +1252,7 @@ install_nvidia() {
     apk add bubblewrap akms nvidia-src
 
     echo ">>> building nvidia kernel modules"
-    sudo akms install all
+    sudo -iu $user -c akms install all
     if [ -d /usr/src/nvidia-*/ ]; then
         rm -r /usr/src/nvidia-*/
     fi
