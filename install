@@ -879,7 +879,8 @@ create_user() {
 login_user() {
 
     echo ">>> login as $user"
-    echo -e $password | sudo -i -u $user
+    sudo -iu $user
+    echo -e $password | sudo -iu $user
 
 }
 
