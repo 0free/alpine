@@ -1012,7 +1012,9 @@ configure_alpine() {
     sed -i 's|#rc_send_sigkill="YES"|rc_send_sigkill="YES"|' /etc/rc.conf
     sed -i 's|rc_tty_number=12|rc_tty_number=0|' /etc/rc.conf
 
-    mv /etc/profile.d/color_prompt.sh.disabled /etc/profile.d/color_prompt.sh
+    if [ -f /etc/profile.d/color_prompt.sh.disabled ]; then
+        mv /etc/profile.d/color_prompt.sh.disabled /etc/profile.d/color_prompt.sh
+    fi
 
     echo ">>> setting locales"
     cat > /etc/profile.d/locale.sh <<EOF
