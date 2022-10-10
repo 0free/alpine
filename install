@@ -880,7 +880,6 @@ login_user() {
 
     echo ">>> login as $user"
     sudo -iu $user
-    echo -e $password | sudo -iu $user
 
 }
 
@@ -1135,10 +1134,18 @@ update() {
     fi
 }
 
-search(){sudo apk search;}
-install(){sudo apk add;}
-remove(){sudo apk del;}
-c(){clear;}
+search() {
+    apk search
+}
+install() {
+    sudo apk add
+}
+remove() {
+    sudo apk del
+}
+c() {
+    clear
+}
 
 disk() {
     lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
