@@ -15,7 +15,7 @@ glibc_version='2.35-r0'
 trex_version='0.26.6'
 
 kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
-kernel='6.0'
+kernel='6.0.1'
 
 kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
 kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
@@ -115,7 +115,7 @@ packages_list() {
             fwupd fwupd-openrc fwupd-efi
             # mesa
             mesa-dri-gallium mesa-va-gallium mesa-vdpau-gallium mesa-gl mesa-glapi mesa-egl mesa-gles mesa-gbm
-            mesa-vulkan-layers
+            mesa-vulkan-layers mesa-libd3dadapter9
             # intel GPU
             mesa-vulkan-intel intel-media-driver
             # vulkan
