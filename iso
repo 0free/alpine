@@ -46,6 +46,7 @@ profile_linux() {
 	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage quiet mitigations=off splash'
 	initfs_features='base nvme ata usb bootchart btrfs zfs xfs ext4 f2fs lvm mmc raid scsi squashfs'
 	modloop_sign=yes
+	grub_mod='all_video disk part_gpt part_msdos linux normal configfile efi_gop ntfs chain fat'
     boot_addons='amd-ucode intel-ucode'
     initrd_ucode='/boot/amd-ucode.img /boot/intel-ucode.img'
     apkovl='./aports/scripts/apkovl.sh'
