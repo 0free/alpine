@@ -15,7 +15,7 @@ glibc_version='2.35-r0'
 trex_version='0.26.8'
 
 kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
-kernel='6.0.2'
+kernel='6.0.8'
 
 kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
 kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
