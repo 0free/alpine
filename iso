@@ -43,10 +43,10 @@ profile_linux() {
     image_ext='iso'
     arch='x86_64'
 	hostname='alpine'
-	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage quiet mitigations=off splash'
-	initfs_features='base nvme ata usb bootchart btrfs zfs xfs ext4 f2fs lvm mmc raid scsi squashfs'
+	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage quiet'
+	initfs_features='ata base bootchart cdrom ext4 mmc nvme raid scsi squashfs usb virtio'
 	modloop_sign=yes
-	grub_mod='all_video disk part_gpt part_msdos linux normal configfile efi_gop ntfs chain fat'
+	grub_mod='all_video disk part_gpt part_msdos linux normal configfile search search_label efi_gop fat iso9660 cat echo ls test true help gzio'
     boot_addons='amd-ucode intel-ucode'
     initrd_ucode='/boot/amd-ucode.img /boot/intel-ucode.img'
     apkovl='./aports/scripts/apkovl.sh'
@@ -63,9 +63,9 @@ profile_linux() {
         colord colord-bash-completion colord-gtk
         dbus dbus-libs dbus-openrc dbus-x11
         dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
-        efibootmgr grub grub-bash-completion grub-efi syslinux
+        efibootmgr grub grub-efi grub-bash-completion
         elogind elogind-bash-completion elogind-openrc
-        efibootmgr
+        efibootmgr grub grub-efi grub-bash-completion
         ethtool ethtool-bash-completion
         eudev eudev-libs eudev-openrc
         font-noto-arabic
