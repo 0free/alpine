@@ -62,7 +62,7 @@ colord colord-bash-completion colord-gtk
 dbus dbus-libs dbus-openrc dbus-x11
 dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
 elogind elogind-bash-completion elogind-openrc
-efibootmgr grub grub-efi syslinux
+efibootmgr syslinux
 ethtool ethtool-bash-completion
 eudev eudev-libs eudev-openrc
 font-noto-arabic
