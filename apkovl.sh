@@ -70,11 +70,10 @@ ibus ibus-bash-completion
 intel-media-driver intel-ucode
 iptables iptables-openrc
 iwd iwd-openrc wireless-regdb
-linux-lts linux-pam
-linux-firmware-i915 linux-firmware-intel linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
+linux-pam
 mesa mesa-dri-gallium
 musl musl-locales musl-utils
-networkmanager
+networkmanager networkmanager-bash-completion networkmanager-common networkmanager-elogind networkmanager-openrc networkmanager-wifi
 openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
 polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
 gdm gdm-openrc mutter mutter-schemas
@@ -87,7 +86,6 @@ pinentry-gnome
 gnome-terminal gnome-disk-utility gnome-system-monitor gedit
 nautilus
 network-manager-applet
-networkmanager networkmanager-bash-completion networkmanager-bluetooth networkmanager-common networkmanager-elogind networkmanager-initrd-generator networkmanager-openrc networkmanager-wifi networkmanager-wwan
 adwaita-icon-theme hicolor-icon-theme
 udev-init-scripts udev-init-scripts-openrc
 util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
