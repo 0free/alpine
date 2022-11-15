@@ -14,8 +14,8 @@ password='0000'
 glibc_version='2.35-r0'
 trex_version='0.26.8'
 
-kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
 kernel='6.0.8'
+kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
 
 kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
 kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
@@ -485,7 +485,7 @@ setup_drive() {
         fi
     fi
 
-    filesystems=(btrfs zfs xfs ext4 exfat ntfs)
+    filesystems=(btrfs zfs xfs ext4)
     menu 'select a filesystem' filesystem ${filesystems[@]}
 
     computers=(minimal miner server VirtualBox workstation)
@@ -503,7 +503,7 @@ setup_drive() {
     fi
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
-    kernels=(no 'Linux-$kernel')
+    kernels=(no "Linux-$kernel")
     menu 'build a custom kernel' kernel ${kernels[@]}
 
     echo -e "\n"
@@ -572,10 +572,6 @@ setup_drive() {
         mkfs.btrfs -f -L btrfs $root_drive
     elif [[ $filesystem == ext4 ]]; then
         mkfs.ext4 -L ext4 $root_drive
-    elif [[ $filesystem == exfat ]]; then
-        mkfs.exfat -f -L exfat $root_drive
-    elif [[ $filesystem == ntfs ]]; then
-        mkfs.ntfs -f -C -L ntfs $root_drive
     elif [[ $filesystem == xfs ]]; then
         mkfs.xfs -f -L xfs $root_drive
     fi
@@ -1230,7 +1226,7 @@ custom_kernel() {
 build_zfs() {
 
     echo ">>> installing required packages to build ZFS"
-    depend='installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev linux-headers-generic python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging git libcurl4-openssl-dev'
+    depend='installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
     apk add $depend
 
     echo ">>> installing zfs-src"
@@ -1250,13 +1246,16 @@ build_zfs() {
 
 install_nvidia() {
 
-    echo ">>> installing nvidia-src"
-    apk add bubblewrap akms nvidia-src
+    echo ">>> installing linux-lts-dev"
+    sudo apk add linux-lts-dev
+    echo ">>> installing linux-edge-dev"
+    sudo apk add linux-edge-dev
 
-    echo ">>> building nvidia kernel modules"
-    sudo -u $user sudo akms install all
+    echo ">>> installing nvidia-src"
+    apk add akms nvidia-src
+
     if [ -d /usr/src/nvidia-*/ ]; then
-        rm -r /usr/src/nvidia-*/
+        rm -r /usr/src/nvidia-*/*
     fi
 
     cat > /etc/profile.d/nvidia.sh <<EOF
@@ -1275,12 +1274,11 @@ nvidia() {
     fi
 }
 install_modules() {
-    sudo apk fix nvidia-src
     echo ">>> building nvidia kernel modules"
     sudo akms install all
     sudo sed -i "s|version=.*|version=\$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
     if [ -d /usr/src/nvidia-*/ ]; then
-        rm -r /usr/src/nvidia-*/
+        rm -r /usr/src/nvidia-*/*
     fi
 }
 EOF
