@@ -52,7 +52,6 @@ EOF
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
-amd-ucode
 alsa-lib alsa-plugins-pulse bluez-alsa bluez-alsa-openrc bluez-alsa-utils
 bash bash-completion
 attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
@@ -72,8 +71,8 @@ intel-media-driver intel-ucode
 iptables iptables-openrc
 iwd iwd-openrc wireless-regdb
 linux-lts linux-pam
-linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
-mesa mesa-dri-gallium mesa-egl mesa-gbm mesa-gl mesa-glapi mesa-gles mesa-va-gallium mesa-vdpau-gallium mesa-vulkan-intel mesa-vulkan-layers
+linux-firmware-i915 linux-firmware-intel linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
+mesa mesa-dri-gallium
 musl musl-locales musl-utils
 networkmanager
 openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
