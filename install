@@ -1169,6 +1169,7 @@ EOF
 
 patch_gcc() {
 
+    echo ">>> patching gcc"
     sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
 
 }
@@ -1301,7 +1302,7 @@ install_flatpak() {
 install_google_chrome() {
 
     echo ">>> installing google-chrome from flatpak"
-    flatpak install -y --user com.google.Chrome
+    flatpak install -y --user flathub com.google.Chrome
     flatpak override -y com.google.Chrome --filesystem=/home/$user/
 
     echo ">>> installing google-chrome dependencies"
