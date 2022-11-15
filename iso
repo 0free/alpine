@@ -37,16 +37,16 @@ cd ~
 
 chmod 700 ~/aports/scripts/apkovl.sh
 
-cat << EOF > ~/aports/scripts/mkimg.linux.sh
+cat > ~/aports/scripts/mkimg.linux.sh << EOF
 profile_linux() {
     output_format='iso'
     image_ext='iso'
     arch='x86_64'
 	hostname='alpine'
-	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage quiet'
-	initfs_features='ata base bootchart cdrom ext4 mmc nvme raid scsi squashfs usb virtio'
+	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage mitigations=off'
+	initfs_features='ata base bootchart cdrom btrfs zfs xfs ext4 mmc nvme raid scsi squashfs usb virtio'
 	modloop_sign=yes
-	grub_mod='all_video disk part_gpt part_msdos linux normal configfile search search_label efi_gop fat iso9660 cat echo ls test true help gzio'
+	grub_mod='all_video disk part_gpt part_msdos linux normal configfile search search_label efi_gop fat iso9660 cat echo ls true gzio'
     boot_addons='amd-ucode intel-ucode'
     initrd_ucode='/boot/amd-ucode.img /boot/intel-ucode.img'
     apkovl='./aports/scripts/apkovl.sh'
@@ -54,7 +54,6 @@ profile_linux() {
     kernel_addons='xtables-addons zfs'
     apks="\$apks
         alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
-        amd-ucode
         alsa-lib alsa-plugins-pulse bluez-alsa bluez-alsa-openrc bluez-alsa-utils
         bash bash-completion
         attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
@@ -63,23 +62,22 @@ profile_linux() {
         colord colord-bash-completion colord-gtk
         dbus dbus-libs dbus-openrc dbus-x11
         dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
-        efibootmgr grub grub-efi grub-bash-completion
         elogind elogind-bash-completion elogind-openrc
-        efibootmgr grub grub-efi grub-bash-completion
+        efibootmgr
         ethtool ethtool-bash-completion
         eudev eudev-libs eudev-openrc
         font-noto-arabic
         git git-bash-completion
         hwids-net hwids-pci hwids-udev hwids-usb
         ibus ibus-bash-completion
-        intel-media-driver intel-ucode
+        intel-media-driver
         iptables iptables-openrc
         iwd iwd-openrc wireless-regdb
         linux-lts linux-pam
         linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
-        mesa mesa-dri-gallium mesa-egl mesa-gbm mesa-gl mesa-glapi mesa-gles mesa-va-gallium mesa-vdpau-gallium mesa-vulkan-intel mesa-vulkan-layers
+        mesa mesa-dri-gallium
         musl musl-locales musl-utils
-        networkmanager
+        networkmanager networkmanager-bash-completion networkmanager-common networkmanager-elogind networkmanager-openrc networkmanager-wifi
         openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
         polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
         gdm gdm-openrc mutter mutter-schemas
@@ -91,12 +89,10 @@ profile_linux() {
         gnome-terminal gnome-disk-utility gnome-system-monitor gedit
         nautilus
         network-manager-applet
-        networkmanager networkmanager-bash-completion networkmanager-bluetooth networkmanager-common networkmanager-elogind networkmanager-initrd-generator networkmanager-openrc networkmanager-wifi networkmanager-wwan
         adwaita-icon-theme hicolor-icon-theme
         tzdata
         udev-init-scripts udev-init-scripts-openrc
         util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
-        vulkan-loader vulkan-tools
         xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
         xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
     "
