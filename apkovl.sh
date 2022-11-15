@@ -89,6 +89,7 @@ udev-init-scripts udev-init-scripts-openrc
 util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
+zfs zfs-openrc zfs-libs
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
