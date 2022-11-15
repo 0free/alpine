@@ -1302,7 +1302,7 @@ install_flatpak() {
 install_google_chrome() {
 
     echo ">>> installing google-chrome from flatpak"
-    flatpak install -y --user flathub com.google.Chrome
+    flatpak install -y flathub com.google.Chrome
     flatpak override -y com.google.Chrome --filesystem=/home/$user/
 
     echo ">>> installing google-chrome dependencies"
