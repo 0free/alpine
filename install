@@ -752,7 +752,7 @@ install_linux() {
     if grep -q VirtualBox /root/list; then
         list='linux-virt'
         if grep -q zfs /root/list; then
-            list+='zfs-virt zfs zfs-openrc zfs-libs zfs-udev'
+            list+=' zfs-virt zfs zfs-openrc zfs-libs zfs-udev'
         fi
     else
         if grep -q zfs /root/list; then
