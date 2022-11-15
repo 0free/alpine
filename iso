@@ -12,28 +12,24 @@ sudo apk add mtools dosfstools grub grub-efi
 USER=$(whoami)
 
 if ! groups | grep -q abuild; then
- sudo addgroup abuild
+   sudo addgroup abuild
 fi
 
 if ! groups $USER | grep -q abuild; then
- sudo usermod -a -G abuild $USER
+   sudo usermod -a -G abuild $USER
 fi
 
 if [[ ! -d ~/.abuild ]]; then
- echo -en '\n' | abuild-keygen -i -a
+   echo -en '\n' | abuild-keygen -i -a
 fi
 
 if [[ ! -d ~/aports ]]; then
- git clone --single-branch -b master https://gitlab.alpinelinux.org/alpine/aports.git
+   git clone --single-branch -b master https://gitlab.alpinelinux.org/alpine/aports.git
 else
- cd ~/aports
- git pull
- cd ..
+   cd ~/aports && git pull && cd ~
 fi
 
-cd ~/aports/scripts/
-curl -LO raw.githubusercontent.com/0free/alpine/1/apkovl.sh
-cd ~
+wget -q -P ~/aports/scripts/ raw.githubusercontent.com/0free/alpine/1/apkovl.sh
 
 chmod 700 ~/aports/scripts/apkovl.sh
 
