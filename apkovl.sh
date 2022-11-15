@@ -52,12 +52,11 @@ EOF
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
-alsa-lib alsa-plugins-pulse bluez-alsa bluez-alsa-openrc bluez-alsa-utils
+alsa-lib alsa-plugins-pulse
 bash bash-completion
 attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
 brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
 btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
-colord colord-bash-completion colord-gtk
 dbus dbus-libs dbus-openrc dbus-x11
 dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
 elogind elogind-bash-completion elogind-openrc
