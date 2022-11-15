@@ -1090,6 +1090,9 @@ EOF
             cp -rlf /kde/config/* /home/$user/.config/
             rm -r kde/
         fi
+        if [ ! -d /etc/sddm.conf.d/ ]; then
+            mkdir /etc/sddm.conf.d/
+        fi
         cat > /etc/sddm.conf.d/autologin.conf <<EOF
 [Autologin]
 User=$user
