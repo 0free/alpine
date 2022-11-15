@@ -504,7 +504,7 @@ setup_drive() {
     menu 'select a bootloader' bootloader ${bootloaders[@]}
 
     kernels=(no "Linux-$kernel")
-    menu 'build a custom kernel' kernel ${kernels[@]}
+    menu 'build a custom kernel' customKernel ${kernels[@]}
 
     echo -e "\n"
 
@@ -585,7 +585,7 @@ setup_drive() {
     echo "computer=$computer" >> /root/list
     echo "desktop=$desktop" >> /root/list
     echo "bootloader=$bootloader" >> /root/list
-    echo "kernel=Linux-$kernel" >> /root/list
+    echo "kernel=$customKernel" >> /root/list
 
     mount_root
     mount_boot
