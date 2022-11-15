@@ -67,7 +67,6 @@ font-noto-arabic
 git git-bash-completion
 hwids-net hwids-pci hwids-udev hwids-usb
 ibus ibus-bash-completion
-intel-media-driver intel-ucode
 iptables iptables-openrc
 iwd iwd-openrc wireless-regdb
 linux-pam
