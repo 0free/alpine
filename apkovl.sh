@@ -89,10 +89,8 @@ nautilus
 network-manager-applet
 networkmanager networkmanager-bash-completion networkmanager-bluetooth networkmanager-common networkmanager-elogind networkmanager-initrd-generator networkmanager-openrc networkmanager-wifi networkmanager-wwan
 adwaita-icon-theme hicolor-icon-theme
-tzdata
 udev-init-scripts udev-init-scripts-openrc
 util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
-vulkan-loader vulkan-tools
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 EOF
