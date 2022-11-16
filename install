@@ -569,8 +569,6 @@ setup_drive() {
         create_zfs
         set_zfs
     elif [[ $filesystem == btrfs ]]; then
-        echo ">>> creating btrfs-control device node"
-        mknod /dev/btrfs-control c 10 234
         mkfs.btrfs -f -L btrfs $root_drive
     elif [[ $filesystem == ext4 ]]; then
         mkfs.ext4 -L ext4 $root_drive
