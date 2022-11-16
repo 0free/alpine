@@ -539,7 +539,7 @@ setup_drive() {
         fi
         echo "boot_drive=$boot_drive" >> /root/list
 
-        if [ $swapSize != 0MiB ]; then
+        if [ "$swapSize" != "0MiB" ]; then
             echo ">>> creating swap partition"
             sgdisk -n 0:0:+$swapSize -c 0:SWAP -t 0:8200 $drive
             ((++i))
