@@ -542,7 +542,7 @@ setup_drive() {
         if [ swapSize != '0MiB' ]; then
             echo ">>> creating swap partition"
             sgdisk -n 0:0:+$swapSize -c 0:SWAP -t 0:8200 $drive
-            i=$(($i+1))
+            ((++i))
             if ls $drive | grep nvme; then
                 swap_drive=$drive"p$i"
             else
@@ -557,7 +557,7 @@ setup_drive() {
         else
             sgdisk -n 0:0:0 -c 0:ROOT -t 0:8300 $drive
         fi
-        i=$(($i+1))
+        ((++i))
         if ls $drive | grep nvme; then
             root_drive=$drive"p$i"
         else
