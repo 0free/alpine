@@ -1412,8 +1412,6 @@ make_initramfs() {
         mkdir /lib/modules/$kernel_lts
     fi
 
-    mkdir /boot/efi/
-
     if [ -f /boot/vmlinuz ]; then
         echo ">>> building linux-$kernel initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs $kernel
@@ -1430,6 +1428,8 @@ make_initramfs() {
         echo ">>> building linux edge initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-edge $kernel_edge
     fi
+
+    mkdir /boot/efi/
 
 }
 
@@ -1527,8 +1527,6 @@ EOF
         cat > /boot/loader/entries/linux-virt.conf <<EOF
 title       alpine Linux virt
 linux       /vmlinuz-virt
-initrd      /amd-ucode.img
-initrd      /intel-ucode.img
 initrd      /initramfs-virt
 options     $disk
 EOF
