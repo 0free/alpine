@@ -1412,7 +1412,7 @@ make_initramfs() {
         mkdir /lib/modules/$kernel_lts
     fi
 
-    mkdir /mnt/boot/efi/
+    mkdir /boot/efi/
 
     if [ -f /boot/vmlinuz ]; then
         echo ">>> building linux-$kernel initial ramdisk"
