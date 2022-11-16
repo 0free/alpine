@@ -882,7 +882,7 @@ setup_desktop() {
     #install_glibc
 
     if ! grep -q VirtualBox /root/list; then
-        if grep -q Linux-$kernel /root/list; then
+        if grep -q $kernel /root/list; then
             custom_kernel
             build_zfs
         fi
@@ -1303,7 +1303,7 @@ install_google_chrome() {
 
     echo ">>> installing google-chrome from flatpak"
     flatpak install -y flathub com.google.Chrome
-    flatpak override -y com.google.Chrome --filesystem=/home/$user/
+    flatpak override com.google.Chrome --filesystem=/home/$user/
 
     echo ">>> installing google-chrome dependencies"
     depend='ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib'
