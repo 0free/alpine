@@ -1412,6 +1412,8 @@ make_initramfs() {
         mkdir /lib/modules/$kernel_lts
     fi
 
+    mkdir /mnt/boot/efi/
+
     if [ -f /boot/vmlinuz ]; then
         echo ">>> building linux-$kernel initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs $kernel
@@ -1428,8 +1430,6 @@ make_initramfs() {
         echo ">>> building linux edge initial ramdisk"
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-edge $kernel_edge
     fi
-
-    mkdir /mnt/boot/efi/
 
 }
 
