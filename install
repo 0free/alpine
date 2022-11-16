@@ -1,7 +1,7 @@
 #!/bin/bash
 
 bootSize='190MiB'
-swapSize='4000MiB'
+swapSize='0MiB'
 timezone='Asia/Muscat'
 mirror='https://dl-cdn.alpinelinux.org/alpine'
 arch='x86_64'
@@ -473,6 +473,7 @@ setup_drive() {
     done
 
     menu 'select a drive' drive ${drives[@]}
+    echo "drive=$drive" > /root/list
 
     if ls $drive* | grep -Eq "$drive.{1}|$drive.{2}"; then
         partitions=($(ls $drive*))
@@ -487,12 +488,15 @@ setup_drive() {
 
     filesystems=(btrfs zfs xfs ext4)
     menu 'select a filesystem' filesystem ${filesystems[@]}
+    echo "filesystem=$filesystem" >> /root/list
 
     computers=(minimal miner server VirtualBox workstation)
     menu 'select a computer' computer ${computers[@]}
+    echo "computer=$computer" >> /root/list
 
     desktops=(gnome kde none)
     menu 'select a desktop' desktop ${desktops[@]}
+    echo "desktop=$desktop" >> /root/list
 
     if [[ $filesystem == zfs ]]; then
         bootloaders=(gummiboot grub)
@@ -502,9 +506,11 @@ setup_drive() {
         bootloaders=(gummiboot grub rEFInd clover)
     fi
     menu 'select a bootloader' bootloader ${bootloaders[@]}
+    echo "bootloader=$bootloader" >> /root/list
 
     kernels=(no "Linux-$kernel")
     menu 'build a custom kernel' customKernel ${kernels[@]}
+    echo "kernel=$customKernel" >> /root/list
 
     echo -e "\n"
 
@@ -522,20 +528,27 @@ setup_drive() {
         echo ">>> creating GPT"
         sgdisk -o -U $drive
 
+        i=1
+
         echo ">>> creating boot partition"
         sgdisk -n 0:0:+$bootSize -c 0:BOOT -t 0:ef00 $drive
         if ls $drive | grep nvme; then
-            boot_drive=$drive"p1"
+            boot_drive=$drive"p$i"
         else
-            boot_drive=$drive"1"
+            boot_drive=$drive"$i"
         fi
+        echo "boot_drive=$boot_drive" >> /root/list
 
-        echo ">>> creating swap partition"
-        sgdisk -n 0:0:+$swapSize -c 0:SWAP -t 0:8200 $drive
-        if ls $drive | grep nvme; then
-            swap_drive=$drive"p2"
-        else
-            swap_drive=$drive"2"
+        if [ swapSize != '0MiB' ]; then
+            echo ">>> creating swap partition"
+            sgdisk -n 0:0:+$swapSize -c 0:SWAP -t 0:8200 $drive
+            i=$i+1
+            if ls $drive | grep nvme; then
+                swap_drive=$drive"p$i"
+            else
+                swap_drive=$drive"$i"
+            fi
+            echo "swap_drive=$swap_drive" >> /root/list
         fi
 
         echo ">>> creating root partition"
@@ -544,15 +557,16 @@ setup_drive() {
         else
             sgdisk -n 0:0:0 -c 0:ROOT -t 0:8300 $drive
         fi
+        i=$i+1
         if ls $drive | grep nvme; then
-            root_drive=$drive"p3"
+            root_drive=$drive"p$i"
         else
-            root_drive=$drive"3"
+            root_drive=$drive"$i"
         fi
+        echo "root_drive=$root_drive" >> /root/list
 
         echo ">>> reading partition tables"
-        mdev -s
-        mdev -s
+        mdev -s && mdev -s
 
         echo ">>> creating boot filesystem"
         mkfs.vfat -F32 -n BOOT $boot_drive
@@ -575,17 +589,6 @@ setup_drive() {
     elif [[ $filesystem == xfs ]]; then
         mkfs.xfs -f -L xfs $root_drive
     fi
-
-    echo ">>> adding options"
-    echo "drive=$drive" > /root/list
-    echo "boot_drive=$boot_drive" >> /root/list
-    echo "swap_drive=$swap_drive" >> /root/list
-    echo "root_drive=$root_drive" >> /root/list
-    echo "filesystem=$filesystem" >> /root/list
-    echo "computer=$computer" >> /root/list
-    echo "desktop=$desktop" >> /root/list
-    echo "bootloader=$bootloader" >> /root/list
-    echo "kernel=$customKernel" >> /root/list
 
     mount_root
     mount_boot
