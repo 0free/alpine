@@ -884,7 +884,6 @@ setup_desktop() {
 
     enable_services
     configure_alpine
-    patch_gcc
     #install_glibc
 
     if ! grep -q VirtualBox /root/list; then
@@ -904,6 +903,7 @@ setup_desktop() {
         fi
     fi
 
+    openwrt
     make_initramfs
     setup_bootloader
 
@@ -1149,31 +1149,7 @@ fwupd() {
 youtube() {
     yt-dlp -o '~/%(title)s.%(ext)s' -f 'bv[vcodec~="^((he|a)vc|h26[45])"][height<=1080][fps<=60]+ba' --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:'-ss 00:00:00 -to 03:00:00'
 }
-openwrt() {
-    sudo apk add gcc g++ argp-standalone musl-fts-dev musl-obstack-dev musl-libintl
-    if [ -d ~/openwrt ]; then
-        cd ~/openwrt && git pull
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        make menuconfig
-        make -j$(nproc)
-    else
-        git clone -b master https://git.openwrt.org/openwrt/openwrt.git
-        echo "src-git-full packages https://git.openwrt.org/feed/packages.git" > ~/openwrt/feeds.conf
-        echo "src-git-full luci https://git.openwrt.org/project/luci.git" >> ~/openwrt/feeds.conf
-        openwrt
-    fi
-}
 EOF
-
-}
-
-patch_gcc() {
-
-    echo ">>> patching gcc"
-    sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
-
-}
 
 install_glibc() {
 
@@ -1268,7 +1244,7 @@ version="$(apk search -e nvidia-src)"
 nvidia() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
         if find /lib/modules/ -type f -name 'nvidia.ko.gz' | grep -q nvidia; then
-            if grep -q "\$(apk search -e nvidia-src)" /etc/profile.d/nvidia.sh ; then
+            if grep -q "\$(apk search -e nvidia-src)" /etc/profile.d/nvidia.sh; then
                 echo "nvidia driver is up-to-date"
             else
                 install_modules
@@ -1349,6 +1325,36 @@ update_trex() {
 }
 calc() {
     printf "%s\n" "$@" | bc -l;
+}
+EOF
+
+}
+
+openwrt() {
+
+    cat > /etc/profile.d/openwrt.sh << EOF
+version="$(apk search -e musl-dev)"
+openwrt() {
+    if wget -q --spider https://alpinelinux.org &>/dev/null; then
+        sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar
+        sudo sed -z 's|if wget.*\n.*\n.*\nfi||' -i /etc/profile.d/openwrt.sh
+    fi
+    if ! grep -q "\$(apk search -e musl-dev)" /etc/profile.d/openwrt.sh; then
+        sudo sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
+        sudo sed -i 's|version=.*|version="\$(apk search -e musl-dev)"|' /etc/profile.d/openwrt.sh
+    fi
+    if [ -d ~/openwrt ]; then
+        cd ~/openwrt && git pull
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        make menuconfig
+        make -j$(nproc)
+    else
+        git clone -b master https://git.openwrt.org/openwrt/openwrt.git
+        echo "src-git-full packages https://git.openwrt.org/feed/packages.git" > ~/openwrt/feeds.conf
+        echo "src-git-full luci https://git.openwrt.org/project/luci.git" >> ~/openwrt/feeds.conf
+        openwrt
+    fi
 }
 EOF
 
