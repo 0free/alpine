@@ -1334,7 +1334,6 @@ EOF
 
 create_iso() {
     cat > /etc/profile.d/iso.sh << EOF
-version="$(apk search -e musl-dev)"
 iso() {
     if wget -q --spider https://alpinelinux.org &>/dev/null; then
         wget -q -P ~/ https://raw.githubusercontent.com/0free/alpine/1/iso
