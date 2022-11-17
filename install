@@ -884,7 +884,6 @@ setup_desktop() {
 
     enable_services
     configure_alpine
-    #install_glibc
 
     if ! grep -q VirtualBox /root/list; then
         if grep -q $kernel /root/list; then
@@ -1153,22 +1152,6 @@ youtube() {
 }
 EOF
 
-install_glibc() {
-
-    echo ">>> downloading glibc-$glibc_version for alpine"
-    wget -q -P /etc/apk/keys/ https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-    wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-$glibc_version.apk
-    wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-bin-$glibc_version.apk
-    wget -q -P /root/ https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$glibc_version/glibc-i18n-$glibc_version.apk
-    echo ">>> installing glibc-$glibc_version"
-    apk add --force-overwrite /root/glibc-$glibc_version.apk
-    apk add /root/glibc-bin-$glibc_version.apk
-    apk add /root/glibc-i18n-$glibc_version.apk
-    rm /root/glibc-*.apk
-    apk fix --force-overwrite alpine-baselayout-data
-
-}
-
 custom_kernel() {
 
     echo ">>> installing required packages to build Linux-$kernel"
@@ -1333,6 +1316,7 @@ EOF
 }
 
 create_iso() {
+
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
     if wget -q --spider https://alpinelinux.org &>/dev/null; then
@@ -1341,6 +1325,7 @@ iso() {
     fi
 }
 EOF
+
 }
 
 openwrt() {
