@@ -902,6 +902,7 @@ setup_desktop() {
             install_miner
         fi
     elif ! grep -q server /root/list; then
+        create_iso
         openwrt
     fi
 
@@ -1329,6 +1330,18 @@ calc() {
 }
 EOF
 
+}
+
+create_iso() {
+    cat > /etc/profile.d/iso.sh << EOF
+version="$(apk search -e musl-dev)"
+iso() {
+    if wget -q --spider https://alpinelinux.org &>/dev/null; then
+        wget -q -P ~/ https://raw.githubusercontent.com/0free/alpine/1/iso
+        sh iso
+    fi
+}
+EOF
 }
 
 openwrt() {
