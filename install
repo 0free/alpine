@@ -1152,6 +1152,8 @@ youtube() {
 }
 EOF
 
+}
+
 custom_kernel() {
 
     echo ">>> installing required packages to build Linux-$kernel"
