@@ -901,9 +901,10 @@ setup_desktop() {
         if [ ! -f /etc/profile.d/t-rex.sh ]; then
             install_miner
         fi
+    elif ! grep -q server /root/list; then
+        openwrt
     fi
 
-    openwrt
     make_initramfs
     setup_bootloader
 
@@ -1336,7 +1337,7 @@ openwrt() {
 version="$(apk search -e musl-dev)"
 openwrt() {
     if wget -q --spider https://alpinelinux.org &>/dev/null; then
-        sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar
+        sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev
         sudo sed -z 's|if wget.*\n.*\n.*\nfi||' -i /etc/profile.d/openwrt.sh
     fi
     if ! grep -q "\$(apk search -e musl-dev)" /etc/profile.d/openwrt.sh; then
