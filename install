@@ -3,26 +3,24 @@
 bootSize='190MiB'
 timezone='Asia/Muscat'
 mirror='https://dl-cdn.alpinelinux.org/alpine'
-arch='x86_64'
 branch='edge'
 version='v3.16'
 pool='rpool'
 hostname='linux'
 user='user'
 password='0000'
-glibc_version='2.35-r0'
 trex_version='0.26.8'
 
 kernel='6.0.8'
 kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
 
-kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
-kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
-kernel_virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
+kernel_lts="$(echo "$(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')"-lts)"
+kernel_edge="$(echo "$(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')"-edge)"
+kernel_virt="$(echo "$(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')"-virt)"
 
 packages_list() {
 
-    packages+=(
+    packages=(
         # alpine
         alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release
         # openrc
@@ -428,29 +426,28 @@ packages_list() {
 menu() {
 
     echo -e "\n --> $1:\n"
-    output=$2
     shift 2
-    options=($@)
+    options=("$@")
     i=0
     while true; do
-        for option in ${options[@]}; do
-            if [[ $option == ${options[$i]} ]]; then
+        for option in "${options[@]}"; do
+            if [[ "$option" == "${options[$i]}" ]]; then
                 echo -e "\t\e[7m$option\e[0m"
             else
                 echo -e "\t$option"
             fi
         done
-        read -sn3 key
+        read -rsn3 key
         if [[ $key == $(echo -en "\e[A") ]] && [[ $i -gt 0 ]]; then
-            i=$(($i-1))
+            i=$((i-1))
         elif [[ $key == $(echo -en "\e[B") ]] && [[ $i -lt ${#options[@]} ]]; then
-            i=$(($i+1))
+            i=$((i+1))
         elif [[ -z $key ]]; then
             break
         fi
         echo -en "\e[${#options[@]}A"
     done
-    printf -v $output "${options[$i]}"
+    printf "%s" "${options[$i]}"
 
 }
 
@@ -465,54 +462,57 @@ setup_drive() {
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
-    drives=($(ls /dev/ | grep -E '^nvme.{3}$|^sd.{1}$'))
+    if test ls -d /dev/nvme*; then
+        drives=("$(ls -d /dev/{nvme[0-9]n[1-9],sd[a-z]})")
+    else
+        drives=("$(ls -d /dev/sd[a-z])")
+    fi
 
-    for i in ${!drives[@]}; do
-        drives[$i]="/dev/${drives[$i]}"
+    for i in "${!drives[@]}"; do
+        drives[i]="/dev/${drives[i]}"
     done
 
-    menu 'select a drive' drive ${drives[@]}
+    menu 'select a drive' drive "${drives[@]}"
     echo "drive=$drive" > /root/list
 
-    if ls $drive* | grep -Eq "$drive.{1}|$drive.{2}"; then
-        partitions=($(ls $drive*))
-        menu 'select a root partition or use the complete drive' partition ${partitions[@]}
-        if [[ $drive != $partition ]] ; then
+    if test ls -d "$drive"{p[1-9],[1-9]}; then
+        partitions=("$(ls -d "$drive"{p[1-9],[1-9]})")
+        menu 'select a root partition or use the complete drive' partition "${partitions[@]}"
+        if [[ "$drive" != "$partition" ]] ; then
             root_drive=$partition
-            partitions=($(ls $drive* | grep -E "$drive.{1}" | grep -v $partition))
-            menu 'select a boot partition to mount ' partition ${partitions[@]}
-            boot_drive=$partition
+            partitions=("$(ls -d "$drive"{^"$partition",p[1-9],[1-9]})")
+            menu 'select a boot partition to mount ' partition "${partitions[@]}"
+            boot_drive="$partition"
         fi
     fi
 
-    swapSizes=(disable 1000 2000 3000 4000)
-    menu 'select swap partition size in MB' swapValue ${swapSizes[@]}
-    swapSize=$swapValue"MiB"
+    swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
+    menu 'select swap partition size in MB' swapSize "${swapSizes[@]}"
 
     filesystems=(btrfs zfs xfs ext4)
-    menu 'select a filesystem' filesystem ${filesystems[@]}
+    menu 'select a filesystem' filesystem "${filesystems[@]}"
     echo "filesystem=$filesystem" >> /root/list
 
     computers=(minimal miner server VirtualBox workstation)
-    menu 'select a computer' computer ${computers[@]}
+    menu 'select a computer' computer "${computers[@]}"
     echo "computer=$computer" >> /root/list
 
     desktops=(gnome kde none)
-    menu 'select a desktop' desktop ${desktops[@]}
+    menu 'select a desktop' desktop "${desktops[@]}"
     echo "desktop=$desktop" >> /root/list
 
-    if [[ $filesystem == zfs ]]; then
+    if [[ "$filesystem" == zfs ]]; then
         bootloaders=(gummiboot grub)
-    elif [[ $filesystem == btrfs ]]; then
+    elif [[ "$filesystem" == btrfs ]]; then
         bootloaders=(gummiboot grub rEFInd clover)
     else
         bootloaders=(gummiboot grub rEFInd clover)
     fi
-    menu 'select a bootloader' bootloader ${bootloaders[@]}
+    menu 'select a bootloader' bootloader "${bootloaders[@]}"
     echo "bootloader=$bootloader" >> /root/list
 
     kernels=(no "Linux-$kernel")
-    menu 'build a custom kernel' customKernel ${kernels[@]}
+    menu 'build a custom kernel' customKernel "${kernels[@]}"
     echo "kernel=$customKernel" >> /root/list
 
     echo -e "\n"
@@ -522,49 +522,49 @@ setup_drive() {
         apk add sgdisk
     fi
 
-    if [[ ! $root_drive ]]; then
+    if [[ ! "$root_drive" ]]; then
 
         echo ">>> wiping filesystm"
-        wipefs -a -f $drive
+        wipefs -a -f "$drive"
         echo ">>> deleting partitions"
-        sgdisk -Z $drive
+        sgdisk -Z "$drive"
         echo ">>> creating GPT"
-        sgdisk -o -U $drive
+        sgdisk -o -U "$drive"
 
         i=1
 
         echo ">>> creating boot partition"
-        sgdisk -n 0:0:+$bootSize -c 0:BOOT -t 0:ef00 $drive
-        if ls $drive | grep nvme; then
-            boot_drive=$drive"p$i"
+        sgdisk -n 0:0:+"$bootSize" -c 0:BOOT -t 0:ef00 "$drive"
+        if grep -q nvme "$drive"; then
+            boot_drive="${drive}p${i}"
         else
-            boot_drive=$drive"$i"
+            boot_drive="${drive}${i}"
         fi
         echo "boot_drive=$boot_drive" >> /root/list
 
         if [ "$swapSize" != "disable" ]; then
             echo ">>> creating swap partition"
-            sgdisk -n 0:0:+$swapSize -c 0:SWAP -t 0:8200 $drive
+            sgdisk -n 0:0:+"$swapSize" -c 0:SWAP -t 0:8200 "$drive"
             ((++i))
-            if ls $drive | grep nvme; then
-                swap_drive=$drive"p$i"
+            if grep -q nvme "$drive"; then
+                swap_drive="${drive}p${i}"
             else
-                swap_drive=$drive"$i"
+                swap_drive="${drive}${i}"
             fi
             echo "swap_drive=$swap_drive" >> /root/list
         fi
 
         echo ">>> creating root partition"
-        if [[ $filesystem == zfs ]]; then
-            sgdisk -n 0:0:0 -c 0:ROOT -t 0:bf00 $drive
+        if [[ "$filesystem" == zfs ]]; then
+            sgdisk -n 0:0:0 -c 0:ROOT -t 0:bf00 "$drive"
         else
-            sgdisk -n 0:0:0 -c 0:ROOT -t 0:8300 $drive
+            sgdisk -n 0:0:0 -c 0:ROOT -t 0:8300 "$drive"
         fi
         ((++i))
-        if ls $drive | grep nvme; then
-            root_drive=$drive"p$i"
+        if grep -q nvme "$drive"; then
+            root_drive="${drive}p${i}"
         else
-            root_drive=$drive"$i"
+            root_drive="${drive}${i}"
         fi
         echo "root_drive=$root_drive" >> /root/list
 
@@ -572,25 +572,25 @@ setup_drive() {
         mdev -s && mdev -s
 
         echo ">>> creating boot filesystem"
-        mkfs.vfat -F32 -n BOOT $boot_drive
+        mkfs.vfat -F32 -n BOOT "$boot_drive"
 
-        if [[ $swap_drive ]]; then
+        if [[ "$swap_drive" ]]; then
             echo ">>> creating swap filesystem"
-            mkswap $swap_drive
+            mkswap "$swap_drive"
         fi
 
     fi
 
     echo ">>> creating root filesystem"
-    if [[ $filesystem == zfs ]]; then
+    if [[ "$filesystem" == zfs ]]; then
         create_zfs
         set_zfs
-    elif [[ $filesystem == btrfs ]]; then
-        mkfs.btrfs -f -L btrfs $root_drive
-    elif [[ $filesystem == ext4 ]]; then
-        mkfs.ext4 -L ext4 $root_drive
-    elif [[ $filesystem == xfs ]]; then
-        mkfs.xfs -f -L xfs $root_drive
+    elif [[ "$filesystem" == btrfs ]]; then
+        mkfs.btrfs -f -L btrfs "$root_drive"
+    elif [[ "$filesystem" == ext4 ]]; then
+        mkfs.ext4 -L ext4 "$root_drive"
+    elif [[ "$filesystem" == xfs ]]; then
+        mkfs.xfs -f -L xfs "$root_drive"
     fi
 
     mount_root
@@ -614,7 +614,7 @@ create_zfs() {
     -O recordsize=8192 -O compression=lz4 -O acltype=posixacl -O dedup=off \
     -O devices=off -O xattr=sa -O relatime=off -O atime=off \
     -O dnodesize=legacy -O normalization=formD \
-    -O canmount=noauto -O mountpoint=/ -R /mnt $pool $root_drive
+    -O canmount=noauto -O mountpoint=/ -R /mnt "$pool" "$root_drive"
     echo ">>> checking ZFS pool"
     zpool status
 
@@ -623,7 +623,7 @@ create_zfs() {
 set_zfs() {
 
     echo ">>> setting ZFS pool as rootfs"
-    zpool set bootfs=$pool $pool
+    zpool set bootfs="$pool" "$pool"
     echo ">>> setting ZFS cache"
     mkdir -p /mnt/etc/zfs/
     cp /etc/zfs/zpool.cache /mnt/etc/zfs/zpool.cache
@@ -631,24 +631,27 @@ set_zfs() {
     chattr +i /mnt/etc/zfs/zpool.cache
     echo ">>> adding ZFS options"
     mkdir -p /mnt/etc/modprobe.d/
-    echo "options zfs l2arc_noprefetch=0" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs l2arc_write_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs l2arc_write_boost=1073741824" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs l2arc_headroom=12" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_arc_max=536870912" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_arc_min=268435456" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_prefetch_disable=0" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_top_maxinflight=320" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_txg_timeout=15" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_scheduler=deadline" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_async_read_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_async_read_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_async_write_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_async_write_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_sync_write_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_sync_write_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_sync_read_min_active=8" >> /mnt/etc/modprobe.d/zfs.conf
-    echo "options zfs zfs_vdev_sync_read_max_active=32" >> /mnt/etc/modprobe.d/zfs.conf
+
+    cat > /mnt/etc/modprobe.d/zfs.conf <<EOF
+options zfs l2arc_noprefetch=0
+options zfs l2arc_write_max=536870912
+options zfs l2arc_write_boost=1073741824
+options zfs l2arc_headroom=12
+options zfs zfs_arc_max=536870912
+options zfs zfs_arc_min=268435456
+options zfs zfs_prefetch_disable=0
+options zfs zfs_top_maxinflight=320
+options zfs zfs_txg_timeout=15
+options zfs zfs_vdev_scheduler=deadline
+options zfs zfs_vdev_async_read_min_active=8
+options zfs zfs_vdev_async_read_max_active=32
+options zfs zfs_vdev_async_write_min_active=8
+options zfs zfs_vdev_async_write_max_active=32
+options zfs zfs_vdev_sync_write_min_active=8
+options zfs zfs_vdev_sync_write_max_active=32
+options zfs zfs_vdev_sync_read_min_active=8
+options zfs zfs_vdev_sync_read_max_active=32
+EOF
 
 }
 
@@ -656,14 +659,14 @@ mount_root() {
 
     if grep -q zfs /root/list; then
         echo ">>> exporting zpool"
-        zpool export $pool
+        zpool export "$pool"
         echo ">>> importing zpool"
-        zpool import $pool -d $root_drive -R /mnt/
+        zpool import "$pool" -d "$root_drive" -R /mnt/
         echo ">>> mounting zfs dataset"
         zfs mount -a
     else
         echo ">>> mounting root drive"
-        mount $root_drive /mnt/
+        mount "$root_drive" /mnt/
     fi
     if ! mountpoint -q /mnt; then
         exit
@@ -675,7 +678,7 @@ mount_root() {
 mount_boot() {
 
     echo ">>> mounting boot drive"
-    mount $boot_drive /mnt/boot/
+    mount "$boot_drive" /mnt/boot/
 
 }
 
@@ -713,9 +716,11 @@ EOF
 set_network() {
 
     echo ">>> adding name resolution"
-    echo 'nameserver 10.0.254.3' >> /mnt/etc/resolv.conf
-    echo 'nameserver 1.0.0.1' >> /mnt/etc/resolv.conf
-    echo 'nameserver 8.8.8.8' >> /mnt/etc/resolv.conf
+    cat > /mnt/etc/resolv.conf <<EOF
+nameserver 10.0.254.3
+nameserver 1.0.0.1
+nameserver 8.8.8.8
+EOF
 
     echo ">>> adding interfaces"
     cat > /mnt/etc/network/interfaces <<EOF
@@ -732,14 +737,14 @@ set_fstab() {
     if grep -q zfs /root/list; then
         echo "$pool / $filesystem rw,nodev,noauto,xattr,zfsutil,posixacl 0 0" > /mnt/etc/fstab
     elif grep -q btrfs /root/list; then
-        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem rw,ssd,nofail,discard,noatime 0 0" > /mnt/etc/fstab
+        echo "$(blkid "$root_drive" -o export | grep ^UUID=) / $filesystem rw,ssd,nofail,discard,noatime 0 0" > /mnt/etc/fstab
     else
-        echo "$(blkid $root_drive -o export | grep ^UUID=) / $filesystem rw.ssd,nofail,discard,noatime 0 0" > /mnt/etc/fstab
+        echo "$(blkid "$root_drive" -o export | grep ^UUID=) / $filesystem rw.ssd,nofail,discard,noatime 0 0" > /mnt/etc/fstab
     fi
 
-    echo "$(blkid $boot_drive -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
+    echo "$(blkid "$boot_drive" -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
 
-    echo "$(blkid $swap_drive -o export | grep ^UUID=) none swap sw 0 0" >> /mnt/etc/fstab
+    echo "$(blkid "$swap_drive" -o export | grep ^UUID=) none swap sw 0 0" >> /mnt/etc/fstab
 
 }
 
@@ -782,23 +787,22 @@ install_linux() {
 
     echo ">>> installing linux"
     apk add --root=/mnt/ linux-firmware-none
-    apk add --root=/mnt/ $list
+    apk add --root=/mnt/ "$list"
 
 }
 
 install_packages() {
 
     echo ">>> packages list"
-    packages=''
     packages_list
 
     list=''
-    for i in ${!packages[@]}; do
-        list+=${packages[$i]}
+    for i in "${!packages[@]}"; do
+        list+="${packages[$i]}"
         list+=' '
     done
     echo ">>> installing packages"
-    apk add --root=/mnt/ $list
+    apk add --root=/mnt/ "$list"
     apk fix --root=/mnt/
 
 }
@@ -806,11 +810,11 @@ install_packages() {
 set_timezone() {
 
     echo ">>> setting timezone"
-    if [ -f /mnt/usr/share/zoneinfo/$timezone ]; then
-        install -Dm 0644 /mnt/usr/share/zoneinfo/$timezone /mnt/etc/localtime
-        echo $timezone > /mnt/etc/timezone
+    if [ -f /mnt/usr/share/zoneinfo/"$timezone" ]; then
+        install -Dm 0644 /mnt/usr/share/zoneinfo/"$timezone" /mnt/etc/localtime
+        echo "$timezone" > /mnt/etc/timezone
     else
-        read -p " --- timezone Asia/Muscat: " timezone
+        read -rp " --- timezone Asia/Muscat: " timezone
         set_timezone
     fi
 
@@ -834,8 +838,8 @@ change_root() {
     echo ">>> changing root"
     echo '' > /mnt/root/chroot
     dir=(proc dev sys)
-    for d in ${dir[@]}; do
-        mount --bind /$d/ /mnt/$d/
+    for d in "${dir[@]}"; do
+        mount --bind /"$d"/ /mnt/"$d"/
     done
     chroot /mnt/ /bin/bash /root/install
 
@@ -864,18 +868,18 @@ disable_root() {
 
 create_user() {
 
-    if id $user &>/dev/null; then
+    if id "$user" &>/dev/null; then
         echo ">>> deleting $user"
-        userdel $user
+        userdel "$user"
     fi
     echo ">>> adding wheel to sudo"
     echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/wheel
     chmod 0400 /etc/sudoers.d/wheel
     echo ">>> creating user"
-    echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user $user
-    usermod -aG input,audio,video,netdev,usb,disk,lp,adm $user
+    echo -en "$password\n$password" | adduser -h /home/"$user" -s /bin/bash -G wheel -g "$user" "$user"
+    usermod -aG input,audio,video,netdev,usb,disk,lp,adm "$user"
     if grep -q zfs /root/list; then
-        zfs allow $user create,mount,mountpoint,snapshot $pool
+        zfs allow "$user" create,mount,mountpoint,snapshot "$pool"
     fi
 
 }
@@ -886,7 +890,7 @@ setup_desktop() {
     configure_alpine
 
     if ! grep -q VirtualBox /root/list; then
-        if grep -q $kernel /root/list; then
+        if grep -q "$kernel" /root/list; then
             custom_kernel
             build_zfs
         fi
@@ -897,10 +901,10 @@ setup_desktop() {
     install_google_chrome
 
     if grep -q miner /root/list; then
-        if [ ! -f /etc/profile.d/t-rex.sh ]; then
-            install_miner
-        fi
-    elif ! grep -q server /root/list; then
+        install_miner
+    fi
+
+    if ! grep -Eq "server|miner" /root/list; then
         create_iso
         openwrt
     fi
@@ -1065,14 +1069,14 @@ EOF
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
 
-    if [ ! -d /home/$user/.config/ ]; then
-        mkdir /home/$user/.config/
+    if [ ! -d /home/"$user"/.config/ ]; then
+        mkdir /home/"$user"/.config/
     fi
 
     if grep -q gnome /root/list; then
         if [ ! -f /etc/profile.d/gnome.sh ]; then
             echo ">>> downloading gnome dconf-settings"
-            wget -q -P /home/$user/ https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+            wget -q -P /home/"$user"/ https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
             cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
     dconf load / < ~/dconf-settings.ini
@@ -1086,7 +1090,7 @@ EOF
         if [ ! -d kde/ ]; then
             echo ">>> configuring kde"
             git clone https://github.com/0free/kde.git
-            cp -rlf /kde/config/* /home/$user/.config/
+            cp -rlf /kde/config/* /home/"$user"/.config/
             rm -r kde/
         fi
         if [ ! -d /etc/sddm.conf.d/ ]; then
@@ -1094,16 +1098,16 @@ EOF
         fi
         cat > /etc/sddm.conf.d/autologin.conf <<EOF
 [Autologin]
-User=$user
+User="$user"
 Session=/usr/share/wayland-sessions/plasma.desktop
 EOF
     fi
 
     echo ">>> setting ~/"
-    chown -R $user:wheel /home/$user/
-    chown -R $user:wheel /home/$user/.config/
-    chmod -R 700 /home/$user/
-    chmod -R 700 /home/$user/.config/
+    chown -R "$user":wheel /home/"$user"/
+    chown -R "$user":wheel /home/"$user"/.config/
+    chmod -R 700 /home/"$user"/
+    chmod -R 700 /home/"$user"/.config/
 
     cat > /etc/profile.d/custom.sh <<EOF
 PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
@@ -1158,36 +1162,36 @@ custom_kernel() {
 
     echo ">>> installing required packages to build Linux-$kernel"
     depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
-    apk add $depend
+    apk add "$depend"
     echo ">>> downloading Linux-$kernel source"
     wget -q -P /root/ $kernel_url"linux-$kernel.tar.xz"
     echo ">>> extracting Linux-$kernel source"
-    tar -xf /root/linux-$kernel.tar.xz -C /root/
+    tar -xf /root/linux-"$kernel".tar.xz -C /root/
     echo ">>> deleting *.tar.xz"
     rm /root/*.tar.xz
     echo ">>> copying Linux-$kernel configuration"
     if [ -f /boot/config-virt ]; then
-        cp /boot/config-virt /root/linux-$kernel/.config
+        cp /boot/config-virt /root/linux-"$kernel"/.config
     elif [ -f /boot/config-edge ]; then
-        cp /boot/config-edge /root/linux-$kernel/.config
+        cp /boot/config-edge /root/linux-"$kernel"/.config
     else
-        cp /boot/config-lts /root/linux-$kernel/.config
+        cp /boot/config-lts /root/linux-"$kernel"/.config
     fi
-    sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' /root/linux-$kernel/.config
-    sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' /root/linux-$kernel/.config
+    sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' /root/linux-"$kernel"/.config
+    sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' /root/linux-"$kernel"/.config
     echo ">>> configuring Linux kernel"
-    cd /root/linux-$kernel/ && make $(nproc) menuconfig
+    cd /root/linux-"$kernel"/ && make -j"$(nproc)" menuconfig
     echo ">>> making Linux kernel"
-    cd /root/linux-$kernel/ && make $(nproc)
+    cd /root/linux-"$kernel"/ && make -j"$(nproc)"
     echo ">>> installing modules"
-    cd /root/linux-$kernel/ && make $(nproc) modules_install
+    cd /root/linux-"$kernel"/ && make -j"$(nproc)" modules_install
     echo ">>> installing Linux kernel"
     #cd /root/linux-$kernel/ && make install
-    installkernel $kernel /root/linux-$kernel/arch/x86/boot/bzImage /root/linux-$kernel/System.map /boot/
+    installkernel "$kernel" /root/linux-"$kernel"/arch/x86/boot/bzImage /root/linux-"$kernel"/System.map /boot/
     echo ">>> deleting Linux kernel source"
-    rm -r /root/Linux-$kernel/
+    rm -r /root/Linux-"$kernel"/
     echo ">>> deleting un-needed dependencies"
-    apk del $depend
+    apk del "$depend"
 
 }
 
@@ -1195,20 +1199,20 @@ build_zfs() {
 
     echo ">>> installing required packages to build ZFS"
     depend='installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
-    apk add $depend
+    apk add "$depend"
 
     echo ">>> installing zfs-src"
     apk add zfs-src
     echo ">>> building zfs-src"
     cd /usr/src/zfs/ && sh autogen.sh
     cd /usr/src/zfs/ && ./configure
-    cd /usr/src/zfs/ && make -s -j$(nproc)
+    cd /usr/src/zfs/ && make -s -j"$(nproc)"
     cd /usr/src/zfs/ && make install
     cd /usr/src/zfs/ && ldconfig
     cd /usr/src/zfs/ && depmod
 
     echo ">>> deleting un-needed dependencies"
-    apk del $depend
+    apk del "$depend"
 
 }
 
@@ -1222,8 +1226,8 @@ install_nvidia() {
     echo ">>> installing nvidia-src"
     apk add akms nvidia-src
 
-    if [ -d /usr/src/nvidia-*/ ]; then
-        rm -r /usr/src/nvidia-*/*
+    if [ -d /usr/src/nvidia-src/ ]; then
+        rm -r /usr/src/nvidia-src/*
     fi
 
     cat > /etc/profile.d/nvidia.sh <<EOF
@@ -1245,8 +1249,8 @@ install_modules() {
     echo ">>> building nvidia kernel modules"
     sudo akms install all
     sudo sed -i "s|version=.*|version=\$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
-    if [ -d /usr/src/nvidia-*/ ]; then
-        rm -r /usr/src/nvidia-*/*
+    if [ -d /usr/src/nvidia-src/ ]; then
+        rm -r /usr/src/nvidia-src/*
     fi
 }
 EOF
@@ -1258,7 +1262,7 @@ install_flatpak() {
     echo ">>> installing flatpak"
     apk add flatpak flatpak-bash-completion xdg-user-dirs
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    adduser $user flatpak
+    adduser "$user" flatpak
     xdg-user-dirs-update
 
 }
@@ -1267,51 +1271,53 @@ install_google_chrome() {
 
     echo ">>> installing google-chrome from flatpak"
     flatpak install -y flathub com.google.Chrome
-    flatpak override com.google.Chrome --filesystem=/home/$user/
+    flatpak override com.google.Chrome --filesystem=/home/"$user"/
 
     echo ">>> installing google-chrome dependencies"
     depend='ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib'
-    apk add $depend
+    apk add "$depend"
 
 }
 
 install_miner() {
 
-    echo ">>> downloading T-Rex $trex_version"
-    wget -q -P /root/ https://trex-miner.com/download/t-rex-$trex_version-linux.tar.gz
-    echo ">>> extracting T-Rex $trex_version"
-    tar -zxf t-rex-$trex_version-linux.tar.gz t-rex -C /usr/bin/
-    echo ">>> deleting T-Rex files"
-    rm /root/t-rex-$trex_version-linux.tar.gz
+    if [ ! -f /usr/bin/t-rex ]; then
+        echo ">>> downloading T-Rex $trex_version"
+        wget -q -P /root/ https://trex-miner.com/download/t-rex-"$trex_version"-linux.tar.gz
+        echo ">>> extracting T-Rex $trex_version"
+        tar -zxf t-rex-"$trex_version"-linux.tar.gz t-rex -C /usr/bin/
+        echo ">>> deleting T-Rex files"
+        rm /root/t-rex-"$trex_version"-linux.tar.gz
+    fi
 
     cat > /etc/profile.d/t-rex.sh << EOF
-version=$trex_version
+version="$trex_version"
 trex() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
         if [ ! -f ~/config ]; then
             echo ">>> downloading t-rex config file"
-            wget -q -P ~/ https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
+            wget -q -P ~/ https://raw.githubusercontent.com/0free/t-rex/"$trex_version"/config
         fi
         /usr/bin/t-rex -c ~/config
         xdg-open http://127.0.0.1:8080
     fi
 }
 update_trex() {
-    latest="0."$(calc ${version:0-4}+0.1)
-    if wget -q --spider https://trex-miner.com/download/t-rex-$latest-linux.tar.gz
-        echo ">>> downloading T-Rex $latest"
-        wget -q -P ~/ https://trex-miner.com/download/t-rex-$latest-linux.tar.gz
-        echo ">>> extracting T-Rex $latest"
-        sudo tar -zxf t-rex-$latest-linux.tar.gz t-rex -C /usr/bin/
-        sudo sed -i 's|version=.*|version=$latest|' /etc/prfile.d/trex.sh
+    latest="0.$(calc ${version:0-4}+0.1)"
+    if wget -q --spider https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
+        echo ">>> downloading T-Rex \$latest"
+        wget -q -P ~/ https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
+        echo ">>> extracting T-Rex \$latest"
+        sudo tar -zxf t-rex-\$latest-linux.tar.gz t-rex -C /usr/bin/
+        sudo sed -i 's|version=.*|version=\$latest|' /etc/prfile.d/trex.sh
         echo ">>> deleting T-Rex files"
-        rm ~/t-rex-$latest-linux.tar.gz
+        rm ~/t-rex-\$latest-linux.tar.gz
     else
         echo ">>> t-rex is up-to-date"
     fi
 }
 calc() {
-    printf "%s\n" "$@" | bc -l;
+    printf "%s\n" "$@" | bc -l
 }
 EOF
 
@@ -1401,39 +1407,39 @@ make_initramfs() {
     fi
 
     list=''
-    for i in ${!modules[@]}; do
-        list+=${modules[$i]}
+    for i in "${!modules[@]}"; do
+        list+="${modules[$i]}"
         list+=' '
     done
 
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
-    if [ ! -d /lib/modules/$kernel_virt ]; then
-        mkdir /lib/modules/$kernel_virt
+    if [ ! -d /lib/modules/"$kernel_virt" ]; then
+        mkdir /lib/modules/"$kernel_virt"
     fi
-    if [ ! -d /lib/modules/$kernel_edge ]; then
-        mkdir /lib/modules/$kernel_edge
+    if [ ! -d /lib/modules/"$kernel_edge" ]; then
+        mkdir /lib/modules/"$kernel_edge"
     fi
-    if [ ! -d  /lib/modules/$kernel_lts ]; then
-        mkdir /lib/modules/$kernel_lts
+    if [ ! -d  /lib/modules/"$kernel_lts" ]; then
+        mkdir /lib/modules/"$kernel_lts"
     fi
 
     if [ -f /boot/vmlinuz ]; then
         echo ">>> building linux-$kernel initial ramdisk"
-        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs $kernel
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs "$kernel"
     fi
     if [ -f /boot/vmlinuz-virt ]; then
         echo ">>> building linux VirtualMachine initial ramdisk"
-        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-virt $kernel_virt
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-virt "$kernel_virt"
     fi
     if [ -f /boot/vmlinuz-lts ]; then
         echo ">>> building linux LTS initial ramdisk"
-        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-lts $kernel_lts
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-lts "$kernel_lts"
     fi
     if [ -f /boot/vmlinuz-edge ]; then
         echo ">>> building linux edge initial ramdisk"
-        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-edge $kernel_edge
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-edge "$kernel_edge"
     fi
 
     mkdir /boot/efi/
@@ -1447,7 +1453,7 @@ setup_bootloader() {
     if grep -q zfs /root/list; then
         disk="root=$pool $param"
     else
-        disk="root=$(blkid $root_drive -o export | grep ^UUID=) $param"
+        disk="root=$(blkid "$root_drive" -o export | grep ^UUID=) $param"
     fi
 
     if grep -q gummiboot /root/list; then
@@ -1467,36 +1473,40 @@ setup_bootloader() {
 find_windows() {
 
     echo ">>> looking for Windows"
-    drives=($(ls /dev/ | grep -E '^nvme.{3}$|^sd.{1}$'))
+    if test ls -d /dev/nvme*; then
+        drives=("$(ls -d /dev/{nvme[0-9]n[1-9],sd[a-z]})")
+    else
+        drives=("$(ls -d /dev/sd[a-z])")
+    fi
 
     if [ ! -d /windows/ ]; then
         mkdir /windows/
     fi
 
-    while true; do     
-        for d in ${drives[@]}; do
-            drive="/dev/$d"
-            partition=($(ls $drive* | grep -E "$drive"1"|$drive"p1""))
-            if [[ $partition ]]; then
-                mount -r $partition /windows/
+    while true; do
+        for d in "${drives[@]}"; do
+            if grep -q nvme "$d"; then
+                partition="${d}p1"
+            else
+                partition="${d}1"
+            fi
+            if test ls -d "$partition"; then
+                mount -r "$partition" /windows/
                 if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
                     echo ">>> copying Windows Boot Manager"
                     cp -rlf /windows/* /boot/
-                    windows_drive=$drive
-                    windows_boot=$partition
-                    echo "windows_drive=$drive" >> /root/list
+                    windows_drive="$d"
+                    windows_boot="$partition"
+                    echo "windows_drive=$d" >> /root/list
                     echo "windows_boot=$partition" >> /root/list
                     echo ">>> creating Windows efi record"
-                    efibootmgr -c -d $windows_drive -p 1 -t 0 -L "Windows" -l '\EFI\Boot\BOOTX64.EFI'
+                    efibootmgr -c -d "$windows_drive" -p 1 -t 0 -L "Windows" -l '\EFI\Boot\BOOTX64.EFI'
                     break
                 fi
+                umount /windows/
             fi
         done
     done
-
-    if mountpoint -q /windows; then
-        umount /windows/
-    fi
 
 }
 
@@ -1508,7 +1518,7 @@ install_gummiboot() {
     mkdir /boot/efi/alpineLinux/
     cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
 
-    efibootmgr -c -d $drive -p 1 -t 0 -L 'alpineLinux' -l '\EFI\alpineLinux\bootx64.efi'
+    efibootmgr -c -d "$drive" -p 1 -t 0 -L 'alpineLinux' -l '\EFI\alpineLinux\bootx64.efi'
 
     mkdir -p /boot/loader/entries/
 
@@ -1522,12 +1532,12 @@ EOF
     echo ">>> adding entries to gummiboot"
     if [ -f /boot/initramfs ]; then
         cat > /boot/loader/entries/linux.conf <<EOF
-title       Linux-$kernel
+title       Linux-"$kernel"
 linux       /vmlinuz
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
 initrd      /initramfs
-options     $disk
+options     "$disk"
 EOF
     fi
     if [ -f /boot/initramfs-virt ]; then
@@ -1535,7 +1545,7 @@ EOF
 title       alpine Linux virt
 linux       /vmlinuz-virt
 initrd      /initramfs-virt
-options     $disk
+options     "$disk"
 EOF
     fi
     if [ -f /boot/initramfs-edge ]; then
@@ -1545,7 +1555,7 @@ linux       /vmlinuz-edge
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
 initrd      /initramfs-edge
-options     $disk
+options     "$disk"
 EOF
     fi
     if [ -f /boot/initramfs-lts ]; then
@@ -1555,7 +1565,7 @@ linux       /vmlinuz-lts
 initrd      /amd-ucode.img
 initrd      /intel-ucode.img
 initrd      /initramfs-lts
-options     $disk
+options     "$disk"
 EOF
     fi
 
@@ -1591,7 +1601,7 @@ install_grub() {
     apk fix
     apk add grub grub-efi grub-bash-completion
     echo ">>> installing grub bootloader"
-    grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id="alpine linux" $drive
+    grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id="alpine linux" "$drive"
 
     if [ ! -d /boot/grub/themes/ ]; then
         mkdir /boot/grub/themes
@@ -1604,8 +1614,8 @@ install_grub() {
         mv grub-theme/ /boot/grub/themes/
     fi
 
-    sed -i "s|CLASS=\".*\"|CLASS=\"--class $( . /etc/os-release; echo \"$ID\")\"|" /etc/grub.d/10_linux
-    sed -i "s|menuentry '\$LABEL'|menuentry '\$LABEL' --class efi|" /etc/grub.d/30_uefi-firmware
+    sed -i "s|CLASS=\".*\"|CLASS=\"--class \$( . /etc/os-release; echo \"$ID\")\"|" /etc/grub.d/10_linux
+    sed -i "s|menuentry \'\$LABEL\'|menuentry \'\$LABEL\' --class efi|" /etc/grub.d/30_uefi-firmware
 
     cat > /etc/default/grub <<EOF
 loglevel=0
@@ -1642,8 +1652,8 @@ EOF
 
     echo ">>> checking grub-probe"
     grub-probe /
-    grub-probe -t fs -d $root_drive
-    grub-probe -t fs_label -d $root_drive
+    grub-probe -t fs -d "$root_drive"
+    grub-probe -t fs_label -d "$root_drive"
 
 }
 
@@ -1669,40 +1679,40 @@ install_refind() {
 
     echo ">>> configuring rEFInd bootloader"
 
-    if [[ $windows_drive ]]; then
-        uuid=$(blkid $windows_boot -o export | grep ^UUID= | sed 's|UUID=||')
+    if [[ "$windows_drive" ]]; then
+        uuid=$(blkid "$windows_boot" -o export | grep ^UUID= | sed 's|UUID=||')
         cat >> /boot/efi/refind/refind.conf <<EOF
 menuentry "Windows Boot Manager" {
     icon \EFI\refind\icons\os_win8.png
-    volume $uuid
+    volume "$uuid"
     loader \EFI\Boot\BOOTX64.EFI
     options ''
 }
 menuentry "Windows Boot" {
     icon \EFI\refind\icons\os_win8.png
-    volume $uuid
+    volume "$uuid"
     loader \EFI\Microsoft\Boot\BOOTMGFW.EFI
     options ''
 }
 menuentry "Windows 11" {
     icon \EFI\refind\icons\os_win8.png
-    volume $uuid
+    volume "$uuid"
     loader \Windows\Boot\EFI\bootmgfw.efi
     options ''
 }
 EOF
     fi
 
-    uuid=$(blkid $boot_drive -o export | grep ^UUID= | sed 's|UUID=||')
+    uuid=$(blkid "$boot_drive" -o export | grep ^UUID= | sed 's|UUID=||')
 
     if [ -f /boot/initramfs-virt ]; then
         cat >> /boot/efi/refind/refind.conf <<EOF
 menuentry "alpine Linux VirtualMachine" {
     icon /EFI/refind/icons/os_linux.png
-    volume $uuid
+    volume "$uuid"
     loader /vmlinuz-virt
     initrd /initramfs-virt
-    options '$disk'
+    options "$disk"
 }
 EOF
     fi
@@ -1711,10 +1721,10 @@ EOF
         cat >> /boot/efi/refind/refind.conf <<EOF
 menuentry "alpine Linux edge" {
     icon /EFI/refind/icons/os_linux.png
-    volume $uuid
+    volume "$uuid"
     loader /vmlinuz
     initrd /initramfs
-    options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
+    options "$disk initrd=/amd-ucode.img initrd=/intel-ucode.img"
 }
 EOF
     fi
@@ -1723,10 +1733,10 @@ EOF
         cat >> /boot/efi/refind/refind.conf <<EOF
 menuentry "alpine Linux virt" {
     icon /EFI/refind/icons/os_linux.png
-    volume $uuid
+    volume "$uuid"
     loader /vmlinuz-virt
     initrd /initramfs-virt
-    options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
+    options "$disk initrd=/amd-ucode.img initrd=/intel-ucode.img"
 }
 EOF
     fi
@@ -1735,10 +1745,10 @@ EOF
         cat >> /boot/efi/refind/refind.conf <<EOF
 menuentry "alpine Linux edge" {
     icon /EFI/refind/icons/os_linux.png
-    volume $uuid
+    volume "$uuid"
     loader /vmlinuz-edge
     initrd /initramfs-edge
-    options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
+    options "$disk initrd=/amd-ucode.img initrd=/intel-ucode.img"
 }
 EOF
     fi
@@ -1747,10 +1757,10 @@ EOF
         cat >> /boot/efi/refind/refind.conf <<EOF
 menuentry "alpine Linux LTS" {
     icon /EFI/refind/icons/os_linux.png
-    volume $uuid
+    volume "$uuid"
     loader /vmlinuz-lts
     initrd /initramfs-lts
-    options '$disk initrd=/amd-ucode.img initrd=/intel-ucode.img'
+    options "$disk initrd=/amd-ucode.img initrd=/intel-ucode.img"
 }
 EOF
     fi
@@ -1806,8 +1816,8 @@ if [ -f /mnt/root/reboot ]; then
     rm /mnt/root/reboot
     echo ">>> un-mounting & reboot"
     dir=(/mnt/boot/ /mnt/sys/ /mnt/dev/ /mnt/proc/)
-    for d in ${dir[@]}; do
-        umount $d
+    for d in "${dir[@]}"; do
+        umount "$d"
     done
     umount -Rf /mnt/
     if grep -q zfs /root/list; then
@@ -1822,14 +1832,14 @@ elif [ -f /mnt/root/chroot ]; then
     change_root
 else
     if [ -f /root/list ]; then
-        drive=$(. /root/list; echo $drive)
-        filesystem=$(. /root/list; echo $filesystem)
-        boot_drive=$(. /root/list; echo $boot_drive)
-        swap_drive=$(. /root/list; echo $swap_drive)
-        root_drive=$(. /root/list; echo $root_drive)
-        windows_drive=$(. /root/list; echo $windows_drive)
-        windows_boot=$(. /root/list; echo $windows_boot)
-        windows_partition=$(. /root/list; echo $windows_partition)
+        drive=$(. /root/list; echo "$drive")
+        filesystem=$(. /root/list; echo "$filesystem")
+        boot_drive=$(. /root/list; echo "$boot_drive")
+        swap_drive=$(. /root/list; echo "$swap_drive")
+        root_drive=$(. /root/list; echo "$root_drive")
+        windows_drive=$(. /root/list; echo "$windows_drive")
+        windows_boot=$(. /root/list; echo "$windows_boot")
+        windows_partition=$(. /root/list; echo "$windows_partition")
     fi
     if [ -f /root/chroot ]; then
         if [ -d /boot/efi/ ]; then
