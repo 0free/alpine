@@ -447,7 +447,7 @@ menu() {
         fi
         echo -en "\e[${#options[@]}A"
     done
-    printf "%s" "${options[$i]}"
+    printf "%s" "$i"
 
 }
 
@@ -472,33 +472,38 @@ setup_drive() {
         drives[i]="/dev/${drives[i]}"
     done
 
-    menu 'select a drive' drive "${drives[@]}"
+    menu 'select a drive' "$i" "${drives[@]}"
+    drive="${drives[i]}"
     echo "drive=$drive" > /root/list
 
     if test ls -d "$drive"{p[1-9],[1-9]}; then
         partitions=("$(ls -d "$drive"{p[1-9],[1-9]})")
-        menu 'select a root partition or use the complete drive' partition "${partitions[@]}"
-        if [[ "$drive" != "$partition" ]] ; then
-            root_drive=$partition
-            partitions=("$(ls -d "$drive"{^"$partition",p[1-9],[1-9]})")
-            menu 'select a boot partition to mount ' partition "${partitions[@]}"
-            boot_drive="$partition"
+        menu 'select a root partition or use the complete drive' "$i" "${partitions[@]}"
+        if [[ "$drive" != "${partitions[i]}" ]] ; then
+            root_drive="${partitions[i]}"
+            partitions=("$(ls -d "$drive"{^"${partitions[i]}",p[1-9],[1-9]})")
+            menu 'select a boot partition to mount ' "$i" "${partitions[@]}"
+            boot_drive="${partitions[i]}"
         fi
     fi
 
     swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
-    menu 'select swap partition size in MB' swapSize "${swapSizes[@]}"
+    menu 'select swap partition size in MB' "$i" "${swapSizes[@]}"
+    swapSize="${swapSizes[i]}"
 
     filesystems=(btrfs zfs xfs ext4)
-    menu 'select a filesystem' filesystem "${filesystems[@]}"
+    menu 'select a filesystem' "$i" "${filesystems[@]}"
+    filesystem=${filesystems[i]}
     echo "filesystem=$filesystem" >> /root/list
 
     computers=(minimal miner server VirtualBox workstation)
-    menu 'select a computer' computer "${computers[@]}"
+    menu 'select a computer' "$i" "${computers[@]}"
+    computer="${computers[i]}"
     echo "computer=$computer" >> /root/list
 
     desktops=(gnome kde none)
-    menu 'select a desktop' desktop "${desktops[@]}"
+    menu 'select a desktop' "$i" "${desktops[@]}"
+    desktop="${desktops[i]}"
     echo "desktop=$desktop" >> /root/list
 
     if [[ "$filesystem" == zfs ]]; then
@@ -508,11 +513,13 @@ setup_drive() {
     else
         bootloaders=(gummiboot grub rEFInd clover)
     fi
-    menu 'select a bootloader' bootloader "${bootloaders[@]}"
+    menu 'select a bootloader' "$i" "${bootloaders[@]}"
+    bootloader="${bootloaders[i]}"
     echo "bootloader=$bootloader" >> /root/list
 
     kernels=(no "Linux-$kernel")
-    menu 'build a custom kernel' customKernel "${kernels[@]}"
+    menu 'build a custom kernel' "$i" "${kernels[@]}"
+    customKernel="${kernels[i]}"
     echo "kernel=$customKernel" >> /root/list
 
     echo -e "\n"
@@ -1317,7 +1324,7 @@ update_trex() {
     fi
 }
 calc() {
-    printf "%s\n" "$@" | bc -l
+    printf "%s\n" "\$@" | bc -l
 }
 EOF
 
@@ -1797,8 +1804,6 @@ install_clover() {
 
 finish() {
 
-    echo ">>> cleaning apks"
-    apk del *-doc
     echo ">>> installation is completed"
     echo '' > /root/reboot
     exit 0
