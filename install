@@ -14,9 +14,9 @@ trex_version='0.26.8'
 kernel='6.0.8'
 kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
 
-kernel_lts="$(echo "$(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')"-lts)"
-kernel_edge="$(echo "$(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')"-edge)"
-kernel_virt="$(echo "$(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')"-virt)"
+kernel_lts=$(echo "$(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts")
+kernel_edge=$(echo "$(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge")
+kernel_virt=$(echo "$(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt")
 
 packages_list() {
 
@@ -462,10 +462,10 @@ setup_drive() {
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
-    if [ "$(ls -d /dev/nvme*)" ]; then
-        drives=("$(ls -d /dev/{nvme[0-9]n[1-9],sd[a-z]})")
+    if [ $(ls -d /dev/nvme*) ]; then
+        drives=($(ls -d /dev/{nvme[0-9]n[1-9],sd[a-z]}))
     else
-        drives=("$(ls -d /dev/sd[a-z])")
+        drives=($(ls -d /dev/sd[a-z]))
     fi
 
     for i in "${!drives[@]}"; do
@@ -476,12 +476,12 @@ setup_drive() {
     drive="${drives[i]}"
     echo "drive=$drive" > /root/list
 
-    if [ "$(ls -d "$drive"{p[1-9],[1-9]})" ]; then
-        partitions=("$(ls -d "$drive"{p[1-9],[1-9]})")
+    if [ $(ls -d "$drive"{p[1-9],[1-9]}) ]; then
+        partitions=($(ls -d "$drive"{p[1-9],[1-9]}))
         menu 'select a root partition or use the complete drive' "$i" "${partitions[@]}"
         if [[ "$drive" != "${partitions[i]}" ]] ; then
             root_drive="${partitions[i]}"
-            partitions=("$(ls -d "$drive"{^"${partitions[i]}",p[1-9],[1-9]})")
+            partitions=($(ls -d "$drive"{^"${partitions[i]}",p[1-9],[1-9]}))
             menu 'select a boot partition to mount ' "$i" "${partitions[@]}"
             boot_drive="${partitions[i]}"
         fi
@@ -1187,11 +1187,11 @@ custom_kernel() {
     sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' /root/linux-"$kernel"/.config
     sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' /root/linux-"$kernel"/.config
     echo ">>> configuring Linux kernel"
-    cd /root/linux-"$kernel"/ && make -j"$(nproc)" menuconfig
+    cd /root/linux-"$kernel"/ && make -j$(nproc) menuconfig
     echo ">>> making Linux kernel"
-    cd /root/linux-"$kernel"/ && make -j"$(nproc)"
+    cd /root/linux-"$kernel"/ && make -j$(nproc)
     echo ">>> installing modules"
-    cd /root/linux-"$kernel"/ && make -j"$(nproc)" modules_install
+    cd /root/linux-"$kernel"/ && make -j$(nproc) modules_install
     echo ">>> installing Linux kernel"
     #cd /root/linux-$kernel/ && make install
     installkernel "$kernel" /root/linux-"$kernel"/arch/x86/boot/bzImage /root/linux-"$kernel"/System.map /boot/
@@ -1481,9 +1481,9 @@ find_windows() {
 
     echo ">>> looking for Windows"
     if test ls -d /dev/nvme*; then
-        drives=("$(ls -d /dev/{nvme[0-9]n[1-9],sd[a-z]})")
+        drives=($(ls -d /dev/{nvme[0-9]n[1-9],sd[a-z]}))
     else
-        drives=("$(ls -d /dev/sd[a-z])")
+        drives=($(ls -d /dev/sd[a-z]))
     fi
 
     if [ ! -d /windows/ ]; then
