@@ -462,7 +462,7 @@ setup_drive() {
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
-    if [[] $(ls -d /dev/nvme*) ]]; then
+    if [[ $(ls -d /dev/nvme*) ]]; then
         drives=($(ls -d /dev/{nvme[0-9]n[1-9],sd[a-z]}))
     else
         drives=($(ls -d /dev/sd[a-z]))
