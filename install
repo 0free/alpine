@@ -462,7 +462,7 @@ setup_drive() {
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
-    if test ls -d /dev/nvme*; then
+    if [ "$(ls -d /dev/nvme*)" ]; then
         drives=("$(ls -d /dev/{nvme[0-9]n[1-9],sd[a-z]})")
     else
         drives=("$(ls -d /dev/sd[a-z])")
@@ -476,7 +476,7 @@ setup_drive() {
     drive="${drives[i]}"
     echo "drive=$drive" > /root/list
 
-    if test ls -d "$drive"{p[1-9],[1-9]}; then
+    if [ "$(ls -d "$drive"{p[1-9],[1-9]})" ]; then
         partitions=("$(ls -d "$drive"{p[1-9],[1-9]})")
         menu 'select a root partition or use the complete drive' "$i" "${partitions[@]}"
         if [[ "$drive" != "${partitions[i]}" ]] ; then
