@@ -468,10 +468,6 @@ setup_drive() {
         drives=($(ls -d /dev/sd[a-z]))
     fi
 
-    for i in "${!drives[@]}"; do
-        drives[i]="/dev/${drives[i]}"
-    done
-
     menu 'select a drive' "$i" "${drives[@]}"
     drive="${drives[i]}"
     echo "drive=$drive" > /root/list
