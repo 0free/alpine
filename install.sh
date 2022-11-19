@@ -467,12 +467,12 @@ setup_drive() {
     menu 'select a drive' drive ${drives[@]}
     echo "drive=$drive" > /root/list
 
-    if [[ $(ls -d ${drive}*(p[1-9]|[1-9])) ]]; then
+    if [[ $(ls -d ${drive}*\(p[1-9]|[1-9]\)) ]]; then
         partitions=($(ls -d ${drive}*\(p[1-9]|[1-9]\)))
         menu 'select a root partition or use the complete drive' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
             rootDrive=${partitions[i]}
-            partitions=($(ls -d ${drive}*\(p[1-9]|[1-9]\)) | grep -v ${partitions[i]})
+            partitions=($(ls -d ${drive}*\(p[1-9]|[1-9]\) | grep -v ${partitions[i]}))
             menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
         fi
     fi
