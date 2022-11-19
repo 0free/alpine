@@ -1067,7 +1067,7 @@ EOF
     if grep -q gnome /root/list; then
         if [ ! -f /etc/profile.d/gnome.sh ]; then
             echo ">>> downloading gnome dconf-settings"
-            wget -q -P /home/$user/ https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+            curl -O https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini > /home/$user/
             cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
     dconf load / < ~/dconf-settings.ini
@@ -1155,7 +1155,7 @@ custom_kernel() {
     depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
     apk add $depend
     echo ">>> downloading Linux-$kernel source"
-    wget -q -P /root/ $kernel_url"linux-$kernel.tar.xz"
+    curl -O $kernel_url"linux-$kernel.tar.xz" > /root/
     echo ">>> extracting Linux-$kernel source"
     tar -xf /root/linux-$kernel.tar.xz -C /root/
     echo ">>> deleting *.tar.xz"
@@ -1274,7 +1274,7 @@ install_miner() {
 
     if [ ! -f /usr/bin/t-rex ]; then
         echo ">>> downloading T-Rex $trex_version"
-        wget -q -P /root/ https://trex-miner.com/download/t-rex-$trex_version-linux.tar.gz
+        curl -O https://trex-miner.com/download/t-rex-$trex_version-linux.tar.gz > /root/
         echo ">>> extracting T-Rex $trex_version"
         tar -zxf t-rex-$trex_version-linux.tar.gz t-rex -C /usr/bin/
         echo ">>> deleting T-Rex files"
@@ -1287,7 +1287,7 @@ trex() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
         if [ ! -f ~/config ]; then
             echo ">>> downloading t-rex config file"
-            wget -q -P ~/ https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
+            curl -O https://raw.githubusercontent.com/0free/t-rex/$trex_version/config > ~/
         fi
         /usr/bin/t-rex -c ~/config
         xdg-open http://127.0.0.1:8080
@@ -1297,7 +1297,7 @@ update_trex() {
     latest="0.$(calc \${version:0-4}+0.1)"
     if wget -q --spider https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
         echo ">>> downloading T-Rex \$latest"
-        wget -q -P ~/ https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
+        curl -O https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz > ~/
         echo ">>> extracting T-Rex \$latest"
         sudo tar -zxf t-rex-\$latest-linux.tar.gz t-rex -C /usr/bin/
         sudo sed -i 's|version=.*|version=\$latest|' /etc/prfile.d/trex.sh
@@ -1319,7 +1319,7 @@ create_iso() {
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
     if wget -q --spider https://alpinelinux.org &>/dev/null; then
-        wget -q -P ~/ https://raw.githubusercontent.com/0free/alpine/1/iso
+        curl -O https://raw.githubusercontent.com/0free/alpine/1/iso > ~/
         sh iso
     fi
 }
@@ -1660,8 +1660,8 @@ install_refind() {
         echo ">>> copying rEFInd drivers"
         cp /usr/share/refind/drivers_x86_64/*.efi /boot/efi/refind/drivers_x64/
         echo ">>> downloading efifs drivers"
-        wget -q -P /boot/efi/refind/drivers_x64/ github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
-        wget -q -P /boot/efi/refind/drivers_x64/ github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
+        curl -O github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi > /boot/efi/refind/drivers_x64/
+        curl -O github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi > /boot/efi/refind/drivers_x64/
     fi
 
     echo ">>> configuring rEFInd bootloader"
@@ -1774,10 +1774,10 @@ install_clover() {
         cp -rlf CloverBootLoader/* /boot/
         rm -r CloverBootLoader/
         echo ">>> downloading efifs drivers"
-        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/btrfs_x64.efi
-        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/ntfs_x64.efi
-        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
-        wget -q -P /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
+        curl -O github.com/pbatard/efifs/releases/download/v1.9/btrfs_x64.efi > /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
+        curl -O github.com/pbatard/efifs/releases/download/v1.9/ntfs_x64.efi > /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
+        curl -O github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi > /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
+        curl -O github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi > /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
     fi
 
 }
