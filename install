@@ -447,7 +447,7 @@ menu() {
         fi
         echo -en "\e[${#options[@]}A"
     done
-    printf "%s" $i
+    printf "%s" ${options[$i]}
 
 }
 
@@ -464,38 +464,32 @@ setup_drive() {
 
     drives=($(ls -d /dev/*(nvme[0-9]n[1-9]|sd[a-z])))
 
-    menu 'select a drive' $i ${drives[@]}
-    drive=${drives[i]}
+    menu 'select a drive' drive ${drives[@]}
     echo "drive=$drive" > /root/list
 
     if [[ $(ls -d ${drive}*(p[1-9]|[1-9])) ]]; then
         partitions=($(ls -d ${drive}*(p[1-9]|[1-9])))
-        menu 'select a root partition or use the complete drive' $i ${partitions[@]}
-        if [[ $drive != ${partitions[i]} ]] ; then
+        menu 'select a root partition or use the complete drive' partition ${partitions[@]}
+        if [[ $drive != $partition ]] ; then
             rootDrive=${partitions[i]}
             partitions=($(ls -d ${drive}*(p[1-9]|[1-9])) | grep -v ${partitions[i]})
-            menu 'select a boot partition to mount ' $i ${partitions[@]}
-            bootDrive=${partitions[i]}
+            menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
         fi
     fi
 
     swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
-    menu 'select swap partition size in MB' $i ${swapSizes[@]}
-    swapSize=${swapSizes[i]}
+    menu 'select swap partition size in MB' swapSize ${swapSizes[@]}
 
     filesystems=(btrfs zfs xfs ext4)
-    menu 'select a filesystem' $i ${filesystems[@]}
-    filesystem=${filesystems[i]}
+    menu 'select a filesystem' filesystem ${filesystems[@]}
     echo "filesystem=$filesystem" >> /root/list
 
     computers=(minimal miner server VirtualBox workstation)
-    menu 'select a computer' $i ${computers[@]}
-    computer=${computers[i]}
+    menu 'select a computer' computer ${computers[@]}
     echo "computer=$computer" >> /root/list
 
     desktops=(gnome kde none)
-    menu 'select a desktop' $i ${desktops[@]}
-    desktop=${desktops[i]}
+    menu 'select a desktop' desktop ${desktops[@]}
     echo "desktop=$desktop" >> /root/list
 
     if [[ $filesystem == zfs ]]; then
@@ -505,13 +499,11 @@ setup_drive() {
     else
         bootloaders=(gummiboot grub rEFInd clover)
     fi
-    menu 'select a bootloader' $i ${bootloaders[@]}
-    bootloader=${bootloaders[i]}
+    menu 'select a bootloader' bootloader ${bootloaders[@]}
     echo "bootloader=$bootloader" >> /root/list
 
     kernels=(no "Linux-$kernel")
-    menu 'build a custom kernel' $i ${kernels[@]}
-    customKernel=${kernels[i]}
+    menu 'build a custom kernel' customKernel ${kernels[@]}
     echo "kernel=$customKernel" >> /root/list
 
     echo -e "\n"
