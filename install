@@ -11,7 +11,7 @@ user='user'
 password='0000'
 trex_version='0.26.8'
 
-kernel='6.0.8'
+kernel='6.0.9'
 kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
 
 kernel_lts=$(echo "$(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts")
@@ -462,22 +462,18 @@ setup_drive() {
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
-    if [[ $(ls -d /dev/nvme*) ]]; then
-        drives=($(ls -d /dev/{nvme[0-9]n[1-9],sd[a-z]}))
-    else
-        drives=($(ls -d /dev/sd[a-z]))
-    fi
+    drives=($(ls -d /dev/*(nvme[0-9]n[1-9]|sd[a-z])))
 
     menu 'select a drive' $i ${drives[@]}
     drive=${drives[i]}
     echo "drive=$drive" > /root/list
 
-    if [[ $(ls -d ${drive}{p[1-9],[1-9]}) ]]; then
-        partitions=($(ls -d ${drive}{p[1-9],[1-9]}))
+    if [[ $(ls -d ${drive}*(p[1-9]|[1-9])) ]]; then
+        partitions=($(ls -d ${drive}*(p[1-9]|[1-9])))
         menu 'select a root partition or use the complete drive' $i ${partitions[@]}
         if [[ $drive != ${partitions[i]} ]] ; then
             rootDrive=${partitions[i]}
-            partitions=($(ls -d ${drive}{${partitions[i]},p[1-9],[1-9]}))
+            partitions=($(ls -d ${drive}*(p[1-9]|[1-9])) | grep -v ${partitions[i]})
             menu 'select a boot partition to mount ' $i ${partitions[@]}
             bootDrive=${partitions[i]}
         fi
