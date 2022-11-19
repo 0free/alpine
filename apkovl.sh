@@ -122,7 +122,7 @@ fi
 PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
 install() {
 	if ping -q -c1 alpinelinux.org &>/dev/null; then
-	    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install && bash install
+	    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install.sh && bash install.sh
     else
         echo "no internet"
 	fi
