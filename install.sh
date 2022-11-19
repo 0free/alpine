@@ -462,17 +462,17 @@ setup_drive() {
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
-    drives=($(ls -d /dev/*\(nvme[0-9]n[1-9]|sd[a-z]\)))
+    drives=($(ls -d /dev/*\(nvme[0-9]n[1-9]\|sd[a-z]\)))
 
     menu 'select a drive' drive ${drives[@]}
     echo "drive=$drive" > /root/list
 
-    if [[ $(ls -d ${drive}*\(p[1-9]|[1-9]\)) ]]; then
-        partitions=($(ls -d ${drive}*\(p[1-9]|[1-9]\)))
+    if [[ $(ls -d ${drive}*\(p[1-9]\|[1-9]\)) ]]; then
+        partitions=($(ls -d ${drive}*\(p[1-9]\|[1-9]\)))
         menu 'select a root partition or use the complete drive' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
             rootDrive=${partitions[i]}
-            partitions=($(ls -d ${drive}*\(p[1-9]|[1-9]\) | grep -v ${partitions[i]}))
+            partitions=($(ls -d ${drive}*\(p[1-9]\|[1-9]\) | grep -v ${partitions[i]}))
             menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
         fi
     fi
@@ -1464,7 +1464,7 @@ setup_bootloader() {
 find_windows() {
 
     echo ">>> looking for Windows"
-    drives=($(ls -d /dev/*\(nvme[0-9]n[1-9]|sd[a-z]\)))
+    drives=($(ls -d /dev/*\(nvme[0-9]n[1-9]\|sd[a-z]\)))
 
     if [ ! -d /windows/ ]; then
         mkdir /windows/
