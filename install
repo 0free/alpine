@@ -824,7 +824,7 @@ change_root() {
 
     echo ">>> copying install script"
     cp /root/list /mnt/root/list
-    cp /root/install /mnt/root/install
+    cp /root/install.sh /mnt/root/install.sh
 
     echo ">>> changing root"
     echo '' > /mnt/root/chroot
@@ -832,7 +832,7 @@ change_root() {
     for d in ${dir[@]}; do
         mount --bind /$d/ /mnt/$d/
     done
-    chroot /mnt/ /bin/bash /root/install
+    chroot /mnt/ /bin/bash /root/install.sh
 
 }
 
@@ -1797,7 +1797,7 @@ if [ -f /mnt/lib/apk/db/lock ]; then
 fi
 
 if [ -f /mnt/root/reboot ]; then
-    rm /mnt/root/install
+    rm /mnt/root/install.sh
     rm /mnt/root/reboot
     echo ">>> un-mounting & reboot"
     dir=(/mnt/boot/ /mnt/sys/ /mnt/dev/ /mnt/proc/)
