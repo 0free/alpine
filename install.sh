@@ -1475,18 +1475,20 @@ find_windows() {
                 mkdir /windows/
             fi
             for p in ${partitions[@]}; do
-                p="/dev/$p"
-                if [[ $p != $bootDrive ]]; then
-                    mount -r $partition /windows/
-                    if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
-                        echo ">>> copying Windows Boot Manager"
-                        cp -rlf /windows/* /boot/
-                        windowsDrive=$d
-                        windowsBoot=$p
-                        echo "windowsDrive=$d" >> /root/list
-                        echo "windowsBoot=$p" >> /root/list
+                p=/dev/$p
+                if ! df | grep -q $p; then
+                    if [[ $p != $bootDrive ]]; then
+                        mount -r $partition /windows/
+                        if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
+                            echo ">>> copying Windows Boot Manager"
+                            cp -rlf /windows/* /boot/
+                            windowsDrive=$d
+                            windowsBoot=$p
+                            echo "windowsDrive=$d" >> /root/list
+                            echo "windowsBoot=$p" >> /root/list
+                        fi
+                        umount /windows/
                     fi
-                    umount /windows/
                 fi
             done
             if [ -d /windows/ ]; then
