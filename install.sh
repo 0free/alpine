@@ -533,22 +533,14 @@ setup_drive() {
 
         echo ">>> creating boot partition"
         sgdisk -n 0:0:+$bootSize -c 0:BOOT -t 0:ef00 $drive
-        if grep -q nvme $drive; then
-            bootDrive=${drive}"p"${i}
-        else
-            bootDrive=${drive}${i}
-        fi
+        bootDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
         echo "bootDrive=$bootDrive" >> /root/list
 
         if grep -q GiB $swapSize; then
             echo ">>> creating swap partition"
             sgdisk -n 0:0:+$swapSize -c 0:SWAP -t 0:8200 $drive
             ((++i))
-            if grep -q nvme $drive; then
-                swapDrive=${drive}"p"${i}
-            else
-                swapDrive=${drive}${i}
-            fi
+            swapDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
             echo "swapDrive=$swapDrive" >> /root/list
         fi
 
@@ -559,11 +551,7 @@ setup_drive() {
             sgdisk -n 0:0:0 -c 0:ROOT -t 0:8300 $drive
         fi
         ((++i))
-        if grep -q nvme $drive; then
-            rootDrive=${drive}"p"${i}
-        else
-            rootDrive=${drive}${i}
-        fi
+        rootDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
         echo "rootDrive=$rootDrive" >> /root/list
 
         echo ">>> reading partition tables"
