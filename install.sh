@@ -1471,14 +1471,14 @@ find_windows() {
     for d in ${drives[@]}; do
         if ls /dev/ | grep -Eq "$d.*p1|$d.*1"; then
             partitions=($(ls /dev/ | grep -E "$d.*p1|$d.*1"))
-            if [ ! -d /windows/ ]; then
-                mkdir /windows/
-            fi
             for p in ${partitions[@]}; do
                 p=/dev/$p
                 if ! df | grep -q $p; then
                     if [[ $p != $bootDrive ]]; then
-                        mount -r $partition /windows/
+                        if [ ! -d /windows/ ]; then
+                            mkdir /windows/
+                        fi
+                        mount -r $p /windows/
                         if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
                             echo ">>> copying Windows Boot Manager"
                             cp -rlf /windows/* /boot/
@@ -1488,12 +1488,12 @@ find_windows() {
                             echo "windowsBoot=$p" >> /root/list
                         fi
                         umount /windows/
+                        if [ -d /windows/ ]; then
+                            rm -r /windows/
+                        fi
                     fi
                 fi
             done
-            if [ -d /windows/ ]; then
-                rm -r /windows/
-            fi
         fi
     done
 
