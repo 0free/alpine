@@ -467,8 +467,9 @@ setup_drive() {
     menu 'select a drive' drive ${drives[@]}
     echo "drive=$drive" > /root/list
 
-    if [[ $(ls /dev/ | grep -E "$drive.p[1-9]$|$drive.[1-9]$") ]]; then
-        partitions=$(ls ${drive}*\(p[1-9]\|[1-9]\))
+    partitions=$(ls /dev/ | grep -E "$drive.p[1-9]$|$drive.[1-9]$")
+
+    if [[ $partitions ]]; then
         menu 'select a root partition or use the complete drive' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
             rootDrive=$partition
@@ -1439,6 +1440,8 @@ make_initramfs() {
 
 setup_bootloader() {
 
+    find_windows
+
     param="rootfstype=$filesystem rw loglevel=1 quiet mitigations=off modules=sd-mod,usb-storage"
 
     if grep -q zfs /root/list; then
@@ -1458,6 +1461,40 @@ setup_bootloader() {
     fi
 
     finish
+
+}
+
+find_windows() {
+
+    echo ">>> looking for Windows"
+    drives=$(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$\|^sd[a-z]$' | grep -v $drive)
+
+    for d in ${drives[@]}; do
+        partitions=$(ls /dev/ | grep -E "$d.p1|$d.1")
+        if [[ $partitions ]]; then
+            if [ ! -d /windows/ ]; then
+                mkdir /windows/
+            fi
+            while true; do
+                for p in ${partitions[@]}; do
+                    mount -r $partition /windows/
+                    if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
+                        echo ">>> copying Windows Boot Manager"
+                        cp -rlf /windows/* /boot/
+                        windowsDrive=$d
+                        windowsBoot=$p
+                        echo "windowsDrive=$d" >> /root/list
+                        echo "windowsBoot=$p" >> /root/list
+                        break
+                    fi
+                    umount /windows/
+                done
+            done
+            if [ -d /windows/ ]; then
+                rm -r /windows/
+            fi
+        fi
+    done
 
 }
 
@@ -1481,6 +1518,13 @@ console-mode auto
 EOF
 
     echo ">>> adding entries to gummiboot"
+    if [[ $windowsDrive ]]; then
+        cat > /boot/loader/entries/windows.conf <<EOF
+title       Windows
+initrd      /EFI/Microsoft/Boot/BOOTMGFW.EFI
+options     'root=$(blkid $windowsBoot -o export | grep ^UUID=)'
+EOF
+    fi
     if [ -f /boot/initramfs ]; then
         cat > /boot/loader/entries/linux.conf <<EOF
 title       Linux-$kernel
@@ -1606,7 +1650,8 @@ EOF
     grub-probe -t fs -d $rootDrive
     grub-probe -t fs_label -d $rootDrive
 
-    find_windows
+    echo ">>> creating Windows efi record"
+    efibootmgr -c -d $windowsDrive -p 1 -t 0 -L "Windows" -l '\EFI\Boot\BOOTX64.EFI'
 
 }
 
@@ -1748,38 +1793,6 @@ install_clover() {
 
 }
 
-find_windows() {
-
-    echo ">>> looking for Windows"
-    drives=$(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$\|^sd[a-z]$' | grep -v $drive)
-
-    for d in ${drives[@]}; do
-        partitions=$(ls /dev/ | grep -E "$d.p[1-9]|$d.[1-9]")
-        if [[ $partitions ]]; then
-            if [ ! -d /windows/ ]; then
-                mkdir /windows/
-            fi
-            while true; do
-                for p in ${partitions[@]}; do
-                    mount -r $partition /windows/
-                    if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
-                        echo ">>> copying Windows Boot Manager"
-                        cp -rlf /windows/* /boot/
-                        echo ">>> creating Windows efi record"
-                        efibootmgr -c -d $d -p 1 -t 0 -L "Windows" -l '\EFI\Boot\BOOTX64.EFI'
-                        break
-                    fi
-                    umount /windows/
-                done
-            done
-            if [ -d /windows/ ]; then
-                rm -r /windows/
-            fi
-        fi
-    done
-
-}
-
 finish() {
 
     echo ">>> installation is completed"
@@ -1822,7 +1835,6 @@ else
         rootDrive=$(. /root/list; echo $rootDrive)
         windowsDrive=$(. /root/list; echo $windowsDrive)
         windowsBoot=$(. /root/list; echo $windowsBoot)
-        windowsPartition=$(. /root/list; echo $windowsPartition)
     fi
     if [ -f /root/chroot ]; then
         if [ -d /boot/efi/ ]; then
