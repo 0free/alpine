@@ -1072,7 +1072,7 @@ EOF
     fi
 
     if grep -q kde /root/list; then
-        if [ ! -d kde/ ]; then
+        if [ ! -f /home/$user/.config/kde.org/systemsettings.conf ]; then
             echo ">>> configuring kde"
             git clone https://github.com/0free/kde.git
             cp -rlf /kde/config/* /home/$user/.config/
