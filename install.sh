@@ -491,11 +491,11 @@ setup_drive() {
     menu 'select a filesystem' filesystem ${filesystems[@]}
     echo "filesystem=$filesystem" >> /root/list
 
-    computers=(minimal miner server VirtualBox workstation)
+    computers=(VirtualBox minimal miner server workstation)
     menu 'select a computer' computer ${computers[@]}
     echo "computer=$computer" >> /root/list
 
-    desktops=(gnome kde none)
+    desktops=(kde gnome none)
     menu 'select a desktop' desktop ${desktops[@]}
     echo "desktop=$desktop" >> /root/list
 
