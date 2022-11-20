@@ -1466,27 +1466,30 @@ setup_bootloader() {
 find_windows() {
 
     echo ">>> looking for Windows"
-    drives=($(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$\|^sd[a-z]$' | grep -v $drive))
+    drives=($(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$|^sd[a-z]$'))
 
     for d in ${drives[@]}; do
-        partitions=($(ls /dev/ | grep -E "$d.p1|$d.1"))
-        if [[ $partitions ]]; then
+        if ls /dev/ | grep -E "$d.*p1|$d.*1"; then
+            partitions=($(ls /dev/ | grep -E "$d.*p1|$d.*1"))
             if [ ! -d /windows/ ]; then
                 mkdir /windows/
             fi
             while true; do
                 for p in ${partitions[@]}; do
-                    mount -r $partition /windows/
-                    if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
-                        echo ">>> copying Windows Boot Manager"
-                        cp -rlf /windows/* /boot/
-                        windowsDrive=$d
-                        windowsBoot=$p
-                        echo "windowsDrive=$d" >> /root/list
-                        echo "windowsBoot=$p" >> /root/list
-                        break
+                    p=/dev/$p
+                    if [[ $p != $bootDrive ]]; then
+                        mount -r $partition /windows/
+                        if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
+                            echo ">>> copying Windows Boot Manager"
+                            cp -rlf /windows/* /boot/
+                            windowsDrive=$d
+                            windowsBoot=$p
+                            echo "windowsDrive=$d" >> /root/list
+                            echo "windowsBoot=$p" >> /root/list
+                            break
+                        fi
+                        umount /windows/
                     fi
-                    umount /windows/
                 done
             done
             if [ -d /windows/ ]; then
