@@ -462,17 +462,17 @@ setup_drive() {
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
-    drives=($(ls -d /dev/*\(nvme[0-9]n[1-9]\|sd[a-z]\)))
+    drives=$(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$|^sd[a-z]$')
 
     menu 'select a drive' drive ${drives[@]}
     echo "drive=$drive" > /root/list
 
-    if [[ $(ls -d ${drive}*\(p[1-9]\|[1-9]\)) ]]; then
-        partitions=($(ls -d ${drive}*\(p[1-9]\|[1-9]\)))
+    if [[ $(ls /dev/ | grep -E "$drive.p[1-9]$|$drive.[1-9]$") ]]; then
+        partitions=$(ls ${drive}*\(p[1-9]\|[1-9]\))
         menu 'select a root partition or use the complete drive' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
-            rootDrive=${partitions[i]}
-            partitions=($(ls -d ${drive}*\(p[1-9]\|[1-9]\) | grep -v ${partitions[i]}))
+            rootDrive=$partition
+            partitions=$(ls ${drive}*\(p[1-9]\|[1-9]\) | grep -v $partition)
             menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
         fi
     fi
@@ -1461,42 +1461,6 @@ setup_bootloader() {
 
 }
 
-find_windows() {
-
-    echo ">>> looking for Windows"
-    drives=($(ls -d /dev/*\(nvme[0-9]n[1-9]\|sd[a-z]\)))
-
-    if [ ! -d /windows/ ]; then
-        mkdir /windows/
-    fi
-
-    while true; do
-        for d in ${drives[@]}; do
-            if grep -q nvme $d; then
-                partition=${d}"p1"
-            else
-                partition=${d}"1"
-            fi
-            if [[ $partition ]]; then
-                mount -r $partition /windows/
-                if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
-                    echo ">>> copying Windows Boot Manager"
-                    cp -rlf /windows/* /boot/
-                    windowsDrive=$d
-                    windowsBoot=$partition
-                    echo "windowsDrive=$d" >> /root/list
-                    echo "windowsBoot=$partition" >> /root/list
-                    echo ">>> creating Windows efi record"
-                    efibootmgr -c -d $windowsDrive -p 1 -t 0 -L "Windows" -l '\EFI\Boot\BOOTX64.EFI'
-                    break
-                fi
-                umount /windows/
-            fi
-        done
-    done
-
-}
-
 install_gummiboot() {
 
     echo ">>> installing gummiboot"
@@ -1642,6 +1606,8 @@ EOF
     grub-probe -t fs -d $rootDrive
     grub-probe -t fs_label -d $rootDrive
 
+    find_windows
+
 }
 
 install_refind() {
@@ -1779,6 +1745,38 @@ install_clover() {
         curl -O github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
         curl -O github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
     fi
+
+}
+
+find_windows() {
+
+    echo ">>> looking for Windows"
+    drives=$(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$\|^sd[a-z]$' | grep -v $drive)
+
+    for d in ${drives[@]}; do
+        partitions=$(ls /dev/ | grep -E "$d.p[1-9]|$d.[1-9]")
+        if [[ $partitions ]]; then
+            if [ ! -d /windows/ ]; then
+                mkdir /windows/
+            fi
+            while true; do
+                for p in ${partitions[@]}; do
+                    mount -r $partition /windows/
+                    if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
+                        echo ">>> copying Windows Boot Manager"
+                        cp -rlf /windows/* /boot/
+                        echo ">>> creating Windows efi record"
+                        efibootmgr -c -d $d -p 1 -t 0 -L "Windows" -l '\EFI\Boot\BOOTX64.EFI'
+                        break
+                    fi
+                    umount /windows/
+                done
+            done
+            if [ -d /windows/ ]; then
+                rm -r /windows/
+            fi
+        fi
+    done
 
 }
 
