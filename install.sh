@@ -478,12 +478,14 @@ setup_drive() {
         if [[ $drive != $partition ]] ; then
             rootDrive=$partition
             partitions=($(ls $drive* | grep -Eq "$drive.{1}|$drive.{2}" | grep -v $partition))
-            menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
+            if [[ $partitions ]]; then
+                menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
+            fi
+        else   
+            swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
+            menu 'select swap partition size in MB' swapSize ${swapSizes[@]}
         fi
     fi
-
-    swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
-    menu 'select swap partition size in MB' swapSize ${swapSizes[@]}
 
     filesystems=(btrfs zfs xfs ext4)
     menu 'select a filesystem' filesystem ${filesystems[@]}
