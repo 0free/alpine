@@ -1084,7 +1084,8 @@ EOF
         cat > /etc/sddm.conf.d/autologin.conf <<EOF
 [Autologin]
 User=$user
-Session=/usr/share/wayland-sessions/plasma.desktop
+Session=/usr/share/xsessions/plasmax11.desktop
+#Session=/usr/share/wayland-sessions/plasma.desktop
 EOF
     fi
 
