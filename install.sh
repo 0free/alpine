@@ -2,9 +2,6 @@
 
 bootSize='190MiB'
 timezone='Asia/Muscat'
-mirror='https://dl-cdn.alpinelinux.org/alpine'
-branch='edge'
-version='v3.16'
 pool='rpool'
 hostname='linux'
 user='user'
@@ -13,10 +10,6 @@ trex_version='0.26.8'
 
 kernel='6.0.9'
 kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
-
-kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
-kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
-kernel_virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
 
 packages_list() {
 
@@ -674,11 +667,11 @@ install_base() {
 
     echo ">>> updating packages"
     cat > /etc/apk/repositories <<EOF
-$mirror/$branch/main
-$mirror/$branch/community
-$mirror/$branch/testing
-#$mirror/$version/main
-#$mirror/$version/community
+http://dl-cdn.alpinelinux.org/alpine/edge/main
+http://dl-cdn.alpinelinux.org/alpine/edge/community
+http://dl-cdn.alpinelinux.org/alpine/edge/testing
+#https://dl-cdn.alpinelinux.org/alpine/latest-stable/main
+#https://dl-cdn.alpinelinux.org/alpine/latest-stable/community
 EOF
 
     echo ">>> installing alpine-base"
@@ -1405,6 +1398,10 @@ make_initramfs() {
 
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
+
+    kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
+    kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
+    kernel_virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
 
     if [ ! -d /lib/modules/$kernel_virt ]; then
         mkdir /lib/modules/$kernel_virt
