@@ -475,15 +475,15 @@ setup_drive() {
     if ls $drive* | grep -Eq "$drive.{1}|$drive.{2}"; then
         partitions=($(ls $drive*))
         menu 'select a root partition or use the complete drive' partition ${partitions[@]}
-        if [[ $drive != $partition ]] ; then
+        if [[ $drive == $partition ]] ; then
+            swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
+            menu 'select swap partition size in MB' swapSize ${swapSizes[@]}
+        else
             rootDrive=$partition
             partitions=($(ls $drive* | grep -Eq "$drive.{1}|$drive.{2}" | grep -v $partition))
             if [[ $partitions ]]; then
                 menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
             fi
-        else   
-            swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
-            menu 'select swap partition size in MB' swapSize ${swapSizes[@]}
         fi
     fi
 
@@ -502,7 +502,7 @@ setup_drive() {
     if [[ $filesystem == zfs ]]; then
         bootloaders=(gummiboot grub)
     elif [[ $filesystem == btrfs ]]; then
-        bootloaders=(gummiboot grub rEFInd clover)
+        bootloaders=(gummiboot grub rEFInd)
     else
         bootloaders=(gummiboot grub rEFInd clover)
     fi
@@ -540,7 +540,7 @@ setup_drive() {
         fi
         echo "bootDrive=$bootDrive" >> /root/list
 
-        if [ $swapSize != 'disable' ]; then
+        if grep -q GiB $swapSize; then
             echo ">>> creating swap partition"
             sgdisk -n 0:0:+$swapSize -c 0:SWAP -t 0:8200 $drive
             ((++i))
