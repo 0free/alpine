@@ -76,7 +76,7 @@ packages_list() {
         font-opensans font-xfree86-type1
         ttf-font-awesome ttf-dejavu ttf-freefont ttf-droid
         # keyboard
-        setxkbmap xkbcomp xkeyboard-config
+        kbd-bkeymaps kbd-openrc setxkbmap xkbcomp xkeyboard-config
         # timezone
         tzdata
         # colord
@@ -939,6 +939,7 @@ enable_services() {
         rc-update add zfs-load-key boot
     fi
 
+    rc-update add loadkeys default
     rc-update add elogind default
     rc-update add polkit default
 
