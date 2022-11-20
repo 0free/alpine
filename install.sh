@@ -463,21 +463,21 @@ setup_drive() {
     lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
-    drives=$(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$|^sd[a-z]$')
+    drives=($(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$|^sd[a-z]$'))
 
     for i in ${!drives[@]}; do
-        drives[$i]="/dev/${drives[$i]}"
+        drives[i]=/dev/${drives[i]}
     done
 
     menu 'select a drive' drive ${drives[@]}
     echo "drive=$drive" > /root/list
 
     if ls $drive* | grep -Eq "$drive.{1}|$drive.{2}"; then
-        partitions=$(ls $drive*)
+        partitions=($(ls $drive*))
         menu 'select a root partition or use the complete drive' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
             rootDrive=$partition
-            partitions=$(ls $drive* | grep -Eq "$drive.{1}|$drive.{2}" | grep -v $partition)
+            partitions=($(ls $drive* | grep -Eq "$drive.{1}|$drive.{2}" | grep -v $partition))
             menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
         fi
     fi
@@ -1471,10 +1471,10 @@ setup_bootloader() {
 find_windows() {
 
     echo ">>> looking for Windows"
-    drives=$(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$\|^sd[a-z]$' | grep -v $drive)
+    drives=($(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$\|^sd[a-z]$' | grep -v $drive))
 
     for d in ${drives[@]}; do
-        partitions=$(ls /dev/ | grep -E "$d.p1|$d.1")
+        partitions=($(ls /dev/ | grep -E "$d.p1|$d.1"))
         if [[ $partitions ]]; then
             if [ ! -d /windows/ ]; then
                 mkdir /windows/
