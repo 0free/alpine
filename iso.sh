@@ -47,15 +47,14 @@ profile_linux() {
     initrd_ucode='/boot/amd-ucode.img /boot/intel-ucode.img'
     apkovl='./aports/scripts/apkovl.sh'
     kernel_flavors='lts'
-    kernel_addons='xtables-addons zfs'
+    kernel_addons='zfs'
     apks="\$apks
         alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
-        alsa-lib alsa-plugins-pulse bluez-alsa bluez-alsa-openrc bluez-alsa-utils
+        alsa-lib alsa-plugins-pulse
         bash bash-completion
         attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
         brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
         btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
-        colord colord-bash-completion colord-gtk
         dbus dbus-libs dbus-openrc dbus-x11
         dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
         elogind elogind-bash-completion elogind-openrc
@@ -69,7 +68,7 @@ profile_linux() {
         intel-media-driver
         iptables iptables-openrc
         iwd iwd-openrc wireless-regdb
-        linux-lts linux-pam
+        linux-lts
         linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
         mesa mesa-dri-gallium
         musl musl-locales musl-utils
@@ -91,6 +90,7 @@ profile_linux() {
         util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
         xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
         xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
+        zfs zfs-openrc
     "
 }
 EOF
