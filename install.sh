@@ -480,8 +480,8 @@ setup_drive() {
             menu 'select swap partition size in MB' swapSize ${swapSizes[@]}
         else
             rootDrive=$partition
-            partitions=($(ls $drive* | grep -E "$drive.{1}|$drive.{2}" | grep -v $partition))
-            if [[ $partitions ]]; then
+            if ls $drive* | grep -E "$drive.{1}|$drive.{2}" | grep -v $partition; then
+                partitions=($(ls $drive* | grep -E "$drive.{1}|$drive.{2}" | grep -v $partition))
                 menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
             fi
         fi
@@ -592,7 +592,9 @@ setup_drive() {
     fi
 
     mount_root
-    mount_boot
+    if [[ $bootDrive ]]; then
+        mount_boot
+    fi
     install_base
 
 }
@@ -908,7 +910,10 @@ setup_desktop() {
     fi
 
     make_initramfs
-    setup_bootloader
+
+    if mountpoint -q /mnt/boot; then
+        setup_bootloader
+    fi
 
 }
 
