@@ -14,9 +14,9 @@ trex_version='0.26.8'
 kernel='6.0.9'
 kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
 
-kernel_lts=$(echo "$(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts")
-kernel_edge=$(echo "$(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge")
-kernel_virt=$(echo "$(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt")
+kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
+kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
+kernel_virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
 
 packages_list() {
 
