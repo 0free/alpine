@@ -480,7 +480,7 @@ setup_drive() {
             menu 'select swap partition size in MB' swapSize ${swapSizes[@]}
         else
             rootDrive=$partition
-            partitions=($(ls $drive* | grep -Eq "$drive.{1}|$drive.{2}" | grep -v $partition))
+            partitions=($(ls $drive* | grep -E "$drive.{1}|$drive.{2}" | grep -v $partition))
             if [[ $partitions ]]; then
                 menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
             fi
