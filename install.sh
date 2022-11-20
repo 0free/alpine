@@ -464,16 +464,19 @@ setup_drive() {
 
     drives=$(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$|^sd[a-z]$')
 
+    for i in ${!drives[@]}; do
+        drives[$i]="/dev/${drives[$i]}"
+    done
+
     menu 'select a drive' drive ${drives[@]}
     echo "drive=$drive" > /root/list
 
-    partitions=$(ls /dev/ | grep -E "$drive.p[1-9]$|$drive.[1-9]$")
-
-    if [[ $partitions ]]; then
+    if ls $drive* | grep -Eq "$drive.{1}|$drive.{2}"; then
+        partitions=$(ls $drive*)
         menu 'select a root partition or use the complete drive' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
             rootDrive=$partition
-            partitions=$(ls ${drive}*\(p[1-9]\|[1-9]\) | grep -v $partition)
+            partitions=$(ls $drive* | grep -Eq "$drive.{1}|$drive.{2}" | grep -v $partition)
             menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
         fi
     fi
