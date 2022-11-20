@@ -426,6 +426,7 @@ packages_list() {
 menu() {
 
     echo -e "\n --> $1:\n"
+    output=$2
     shift 2
     options=($@)
     i=0
@@ -447,7 +448,7 @@ menu() {
         fi
         echo -en "\e[${#options[@]}A"
     done
-    printf "%s" ${options[$i]}
+    printf -v $output ${options[$i]}
 
 }
 
