@@ -1079,9 +1079,11 @@ EOF
             rm -r kde/
         fi
         echo ">>> configuring PAM"
-        sed -i 's|-session|session|' /etc/pam/sddm
-        sed -i 's|-session|session|' /etc/pam/sddm-autologin
-        sed -i 's|-auth|auth|' /etc/pam/sddm-autologin
+        sed -i 's|-auth|auth|' /etc/pam.d/sddm
+        sed -i 's|-auth|auth|' /etc/pam.d/sddm-autologin
+        sed -i 's|-session|session|' /etc/pam.d/sddm
+        sed -i 's|-session|session|' /etc/pam.d/sddm-autologin
+        
         if [ ! -d /etc/sddm.conf.d/ ]; then
             mkdir /etc/sddm.conf.d/
         fi
