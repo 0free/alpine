@@ -93,6 +93,16 @@ packages_list() {
         )
     fi
 
+    if grep -q qemu /root/list; then
+        packages+=(
+            qemu-tools
+            qemu-audio-alsa qemu-audio-dbus qemu-audio-pa
+            qemu-hw-display-virtio-gpu qemu-hw-display-virtio-gpu-gl
+            qemu-hw-display-virtio-gpu-pci qemu-hw-display-virtio-gpu-pci-gl
+            qemu-hw-display-virtio-vga qemu-hw-display-virtio-vga-gl
+            qemu-hw-usb-host qemu-hw-usb-redirect
+        )
+
     if grep -q VirtualBox /root/list; then
         packages+=(
             virtualbox-guest-additions virtualbox-guest-additions-openrc virtualbox-guest-additions-x11
@@ -484,7 +494,7 @@ setup_drive() {
     menu 'select a filesystem' filesystem ${filesystems[@]}
     echo "filesystem=$filesystem" >> /root/list
 
-    computers=(VirtualBox minimal miner server workstation)
+    computers=(minimal miner qemu server VirtualBox workstation)
     menu 'select a computer' computer ${computers[@]}
     echo "computer=$computer" >> /root/list
 
@@ -741,7 +751,7 @@ setup_linux() {
 
 install_linux() {
 
-    if grep -q VirtualBox /root/list; then
+    if grep -Eq 'qemu|VirtualBox' /root/list; then
         list='linux-virt'
         if grep -q zfs /root/list; then
             list+=' zfs-virt zfs zfs-openrc zfs-libs zfs-udev'
@@ -870,7 +880,7 @@ setup_desktop() {
     enable_services
     configure_alpine
 
-    if ! grep -q VirtualBox /root/list; then
+    if ! grep -Eq 'qemu|VirtualBox' /root/list; then
         if grep -q $kernel /root/list; then
             custom_kernel
             build_zfs
@@ -1385,6 +1395,8 @@ make_initramfs() {
 
     if grep -q VirtualBox /root/list; then
         modules+=(vboxvideo virtio-gpu vmvga vmwgfx)
+    elif grep -q qemu /root/list; then
+        modules+=()
     else
         modules+=(intel_agp i915)
         modules+=(amdgpu)
