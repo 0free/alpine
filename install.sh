@@ -433,9 +433,9 @@ menu() {
         done
         read -rsn3 key
         if [[ $key == $(echo -en '\e[A') ]] && [[ $i -gt 0 ]]; then
-            i=$((i-1))
+            ((i--))
         elif [[ $key == $(echo -en '\e[B') ]] && [[ $i -lt ${#options[@]} ]]; then
-            i=$((i+1))
+            ((i++))
         elif [[ -z $key ]]; then
             break
         fi
@@ -1078,14 +1078,18 @@ EOF
             cp -rlf /kde/config/* /home/$user/.config/
             rm -r kde/
         fi
+        echo ">>> configuring PAM"
+        sed -i 's|-session|session|' /etc/pam/sddm
+        sed -i 's|-session|session|' /etc/pam/sddm-autologin
+        sed -i 's|-auth|auth|' /etc/pam/sddm-autologin
         if [ ! -d /etc/sddm.conf.d/ ]; then
             mkdir /etc/sddm.conf.d/
         fi
         cat > /etc/sddm.conf.d/autologin.conf <<EOF
 [Autologin]
 User=$user
-Session=/usr/share/xsessions/plasmax11.desktop
-#Session=/usr/share/wayland-sessions/plasma.desktop
+#Session=/usr/share/xsessions/plasmax11.desktop
+Session=/usr/share/wayland-sessions/plasma.desktop
 EOF
     fi
 
