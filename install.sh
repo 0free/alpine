@@ -1079,6 +1079,10 @@ EOF
             rm -r kde/
         fi
         echo ">>> configuring PAM"
+        cat > /etc/pam.d/login <<EOF
+auth            optional        pam_kwallet5.so
+session         optional        pam_kwallet5.so auto_start force_run
+EOF
         sed -i 's|-auth|auth|' /etc/pam.d/sddm
         sed -i 's|-auth|auth|' /etc/pam.d/sddm-autologin
         sed -i 's|-session|session|' /etc/pam.d/sddm
