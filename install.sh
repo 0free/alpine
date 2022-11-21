@@ -1079,25 +1079,14 @@ EOF
             rm -r kde/
         fi
         echo ">>> configuring PAM"
-        cat > /etc/pam.d/login <<EOF
+        cat >> /etc/pam.d/login <<EOF
 auth            optional        pam_kwallet5.so
 session         optional        pam_kwallet5.so auto_start force_run
 EOF
-        sed -i 's|-auth|auth|' /etc/pam.d/sddm
-        sed -i 's|-auth|auth|' /etc/pam.d/sddm-autologin
-        sed -i 's|-session|session|' /etc/pam.d/sddm
-        sed -i 's|-session|session|' /etc/pam.d/sddm-autologin
-        
+ 
         if [ ! -d /etc/sddm.conf.d/ ]; then
             mkdir /etc/sddm.conf.d/
         fi
-        cat > /etc/sddm.conf.d/autologin.conf <<EOF
-[Autologin]
-User=$user
-#Session=/usr/share/xsessions/plasmax11.desktop
-Session=/usr/share/wayland-sessions/plasma.desktop
-EOF
-    fi
 
     echo ">>> setting ~/"
     chown -R $user:wheel /home/$user/
