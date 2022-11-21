@@ -102,6 +102,7 @@ packages_list() {
             qemu-hw-display-virtio-vga qemu-hw-display-virtio-vga-gl
             qemu-hw-usb-host qemu-hw-usb-redirect
         )
+    fi
 
     if grep -q VirtualBox /root/list; then
         packages+=(
