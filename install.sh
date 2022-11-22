@@ -431,7 +431,6 @@ menu() {
     output=$2
     shift 2
     options=($@)
-    i=0
     while true; do
         for option in ${options[@]}; do
             if [[ $option == ${options[$i]} ]]; then
@@ -447,6 +446,8 @@ menu() {
             ((i--))
         elif [[ $key == '' ]]; then
             break
+        else
+            i=0
         fi
         echo -en "\e[${#options[@]}A"
     done
