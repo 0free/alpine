@@ -440,11 +440,11 @@ menu() {
                 echo -e "\t$option"
             fi
         done
-        read -rsn3 key
-        if [[ $key == '\e[A' ]] && [[ $i -gt 0 ]]; then
+        read -rsn3 key &>/dev/null
+        if [[ $key == $(echo -en '\e[A') ]] && [[ $i -gt 0 ]]; then
             ((i--))
         fi
-        if [[ $key == '\e[B' ]] && [[ $i -lt ${#options[@]} ]]; then
+        if [[ $key == $(echo -en '\e[B') ]] && [[ $i -lt ${#options[@]} ]]; then
             ((i--))
         fi
         if [[ $key == '' ]]; then
