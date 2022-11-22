@@ -440,12 +440,16 @@ menu() {
                 echo -e "\t$option"
             fi
         done
-        read -rsn3 key
-        case $key in
-            '\e[A') ((i--));;
-            '\e[B') ((i++));;
-            '') break;;
-        esac
+        read -rsn3 key &>/dev/null
+        if [[ $key == '\e[A' ]] && [[ $i -gt 0 ]]; then
+            ((i--))
+        fi
+        if [[ $key == '\e[B' ]] && [[ $i -gt 0 ]]; then
+            ((i--))
+        fi
+        if [[ $key == '' ]] && [[ $i -lt ${#options[@]} ]]; then
+            break
+        fi
         echo -en "\e[${#options[@]}A"
     done
     printf -v $output ${options[$i]}
