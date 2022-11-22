@@ -432,7 +432,7 @@ menu() {
     shift 2
     options=($@)
     i=0
-    while true; do
+    while read -rsn3 key; do
         for option in ${options[@]}; do
             if [[ $option == ${options[$i]} ]]; then
                 echo -e "\t\e[7m$option\e[0m"
@@ -441,11 +441,13 @@ menu() {
             fi
         done
         read -rsn3 key
-        if [[ $key == $(echo -en "\e[A") ]] && [[ $i -gt 0 ]]; then
-            ((i-=1))
-        elif [[ $key == $(echo -en "\e[B") ]] && [[ $i -lt ${#options[@]} ]]; then
-            ((i+=1))
-        elif [[ -z $key ]]; then
+        if [[ $key == '\e[A' ]] && [[ $i -gt 0 ]]; then
+            ((i--))
+        fi
+        if [[ $key == '\e[B' ]] && [[ $i -lt ${#options[@]} ]]; then
+            ((i++))
+        fi
+        if [[ -z $key ]]; then
             break
         fi
         echo -en "\e[${#options[@]}A"
