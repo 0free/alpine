@@ -442,13 +442,12 @@ menu() {
         done
         read -rsn3 key
         if [[ $key == '\e[B' ]] && [[ $i -lt ${#options[@]} ]]; then
-            ((i++))
+            ((i++)) && echo -en "\e[${#options[@]}A"
         elif [[ $key == '\e[A' ]] && [[ $i -gt 0 ]]; then
-            ((i--))
+            ((i--)) && echo -en "\e[${#options[@]}A"
         elif [[ $key == '' ]]; then
             break
         fi
-        echo -en "\e[${#options[@]}A"
     done
     printf -v $output ${options[$i]}
 
