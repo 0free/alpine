@@ -444,7 +444,7 @@ menu() {
         if [[ $key == '\e[A' ]] && [[ $i -gt 0 ]]; then
             ((i--))
         elif [[ $key == '\e[B' ]] && [[ $i -lt ${#options[@]} ]]; then
-            ((i--))
+            ((i++))
         elif [[ $key == '' ]]; then
             break
         fi
