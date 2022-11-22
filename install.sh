@@ -431,6 +431,7 @@ menu() {
     output=$2
     shift 2
     options=($@)
+    i=0
     while true; do
         for option in ${options[@]}; do
             if [[ $option == ${options[$i]} ]]; then
@@ -440,9 +441,9 @@ menu() {
             fi
         done
         read -rsn3 key
-        if [[ $key == $(echo -e '\e[B') ]] && [[ $i -lt ${#options[@]} ]]; then
+        if [[ $key == '\e[B') ]] && [[ $i -lt ${#options[@]} ]]; then
             ((i++))
-        elif [[ $key == $(echo -e '\e[A') ]] && [[ $i -gt 0 ]]; then
+        elif [[ $key == '\e[A') ]] && [[ $i -gt 0 ]]; then
             ((i--))
         elif [[ $key == '' ]]; then
             break
