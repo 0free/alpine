@@ -441,9 +441,9 @@ menu() {
             fi
         done
         read -rsn3 key
-        if [[ $key == $(echo -en '\e[A') ]] && [[ $i -gt 0 ]]; then
+        if [[ $key == $(echo -en "\e[A") ]] && [[ $i -gt 0 ]]; then
             ((i-=1))
-        elif [[ $key == $(echo -en '\e[B') ]] && [[ $i -lt ${#options[@]} ]]; then
+        elif [[ $key == $(echo -en "\e[B") ]] && [[ $i -lt ${#options[@]} ]]; then
             ((i+=1))
         elif [[ -z $key ]]; then
             break
