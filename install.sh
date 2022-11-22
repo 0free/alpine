@@ -440,7 +440,7 @@ menu() {
                 echo -e "\t$option"
             fi
         done
-        read -rsn3 key &>/dev/null
+        read -rsn1 key
         if [[ $key == '\e[A' ]] && [[ $i -gt 0 ]]; then
             ((i--))
         fi
