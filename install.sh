@@ -1070,15 +1070,15 @@ EOF
     fi
 
     if grep -q gnome /root/list; then
-        if [ ! -f /etc/profile.d/gnome.sh ]; then
-            echo ">>> downloading gnome dconf-settings"
-            curl -O https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini -o /home/$user/
-            cat > /etc/profile.d/gnome.sh <<EOF
+        cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
     dconf load / < ~/dconf-settings.ini
     rm ~/dconf-settings.ini
 fi
 EOF
+        if [ ! -f /home/$user/dconf-settings.ini ]; then
+            echo ">>> downloading gnome dconf-settings"
+            curl -O https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini -o /home/$user/
         fi
     fi
 
@@ -1231,7 +1231,7 @@ version=$(apk search -e nvidia-src)
 nvidia() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
         if find /lib/modules/ -type f -name 'nvidia.ko.gz' | grep -q nvidia; then
-            if grep -q "\$(apk search -e nvidia-src)" /etc/profile.d/nvidia.sh; then
+            if grep -q \$(apk search -e nvidia-src) /etc/profile.d/nvidia.sh; then
                 echo "nvidia driver is up-to-date"
             else
                 install_modules
@@ -1242,9 +1242,9 @@ nvidia() {
     fi
 }
 install_modules() {
-    echo ">>> building nvidia kernel modules"
+    echo '>>> building nvidia kernel modules'
     sudo akms install all
-    sudo sed -i "s|version=.*|version=\$(apk search -e nvidia-src)|" /etc/profile.d/nvidia.sh
+    sudo sed -i 's|version=.*|version=\$(apk search -e nvidia-src)|' /etc/profile.d/nvidia.sh
     if [ -d /usr/src/nvidia-src/ ]; then
         rm -r /usr/src/nvidia-src/*
     fi
@@ -1313,7 +1313,7 @@ update_trex() {
     fi
 }
 calc() {
-    printf "%s\n" "\$@" | bc -l
+    printf "%s" \$@ | bc -l
 }
 EOF
 
@@ -1324,8 +1324,8 @@ create_iso() {
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
     if wget -q --spider https://alpinelinux.org &>/dev/null; then
-        curl -O https://raw.githubusercontent.com/0free/alpine/1/iso -o ~/
-        sh iso
+        curl -O https://raw.githubusercontent.com/0free/alpine/1/iso.sh -o ~/
+        sh iso.sh
     fi
 }
 EOF
@@ -1335,7 +1335,7 @@ EOF
 openwrt() {
 
     cat > /etc/profile.d/openwrt.sh << EOF
-version="$(apk search -e musl-dev)"
+version=$(apk search -e musl-dev)
 openwrt() {
     if wget -q --spider https://alpinelinux.org &>/dev/null; then
         sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev
@@ -1343,7 +1343,7 @@ openwrt() {
     fi
     if ! grep -q "\$(apk search -e musl-dev)" /etc/profile.d/openwrt.sh; then
         sudo sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
-        sudo sed -i 's|version=.*|version="\$(apk search -e musl-dev)"|' /etc/profile.d/openwrt.sh
+        sudo sed -i 's|version=.*|version=\$(apk search -e musl-dev)|' /etc/profile.d/openwrt.sh
     fi
     if [ -d ~/openwrt ]; then
         cd ~/openwrt && git pull
@@ -1587,7 +1587,7 @@ EOF
     fi
 
     cat > /etc/profile.d/gummiboot.sh <<EOF
-version="$(apk search -e gummiboot)"
+version=$(apk search -e gummiboot)
 gummiboot() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
         if grep -q \$(apk search -e gummiboot) etc/profile.d/gummiboot.sh; then
@@ -1595,6 +1595,7 @@ gummiboot() {
         else
             sudo apk update gummiboot
             sudo cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
+            sudo sed -i 's|version=.*|version=\$(apk search -e guammiboot)|' /etc/profile.d/gummiboot.sh
         fi
     fi
 }
