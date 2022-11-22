@@ -7,9 +7,7 @@ hostname='linux'
 user='user'
 password='0000'
 trex_version='0.26.8'
-
 kernel='6.0.9'
-kernel_url='https://cdn.kernel.org/pub/linux/kernel/v6.x/'
 
 packages_list() {
 
@@ -514,8 +512,10 @@ setup_drive() {
     echo "bootloader=$bootloader" >> /root/list
 
     kernels=(no "Linux-$kernel")
-    menu 'build a custom kernel' customKernel ${kernels[@]}
-    echo "kernel=$customKernel" >> /root/list
+    menu 'build a custom kernel?' choise ${kernels[@]}
+    if grep -q $kernel $choise; then
+        echo "kernel=$choise" >> /root/list
+    fi
 
     echo -e "\n"
 
@@ -1078,7 +1078,7 @@ fi
 EOF
         if [ ! -f /home/$user/dconf-settings.ini ]; then
             echo ">>> downloading gnome dconf-settings"
-            curl -O https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini -o /home/$user/
+            curl -o /home/$user/dconf-settings.ini -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
         fi
     fi
 
@@ -1094,10 +1094,10 @@ EOF
 auth            optional        pam_kwallet5.so
 session         optional        pam_kwallet5.so auto_start force_run
 EOF
- 
         if [ ! -d /etc/sddm.conf.d/ ]; then
             mkdir /etc/sddm.conf.d/
         fi
+    fi
 
     echo ">>> setting ~/"
     chown -R $user:wheel /home/$user/
@@ -1156,16 +1156,18 @@ EOF
 
 custom_kernel() {
 
+    kernel_url="https://cdn.kernel.org/pub/linux/kernel/v${kernel::1}.x/linux-$kernel.tar.xz"
+
     echo ">>> installing required packages to build Linux-$kernel"
     depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
     apk add $depend
     echo ">>> downloading Linux-$kernel source"
-    curl -O $kernel_url"linux-$kernel.tar.xz" -o /root/
+    curl -o /root/linux-$kernel.tar.xz -LO $kernel_url
     echo ">>> extracting Linux-$kernel source"
     tar -xf /root/linux-$kernel.tar.xz -C /root/
     echo ">>> deleting *.tar.xz"
     rm /root/*.tar.xz
-    echo ">>> copying Linux-$kernel configuration"
+    echo ">>> copying alpine linux-edge kernel configuration"
     if [ -f /boot/config-virt ]; then
         cp /boot/config-virt /root/linux-$kernel/.config
     elif [ -f /boot/config-edge ]; then
@@ -1279,11 +1281,11 @@ install_miner() {
 
     if [ ! -f /usr/bin/t-rex ]; then
         echo ">>> downloading T-Rex $trex_version"
-        curl -O https://trex-miner.com/download/t-rex-$trex_version-linux.tar.gz -o /root/
+        curl -o /root/t-rex.tar.gz -LO https://trex-miner.com/download/t-rex-$trex_version-linux.tar.gz
         echo ">>> extracting T-Rex $trex_version"
-        tar -zxf t-rex-$trex_version-linux.tar.gz t-rex -C /usr/bin/
+        tar -zxf t-rex.tar.gz t-rex -C /usr/bin/
         echo ">>> deleting T-Rex files"
-        rm /root/t-rex-$trex_version-linux.tar.gz
+        rm /root/t-rex.tar.gz
     fi
 
     cat > /etc/profile.d/t-rex.sh << EOF
@@ -1292,7 +1294,7 @@ trex() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
         if [ ! -f ~/config ]; then
             echo ">>> downloading t-rex config file"
-            curl -O https://raw.githubusercontent.com/0free/t-rex/$trex_version/config -o ~/
+            curl -o ~/config -LO https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
         fi
         /usr/bin/t-rex -c ~/config
         xdg-open http://127.0.0.1:8080
@@ -1324,7 +1326,7 @@ create_iso() {
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
     if wget -q --spider https://alpinelinux.org &>/dev/null; then
-        curl -O https://raw.githubusercontent.com/0free/alpine/1/iso.sh -o ~/
+        curl -o ~/iso.sh -LO https://raw.githubusercontent.com/0free/alpine/1/iso.sh
         sh iso.sh
     fi
 }
@@ -1684,8 +1686,8 @@ install_refind() {
         echo ">>> copying rEFInd drivers"
         cp /usr/share/refind/drivers_x86_64/*.efi /boot/efi/refind/drivers_x64/
         echo ">>> downloading efifs drivers"
-        curl -O github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi -o /boot/efi/refind/drivers_x64/
-        curl -O github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi -o /boot/efi/refind/drivers_x64/
+        curl -o /boot/efi/refind/drivers_x64/xfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
+        curl -o /boot/efi/refind/drivers_x64/zfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
     fi
 
     echo ">>> configuring rEFInd bootloader"
@@ -1798,10 +1800,10 @@ install_clover() {
         cp -rlf CloverBootLoader/* /boot/
         rm -r CloverBootLoader/
         echo ">>> downloading efifs drivers"
-        curl -O github.com/pbatard/efifs/releases/download/v1.9/btrfs_x64.efi -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
-        curl -O github.com/pbatard/efifs/releases/download/v1.9/ntfs_x64.efi -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
-        curl -O github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
-        curl -O github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/
+        curl -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/btrfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/btrfs_x64.efi
+        curl -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ntfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/ntfs_x64.efi
+        curl -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/xfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
+        curl -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/zfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
     fi
 
 }
