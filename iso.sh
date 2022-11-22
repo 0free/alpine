@@ -29,7 +29,7 @@ else
    cd ~/aports && git pull && cd ~
 fi
 
-curl -O raw.githubusercontent.com/0free/alpine/1/apkovl.sh > ~/aports/scripts/
+curl -o ~/aports/scripts/apkovl.sh -LO raw.githubusercontent.com/0free/alpine/1/apkovl.sh
 
 chmod 700 ~/aports/scripts/apkovl.sh
 
@@ -40,7 +40,6 @@ profile_linux() {
     arch='x86_64'
 	hostname='alpine'
 	kernel_cmdline="console=tty0 console=ttyS0,115200"
-	syslinux_serial="0 115200"
 	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage mitigations=off'
 	initfs_features='ata base bootchart cdrom btrfs zfs xfs ext4 mmc nvme raid scsi squashfs usb virtio'
 	modloop_sign=yes
@@ -59,7 +58,7 @@ profile_linux() {
         btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
         dbus dbus-libs dbus-openrc dbus-x11
         dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
-        efibootmgr syslinux
+        efibootmgr
         elogind elogind-bash-completion elogind-openrc
         ethtool ethtool-bash-completion
         eudev eudev-libs eudev-openrc
