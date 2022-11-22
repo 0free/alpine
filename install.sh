@@ -450,7 +450,7 @@ menu() {
         fi
         echo -en "\e[${#options[@]}A"
     done
-    printf -v $output ${options[$i]}
+    printf -v "$output" ${options[$i]}
 
 }
 
