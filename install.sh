@@ -102,11 +102,13 @@ packages_list() {
         )
     fi
 
-    if grep -q VirtualBox /root/list; then
+    if grep -Eq VirtualBox /root/list; then
         packages+=(
             virtualbox-guest-additions virtualbox-guest-additions-openrc virtualbox-guest-additions-x11
         )
-    else
+    fi
+
+    if ! grep -Eq 'qemu|VirtualBox' /root/list; then
         packages+=(
             # hardware
             bolt pciutils
