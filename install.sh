@@ -74,7 +74,7 @@ packages_list() {
         font-opensans font-xfree86-type1
         ttf-font-awesome ttf-dejavu ttf-freefont ttf-droid
         # keyboard
-        kbd-bkeymaps kbd-openrc setxkbmap xkbcomp xkeyboard-config
+        kbd-bkeymaps setxkbmap xkbcomp xkeyboard-config
         # timezone
         tzdata
         # colord
@@ -93,22 +93,14 @@ packages_list() {
 
     if grep -q qemu /root/list; then
         packages+=(
-            qemu-tools
+            qemu-guest-agent qemu-tools
             qemu-audio-alsa qemu-audio-dbus qemu-audio-pa
             qemu-hw-display-virtio-gpu qemu-hw-display-virtio-gpu-gl
             qemu-hw-display-virtio-gpu-pci qemu-hw-display-virtio-gpu-pci-gl
             qemu-hw-display-virtio-vga qemu-hw-display-virtio-vga-gl
             qemu-hw-usb-host qemu-hw-usb-redirect
         )
-    fi
-
-    if grep -Eq VirtualBox /root/list; then
-        packages+=(
-            virtualbox-guest-additions virtualbox-guest-additions-openrc virtualbox-guest-additions-x11
-        )
-    fi
-
-    if ! grep -Eq 'qemu|VirtualBox' /root/list; then
+    else
         packages+=(
             # hardware
             bolt pciutils
@@ -509,7 +501,7 @@ setup_drive() {
     menu 'select a filesystem' filesystem ${filesystems[@]}
     echo "filesystem=$filesystem" >> /root/list
 
-    computers=(minimal miner qemu server VirtualBox workstation)
+    computers=(minimal miner qemu server workstation)
     menu 'select a computer' computer ${computers[@]}
     echo "computer=$computer" >> /root/list
 
@@ -764,7 +756,7 @@ setup_linux() {
 
 install_linux() {
 
-    if grep -Eq 'qemu|VirtualBox' /root/list; then
+    if grep -q qemu /root/list; then
         list='linux-virt'
         if grep -q zfs /root/list; then
             list+=' zfs-virt zfs zfs-openrc zfs-libs zfs-udev'
@@ -893,7 +885,7 @@ setup_desktop() {
     enable_services
     configure_alpine
 
-    if ! grep -Eq 'qemu|VirtualBox' /root/list; then
+    if ! grep -q qemu /root/list; then
         if grep -q $kernel /root/list; then
             custom_kernel
             build_zfs
@@ -944,7 +936,6 @@ enable_services() {
     rc-update add cgroups boot
     rc-update add mtab boot
     rc-update add hwclock boot
-    rc-update add save-keymaps boot
     rc-update add lvm boot
     rc-update add swap boot
     rc-update add localmount boot
@@ -962,7 +953,6 @@ enable_services() {
         rc-update add zfs-load-key boot
     fi
 
-    rc-update add loadkeys default
     rc-update add elogind default
     rc-update add polkit default
 
@@ -974,9 +964,8 @@ enable_services() {
     rc-update add bluetooth default
     rc-update add ufw default
 
-    if grep -q VirtualBox /root/list; then
-        rc-update add virtualbox-guest-additions default
-        rc-update add virtualbox-drm-client default
+    if grep -q qemu /root/list; then
+        rc-update add qemu-guest-agent default
     else
         rc-update add iwd default
         rc-update add rsyncd default
@@ -1408,10 +1397,8 @@ make_initramfs() {
         modules+=(ext4)
     fi
 
-    if grep -q VirtualBox /root/list; then
+    if grep -q qemu /root/list; then
         modules+=(vboxvideo virtio-gpu vmvga vmwgfx)
-    elif grep -q qemu /root/list; then
-        modules+=()
     else
         modules+=(intel_agp i915)
         modules+=(amdgpu)
