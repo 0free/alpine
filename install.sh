@@ -434,25 +434,25 @@ menu() {
     local i=0
     while true; do
         for option in ${options[@]}; do
-            if [ $option == ${options[$i]} ]; then
+            if [[ $option == ${options[$i]} ]]; then
                 echo -e "\t\e[7m$option\e[0m"
             else
                 echo -e "\t$option"
             fi
         done
         read -rsn3 key
+        if [[ $key == $(echo -e '\033[A') ]]; then
+            i=$((i-1))
+        elif [[ $key == $(echo -e '\033[B') ]]; then
+            i=$((i+1))
+        elif [[ $key == '' ]]; then
+            break
+        fi
         if [ $i -ge 0 ] && [ $i -le ${#options[@]} ]; then
-            if [[ $key == $(echo -e '\033[A') ]]; then
-                i=$((i--))
-            elif [[ $key == $(echo -e '\033[B') ]]; then
-                i=$((i++))
-            elif [[ $key == '' ]]; then
-                break
-            fi
+            echo -en "\033[${#options[@]}A"
         else
             i=0
         fi
-        echo -en "\e[${#options[@]}A"
     done
     printf -v $output ${options[$i]}
 
