@@ -428,24 +428,24 @@ packages_list() {
 menu() {
 
     echo -e "\n --> $1:\n"
-    output=$2
+    local output=$2
     shift 2
-    options=($@)
-    i=0
+    local options=($@)
+    local i=0
     while true; do
         for option in ${options[@]}; do
-            if [[ $option == ${options[$i]} ]]; then
+            if [ $option == ${options[$i]} ]; then
                 echo -e "\t\e[7m$option\e[0m"
             else
                 echo -e "\t$option"
             fi
         done
         read -rsn3 key
-        if [[ $key == '\e[B' ]] && [[ $i -lt ${#options[@]} ]]; then
+        if [ $key == '\e[B' ] && [ $i -lt ${#options[@]} ]; then
             i=$((i++))
-        elif [[ $key == '\e[A' ]] && [[ $i -gt 0 ]]; then
+        elif [ $key == '\e[A' ] && [ $i -gt 0 ]; then
             i=$((i--))
-        elif [[ $key == '' ]]; then
+        elif [ $key == '' ]; then
             break
         else
             i=0
