@@ -441,11 +441,11 @@ menu() {
             fi
         done
         read -rsn3 key
-        if [ $key == '\e[B' ] && [ $i -lt ${#options[@]} ]; then
-            i=$((i++))
-        elif [ $key == '\e[A' ] && [ $i -gt 0 ]; then
-            i=$((i--))
-        elif [ $key == '' ]; then
+        if [[ $key == '\e[B' ]] && [ $i -lt ${#options[@]} ]; then
+            i=$((i+1))
+        elif [[ $key == '\e[A' ]] && [ $i -gt 0 ]; then
+            i=$((i-1))
+        elif [[ $key == '' ]]; then
             break
         else
             i=0
