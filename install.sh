@@ -441,13 +441,11 @@ menu() {
             fi
         done
         read -rsn3 key
-        if [[ $key == $(echo -e '\033[A') ]]; then
-            i=$((i-1))
-        elif [[ $key == $(echo -e '\033[B') ]]; then
-            i=$((i+1))
-        elif [[ $key == '' ]]; then
-            break
-        fi
+        case $key in
+            $(echo -e '\033[A'))) i=$((i-1));;
+            $(echo -e '\033[B'))) i=$((i+1));;
+            '')) break;;
+        esac
         if [ $i -ge 0 ] && [ $i -le ${#options[@]} ]; then
             echo -en "\033[${#options[@]}A"
         else
