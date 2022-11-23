@@ -442,9 +442,9 @@ menu() {
         done
         read -rsn3 key
         if [ $i -ge 0 ] && [ $i -le ${#options[@]} ]; then
-            if [[ $key == $(echo -en '\e[A') ]]; then
+            if [[ $key == $(echo -e '\033[A') ]]; then
                 i=$((i--))
-            elif [[ $key == $(echo -en '\e[B') ]]; then
+            elif [[ $key == $(echo -e '\033[B') ]]; then
                 i=$((i++))
             elif [[ $key == '' ]]; then
                 break
