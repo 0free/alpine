@@ -492,6 +492,7 @@ setup_drive() {
                     menu 'select a swap partition ' swapDrive ${partitions[@]}
                 fi
             fi
+        fi
     fi
 
     if [[ ! $swapDrive ]]; then
