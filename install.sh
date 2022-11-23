@@ -478,18 +478,21 @@ setup_drive() {
     partitions=($(ls $drive* | grep -E "$drive.{1}|$drive.{2}"))
 
     if [[ $partitions ]]; then
-        menu 'select a root partition or use the complete drive' rootDrive ${partitions[@]}
+        menu 'select a root partition or use the complete drive' partition ${partitions[@]}
         if [[ $drive != $partition ]] ; then
+            rootDrive=$partition
             if lsblk -o parttypename | grep -q 'EFI System'; then
                 partitions=(${paritions[@]/$partition})
                 if [[ $partitions ]]; then
                     menu 'select a boot partition ' bootDrive ${partitions[@]}
+                    bootDrive=$partition
                 fi
             fi
-            if lsblk -o parttypename | grep -q 'SWAP'; then
+            if lsblk -o parttypename | grep -q 'Linux swap'; then
                 partitions=(${paritions[@]/$partition})
                 if [[ $partitions ]]; then
                     menu 'select a swap partition ' swapDrive ${partitions[@]}
+                    swapDrive=$partition
                 fi
             fi
         fi
@@ -544,19 +547,22 @@ setup_drive() {
         echo ">>> creating GPT"
         sgdisk -o -U $drive
 
-        i=1
-
-        echo ">>> creating boot partition"
-        sgdisk -n 0:0:+$bootSize -c 0:BOOT -t 0:ef00 $drive
-        bootDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
-        echo "bootDrive=$bootDrive" >> /root/list
+        if [[ ! $bootDrive ]]; then
+            echo ">>> creating boot partition"
+            sgdisk -n 0:0:+$bootSize -c 0:BOOT -t 0:ef00 $drive
+            i=1
+            bootDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
+            echo ">>> creating boot filesystem"
+            mkfs.vfat -F32 -n BOOT $bootDrive
+        fi
 
         if grep -q GiB $swapSize; then
             echo ">>> creating swap partition"
             sgdisk -n 0:0:+$swapSize -c 0:SWAP -t 0:8200 $drive
-            ((++i))
+            i=$((i+1))
             swapDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
-            echo "swapDrive=$swapDrive" >> /root/list
+            echo ">>> creating swap filesystem"
+            mkswap $swapDrive
         fi
 
         echo ">>> creating root partition"
@@ -565,22 +571,17 @@ setup_drive() {
         else
             sgdisk -n 0:0:0 -c 0:ROOT -t 0:8300 $drive
         fi
-        ((++i))
+        i=$((i+1))
         rootDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
-        echo "rootDrive=$rootDrive" >> /root/list
-
-        echo ">>> reading partition tables"
-        mdev -s && mdev -s
-
-        echo ">>> creating boot filesystem"
-        mkfs.vfat -F32 -n BOOT $bootDrive
-
-        if [[ $swapDrive ]]; then
-            echo ">>> creating swap filesystem"
-            mkswap $swapDrive
-        fi
 
     fi
+
+    echo ">>> reading partition tables"
+    mdev -s && mdev -s
+
+    echo "bootDrive=$bootDrive" >> /root/list
+    echo "swapDrive=$swapDrive" >> /root/list
+    echo "rootDrive=$rootDrive" >> /root/list
 
     echo ">>> creating root filesystem"
     if [[ $filesystem == zfs ]]; then
@@ -595,9 +596,7 @@ setup_drive() {
     fi
 
     mount_root
-    if [[ $bootDrive ]]; then
-        mount_boot
-    fi
+    mount_boot
     install_base
 
 }
