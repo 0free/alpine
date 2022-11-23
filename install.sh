@@ -446,13 +446,10 @@ menu() {
             $(echo -e '\033[B')) i=$((i+1));;
             '') break;;
         esac
-        if [ $i -ge 0 ]; then
-            if [ $i -le ${#options[@]} ]; then
-                echo -en "\033[${#options[@]}A"
-            fi
-        else
+        if [ $i -le 0 ] || [ $i -ge ${#options[@]} ]; then
             i=0
         fi
+        echo -en "\033[${#options[@]}A"
     done
     printf -v $output ${options[$i]}
 
