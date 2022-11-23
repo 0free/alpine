@@ -475,19 +475,28 @@ setup_drive() {
     menu 'select a drive' drive ${drives[@]}
     echo "drive=$drive" > /root/list
 
-    if ls $drive* | grep -Eq "$drive.{1}|$drive.{2}"; then
-        partitions=($(ls $drive*))
-        menu 'select a root partition or use the complete drive' partition ${partitions[@]}
-        if [[ $drive == $partition ]] ; then
-            swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
-            menu 'select swap partition size in MB' swapSize ${swapSizes[@]}
-        else
-            rootDrive=$partition
-            if ls $drive* | grep -E "$drive.{1}|$drive.{2}" | grep -v $partition; then
-                partitions=($(ls $drive* | grep -E "$drive.{1}|$drive.{2}" | grep -v $partition))
-                menu 'select a boot partition to mount ' bootDrive ${partitions[@]}
+    partitions=($(ls $drive* | grep -E "$drive.{1}|$drive.{2}"))
+
+    if [[ $partitions ]]; then
+        menu 'select a root partition or use the complete drive' rootDrive ${partitions[@]}
+        if [[ $drive != $partition ]] ; then
+            if lsblk -o parttypename | grep -q 'EFI System'; then
+                partitions=(${paritions[@]/$partition})
+                if [[ $partitions ]]; then
+                    menu 'select a boot partition ' bootDrive ${partitions[@]}
+                fi
             fi
-        fi
+            if lsblk -o parttypename | grep -q 'SWAP'; then
+                partitions=(${paritions[@]/$partition})
+                if [[ $partitions ]]; then
+                    menu 'select a swap partition ' swapDrive ${partitions[@]}
+                fi
+            fi
+    fi
+
+    if [[ ! $swapDrive ]]; then
+        swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
+        menu 'select swap partition size in MB' swapSize ${swapSizes[@]} 
     fi
 
     filesystems=(btrfs zfs xfs ext4)
