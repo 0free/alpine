@@ -475,7 +475,7 @@ setup_drive() {
     menu 'select a drive' drive ${drives[@]}
     echo "drive=$drive" > /root/list
 
-    partitions=($(ls $drive* | grep -E "$drive.{1}|$drive.{2}"))
+    partitions=($(ls $drive* | grep -E "$drive$|$drive.{1}|$drive.{2}"))
 
     if [[ $partitions ]]; then
         menu 'select a root partition or use the complete drive' partition ${partitions[@]}
@@ -551,7 +551,7 @@ setup_drive() {
             echo ">>> creating boot partition"
             sgdisk -n 0:0:+$bootSize -c 0:BOOT -t 0:ef00 $drive
             i=1
-            bootDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
+            bootDrive=$(ls $drive* | grep -E "${drive}${i}|${drive}p${i}")
             echo ">>> creating boot filesystem"
             mkfs.vfat -F32 -n BOOT $bootDrive
         fi
@@ -560,7 +560,7 @@ setup_drive() {
             echo ">>> creating swap partition"
             sgdisk -n 0:0:+$swapSize -c 0:SWAP -t 0:8200 $drive
             i=$((i+1))
-            swapDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
+            swapDrive=$(ls $drive* | grep -E "${drive}${i}|${drive}p${i}")
             echo ">>> creating swap filesystem"
             mkswap $swapDrive
         fi
@@ -572,7 +572,7 @@ setup_drive() {
             sgdisk -n 0:0:0 -c 0:ROOT -t 0:8300 $drive
         fi
         i=$((i+1))
-        rootDrive=$(ls $drive* | grep -E "$drive.$i|$drive.p.$i")
+        rootDrive=$(ls $drive* | grep -E "${drive}${i}|${drive}p${i}")
 
     fi
 
