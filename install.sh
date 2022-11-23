@@ -463,7 +463,7 @@ setup_drive() {
 
     echo '# created by Saif AlSubhi'
     printf -- '-%.0s' {1..100}; echo ''
-    lsblk -o name,type,fstype,size,fsused,fsuse%,mountpoint,label,model
+    lsblk -o name,type,fstype,size,fsused,,mountpoint,parttypename,label,model
     printf -- '-%.0s' {1..100}; echo ''
 
     drives=($(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$|^sd[a-z]$'))
@@ -1464,7 +1464,7 @@ setup_bootloader() {
 
     find_windows
 
-    param="rootfstype=$filesystem rw loglevel=1 quiet mitigations=off modules=sd-mod,usb-storage"
+    param="rootfstype=$filesystem rw loglevel=0 quiet mitigations=off modules=sd-mod,usb-storage"
 
     if grep -q zfs /root/list; then
         disk="root=$pool $param"
