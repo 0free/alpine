@@ -442,12 +442,14 @@ menu() {
         done
         read -rsn3 key
         case $key in
-            $(echo -e '\033[A'))) i=$((i-1));;
-            $(echo -e '\033[B'))) i=$((i+1));;
-            '')) break;;
+            $(echo -e '\033[A')) i=$((i-1));;
+            $(echo -e '\033[B')) i=$((i+1));;
+            '') break;;
         esac
-        if [ $i -ge 0 ] && [ $i -le ${#options[@]} ]; then
-            echo -en "\033[${#options[@]}A"
+        if [ $i -ge 0 ]; then
+            if [ $i -le ${#options[@]} ]; then
+                echo -en "\033[${#options[@]}A"
+            fi
         else
             i=0
         fi
