@@ -17,9 +17,7 @@ packages_list() {
         # openrc
         openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
         # busybox
-        busybox
-        # busybox@edge
-        busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
+        busybox busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
         # musl
         musl musl-utils musl-locales
         # dbus
@@ -37,9 +35,7 @@ packages_list() {
         # wayland
         xwayland
         # mesa
-        mesa mesa-dri-gallium
-        # vulkan
-        vulkan-loader vulkan-tools
+        mesa-dri-gallium
         # polkit/elogind
         polkit-openrc polkit-common polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
@@ -73,12 +69,8 @@ packages_list() {
         font-noto-arabic
         font-opensans font-xfree86-type1
         ttf-font-awesome ttf-dejavu ttf-freefont ttf-droid
-        # keyboard
-        kbd-bkeymaps setxkbmap xkbcomp xkeyboard-config
         # timezone
         tzdata
-        # colord
-        colord colord-bash-completion colord-gtk
         # efi
         efibootmgr
     )
@@ -93,7 +85,6 @@ packages_list() {
 
     if grep -q qemu /root/list; then
         packages+=(
-            qemu-guest-agent qemu-tools
             qemu-audio-alsa qemu-audio-dbus qemu-audio-pa
             qemu-hw-display-virtio-gpu qemu-hw-display-virtio-gpu-gl
             qemu-hw-display-virtio-gpu-pci qemu-hw-display-virtio-gpu-pci-gl
@@ -107,7 +98,7 @@ packages_list() {
             # firmware
             fwupd fwupd-openrc fwupd-efi
             # mesa
-            mesa-dri-gallium mesa-va-gallium mesa-vdpau-gallium mesa-gl mesa-glapi mesa-egl mesa-gles mesa-gbm
+            mesa mesa-dri-gallium mesa-va-gallium mesa-vdpau-gallium mesa-gl mesa-glapi mesa-egl mesa-gles mesa-gbm
             mesa-vulkan-layers mesa-libd3dadapter9
             # intel GPU
             mesa-vulkan-intel intel-media-driver
@@ -118,7 +109,7 @@ packages_list() {
             # network
             ethtool ethtool-bash-completion
             rsync rsync-openrc
-            networkmanager-wwan networkmanager-wifi networkmanager-bluetooth networkmanager-openvpn networkmanager-initrd-generator
+            networkmanager-wwan networkmanager-wifi networkmanager-openvpn networkmanager-initrd-generator
         )
     fi
 
@@ -151,6 +142,8 @@ packages_list() {
             network-manager-applet
             # firewall
             gufw
+            # colord
+            colord colord-bash-completion colord-gtk
         )
     fi
 
@@ -167,8 +160,6 @@ packages_list() {
             plasma-thunderbolt plasma-disks
             # system
             systemsettings ksysguard
-            # kwallet
-            kwallet kwallet-pam kwalletmanager
             # theme
             breeze-gtk breeze-icons
             # bluetooth
@@ -907,7 +898,7 @@ setup_desktop() {
 
     make_initramfs
 
-    if mountpoint -q /mnt/boot; then
+    if test mountpoint -q /mnt/boot; then
         setup_bootloader
     fi
 
@@ -964,9 +955,7 @@ enable_services() {
     rc-update add bluetooth default
     rc-update add ufw default
 
-    if grep -q qemu /root/list; then
-        rc-update add qemu-guest-agent default
-    else
+    if ! grep -q qemu /root/list; then
         rc-update add iwd default
         rc-update add rsyncd default
         rc-update add fwupd default
@@ -1090,11 +1079,6 @@ EOF
             cp -rlf /kde/config/* /home/$user/.config/
             rm -r kde/
         fi
-        echo ">>> configuring PAM"
-        cat >> /etc/pam.d/login <<EOF
-auth            optional        pam_kwallet5.so
-session         optional        pam_kwallet5.so auto_start force_run
-EOF
         if [ ! -d /etc/sddm.conf.d/ ]; then
             mkdir /etc/sddm.conf.d/
         fi
@@ -1157,38 +1141,46 @@ EOF
 
 custom_kernel() {
 
+    echo ">>> getting latest stable Linux kernel version"
+    curl -o /home/$user/ -LO "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/Makefile?h=linux-6.0.y"
+    version=$(grep -E '^VERSION = ' /home/$user/Makefile | grep -o '[0-9]{1,4}')
+    patchLevel=$(grep -E '^PATCHLEVEL = ' /home/$user/Makefile | grep -o '[0-9]{1,4}')
+    subLevel=$(grep -E '^SUBLEVEL = ' /home/$user/Makefile | grep -o '[0-9]{1,4}')
+    rm /home/$user/Makefile
+    kernel="${version}.${patchLevel}.${subLevel}"
+
     kernel_url="https://cdn.kernel.org/pub/linux/kernel/v${kernel::1}.x/linux-$kernel.tar.xz"
 
     echo ">>> installing required packages to build Linux-$kernel"
     depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
     apk add $depend
     echo ">>> downloading Linux-$kernel source"
-    curl -o /root/linux-$kernel.tar.xz -LO $kernel_url
+    curl -o /home/$user/linux-$kernel.tar.xz -LO $kernel_url
     echo ">>> extracting Linux-$kernel source"
-    tar -xf /root/linux-$kernel.tar.xz -C /root/
+    tar -xf /home/$user/linux-$kernel.tar.xz -C /home/$user/
     echo ">>> deleting *.tar.xz"
-    rm /root/*.tar.xz
+    rm /home/$user/*.tar.xz
     echo ">>> copying alpine linux-edge kernel configuration"
     if [ -f /boot/config-virt ]; then
-        cp /boot/config-virt /root/linux-$kernel/.config
+        cp /boot/config-virt /home/$user/linux-$kernel/.config
     elif [ -f /boot/config-edge ]; then
-        cp /boot/config-edge /root/linux-$kernel/.config
+        cp /boot/config-edge /home/$user/linux-$kernel/.config
     else
-        cp /boot/config-lts /root/linux-$kernel/.config
+        cp /boot/config-lts /home/$user/linux-$kernel/.config
     fi
-    sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' /root/linux-$kernel/.config
-    sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' /root/linux-$kernel/.config
+    sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' /home/$user/linux-$kernel/.config
+    sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' /home/$user/linux-$kernel/.config
     echo ">>> configuring Linux kernel"
-    cd /root/linux-$kernel/ && make -j$(nproc) menuconfig
+    cd /home/$user/linux-$kernel/ && make -j$(nproc) menuconfig
     echo ">>> making Linux kernel"
-    cd /root/linux-$kernel/ && make -j$(nproc)
+    cd /home/$user/linux-$kernel/ && make -j$(nproc)
     echo ">>> installing modules"
-    cd /root/linux-$kernel/ && make -j$(nproc) modules_install
+    cd /home/$user/linux-$kernel/ && make -j$(nproc) modules_install
+    cd /root/
     echo ">>> installing Linux kernel"
-    #cd /root/linux-$kernel/ && make install
-    installkernel $kernel /root/linux-$kernel/arch/x86/boot/bzImage /root/linux-$kernel/System.map /boot/
+    installkernel $kernel /home/$user/linux-$kernel/arch/x86/boot/bzImage /home/$user/linux-$kernel/System.map /boot/
     echo ">>> deleting Linux kernel source"
-    rm -r /root/Linux-$kernel/
+    rm -r /home/$user/Linux-$kernel/
     echo ">>> deleting un-needed dependencies"
     apk del $depend
 
@@ -1209,6 +1201,7 @@ build_zfs() {
     cd /usr/src/zfs/ && make install
     cd /usr/src/zfs/ && ldconfig
     cd /usr/src/zfs/ && depmod
+    cd /root/
 
     echo ">>> deleting un-needed dependencies"
     apk del $depend
@@ -1591,7 +1584,7 @@ EOF
 version=$(apk search -e gummiboot)
 gummiboot() {
     if wget -q --spider alpinelinux.org &>/dev/null; then
-        if grep -q \$(apk search -e gummiboot) etc/profile.d/gummiboot.sh; then
+        if grep -q \$(apk search -e gummiboot) /etc/profile.d/gummiboot.sh; then
             echo "gummiboot is up-to-date"
         else
             sudo apk update gummiboot
@@ -1808,6 +1801,10 @@ install_clover() {
 }
 
 finish() {
+
+    echo ">>> cleaning files"
+    apk del *-doc
+    find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o iname *.docbook \) -type f -exec rm {} \;
 
     echo ">>> installation is completed"
     echo '' > /root/reboot
