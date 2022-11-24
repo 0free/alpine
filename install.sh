@@ -6,7 +6,6 @@ pool='rpool'
 hostname='linux'
 user='user'
 password='0000'
-trex_version='0.26.8'
 kernel='6.0.9'
 
 packages_list() {
@@ -1222,14 +1221,14 @@ install_nvidia() {
         rm -r /usr/src/nvidia-src/*
     fi
 
+    version=$(apk search -e nvidia-src)
+
     cat > /etc/profile.d/nvidia.sh <<EOF
-version=$(apk search -e nvidia-src)
+version="$version"
 nvidia() {
-    if wget -q --spider alpinelinux.org &>/dev/null; then
-        if find /lib/modules/ -type f -name 'nvidia.ko.gz' | grep -q nvidia; then
-            if grep -q \$(apk search -e nvidia-src) /etc/profile.d/nvidia.sh; then
-                echo "nvidia driver is up-to-date"
-            else
+    if curl -s alpinelinux.org; then
+        if find /lib/modules/ -type f -name nvidia.ko.gz | grep -q nvidia; then
+            if ! grep -q \$(apk search -e nvidia-src) /etc/profile.d/nvidia.sh; then
                 install_modules
             fi
         fi
@@ -1240,7 +1239,7 @@ nvidia() {
 install_modules() {
     echo '>>> building nvidia kernel modules'
     sudo akms install all
-    sudo sed -i 's|version=.*|version=\$(apk search -e nvidia-src)|' /etc/profile.d/nvidia.sh
+    sudo sed -i 's|^version=".*"|version="\$(apk search -e nvidia-src)"|' /etc/profile.d/nvidia.sh
     if [ -d /usr/src/nvidia-src/ ]; then
         rm -r /usr/src/nvidia-src/*
     fi
@@ -1273,43 +1272,42 @@ install_google_chrome() {
 
 install_miner() {
 
+    echo ">>> getting T-Rex latest release from github"
+    version=$(curl -s "https://api.github.com/repos/trexminer/T-Rex/releases/latest" | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+
     if [ ! -f /usr/bin/t-rex ]; then
-        echo ">>> downloading T-Rex $trex_version"
-        curl -o /root/t-rex.tar.gz -LO https://trex-miner.com/download/t-rex-$trex_version-linux.tar.gz
-        echo ">>> extracting T-Rex $trex_version"
-        tar -zxf t-rex.tar.gz t-rex -C /usr/bin/
+        echo ">>> downloading T-Rex $version"
+        curl -o /root/t-rex.tar.gz -LO https://trex-miner.com/download/t-rex-$version-linux.tar.gz
+        echo ">>> extracting T-Rex $version"
+        tar -zxf /root/t-rex.tar.gz t-rex -C /usr/bin/
         echo ">>> deleting T-Rex files"
         rm /root/t-rex.tar.gz
     fi
 
     cat > /etc/profile.d/t-rex.sh << EOF
-version=$trex_version
+version="$version"
 trex() {
-    if wget -q --spider alpinelinux.org &>/dev/null; then
+    if curl -s alpinelinux.org; then
         if [ ! -f ~/config ]; then
             echo ">>> downloading t-rex config file"
-            curl -o ~/config -LO https://raw.githubusercontent.com/0free/t-rex/$trex_version/config
+            curl -o ~/config -LO https://raw.githubusercontent.com/0free/t-rex/$version/config
         fi
         /usr/bin/t-rex -c ~/config
         xdg-open http://127.0.0.1:8080
     fi
 }
 update_trex() {
-    latest="0.$(calc \${version:0-4}+0.1)"
-    if wget -q --spider https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
+    version="$version"
+    latest=\$(curl -s "https://api.github.com/repos/trexminer/T-Rex/releases/latest" | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+    if ! grep -q $latest <<< $version; then
         echo ">>> downloading T-Rex \$latest"
-        curl -O https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz -o ~/
+        curl -o ~/ -LO https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
         echo ">>> extracting T-Rex \$latest"
         sudo tar -zxf t-rex-\$latest-linux.tar.gz t-rex -C /usr/bin/
-        sudo sed -i 's|version=.*|version=\$latest|' /etc/prfile.d/trex.sh
+        sudo sed -Ei 's|^version=".*"|version="\$latest"|' /etc/prfile.d/trex.sh
         echo ">>> deleting T-Rex files"
         rm ~/t-rex-\$latest-linux.tar.gz
-    else
-        echo ">>> t-rex is up-to-date"
     fi
-}
-calc() {
-    printf "%s" \$@ | bc -l
 }
 EOF
 
@@ -1319,7 +1317,7 @@ create_iso() {
 
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
-    if wget -q --spider https://alpinelinux.org &>/dev/null; then
+    if curl -s https://alpinelinux.org; then
         curl -o ~/iso.sh -LO https://raw.githubusercontent.com/0free/alpine/1/iso.sh
         sh iso.sh
     fi
@@ -1333,7 +1331,7 @@ openwrt() {
     cat > /etc/profile.d/openwrt.sh << EOF
 version=$(apk search -e musl-dev)
 openwrt() {
-    if wget -q --spider https://alpinelinux.org &>/dev/null; then
+    if curl -s https://alpinelinux.org; then
         sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev
         sudo sed -z 's|if wget.*\n.*\n.*\nfi||' -i /etc/profile.d/openwrt.sh
     fi
@@ -1580,16 +1578,16 @@ efi     /fwupd/fwupdx64.efi
 EOF
     fi
 
+    version=$(apk search -e gummiboot)
+
     cat > /etc/profile.d/gummiboot.sh <<EOF
-version=$(apk search -e gummiboot)
+version="$version"
 gummiboot() {
-    if wget -q --spider alpinelinux.org &>/dev/null; then
-        if grep -q \$(apk search -e gummiboot) /etc/profile.d/gummiboot.sh; then
-            echo "gummiboot is up-to-date"
-        else
+    if curl -s alpinelinux.org; then
+        if ! grep -q "\$(apk search -e gummiboot)" /etc/profile.d/gummiboot.sh; then
             sudo apk update gummiboot
             sudo cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
-            sudo sed -i 's|version=.*|version=\$(apk search -e guammiboot)|' /etc/profile.d/gummiboot.sh
+            sudo sed -i 's|^version=".*"|version="\$(apk search -e guammiboot)"|' /etc/profile.d/gummiboot.sh
         fi
     fi
 }
