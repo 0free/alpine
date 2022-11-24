@@ -59,7 +59,10 @@ packages_list() {
         # firewall
         ufw ufw-openrc ufw-bash-completion
         iptables iptables-openrc
-        # sound
+        # pipewire
+        pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez
+        pipewire-media-session wireplumber
+        # alsa
         alsa-plugins-pulse alsa-lib alsa-utils alsa-utils-openrc
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
@@ -120,7 +123,6 @@ packages_list() {
             gnome-control-center gnome-control-center-bash-completion
             gnome-tweaks gnome-colors-common gsettings-desktop-schemas
             tracker tracker-bash-completion
-            pinentry-gnome
             # connector
             chrome-gnome-shell gnome-browser-connector
             # theme
@@ -172,7 +174,7 @@ packages_list() {
             # firewall
             iproute2 net-tools
             # audio
-            plasma-pa kmix
+            kpipewire kmix
             # kde
             kde-cli-tools ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kmenuedit konsole kde-gtk-config
             # file manager
@@ -911,11 +913,13 @@ enable_services() {
     rc-update add dmesg sysinit
     rc-update add mdev sysinit
     rc-update add hwdrivers sysinit
+
     rc-update add udev sysinit
     rc-update add udev-trigger sysinit
-    rc-update add dbus sysinit
     rc-update add udev-settle sysinit
     rc-update add udev-postmount sysinit
+
+    rc-update add dbus sysinit
 
     rc-update add procfs boot
     rc-update add devfs boot
@@ -942,6 +946,9 @@ enable_services() {
         rc-update add zfs-zed boot
         rc-update add zfs-load-key boot
     fi
+
+    rc-update add acpid default
+    rc-update add crond default
 
     rc-update add elogind default
     rc-update add polkit default
@@ -1040,6 +1047,9 @@ EOF
     if ! grep -q snd_seq /etc/modules; then
         echo snd_seq >> /etc/modules
     fi
+
+    echo ">>> configuring pipewire"
+    cp /usr/share/pipewire/*.conf /etc/pipewire/
 
     if [ ! -d /usr/share/icons/windows-11-icons/ ]; then
         echo ">>> cloning Windows-11-icons"
@@ -1271,7 +1281,7 @@ install_google_chrome() {
 }
 
 install_miner() {
-
+ 
     echo ">>> getting T-Rex latest release from github"
     version=$(curl -s "https://api.github.com/repos/trexminer/T-Rex/releases/latest" | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
 
