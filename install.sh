@@ -19,6 +19,8 @@ packages_list() {
         busybox busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
         # musl
         musl musl-utils musl-locales
+        # glibc
+        gcompat
         # dbus
         dbus dbus-openrc dbus-libs dbus-x11
         # ibus
@@ -63,9 +65,11 @@ packages_list() {
         pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez
         pipewire-media-session wireplumber
         # alsa
-        alsa-plugins-pulse alsa-lib alsa-utils alsa-utils-openrc
+        alsaconf alsa-lib alsa-tools alsa-tools-gui alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf 
         # bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
+        # intel hda
+        sof-firmware sof-bin
         # fonts
         font-hack font-adobe-source-code-pro
         font-noto-arabic
@@ -128,7 +132,7 @@ packages_list() {
             # theme
             adwaita-icon-theme hicolor-icon-theme
             # gnome tools
-            gnome-keyring gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
+            gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
             # nautilus
             nautilus
             # text
@@ -138,7 +142,7 @@ packages_list() {
             # gnome theme
             arc-theme arc-dark arc-dark-gnome
             # gedit spell check
-            aspell hunspell hunspell-en nuspell
+            aspell-en hunspell-en nuspell
             # network
             network-manager-applet
             # firewall
@@ -180,7 +184,7 @@ packages_list() {
             # file manager
             dolphin dolphin-plugins kfind
             # text
-            kate kate-common
+            kate kate-common hunspell-en
             # archive
             ark
         )
@@ -861,8 +865,7 @@ create_user() {
         userdel $user
     fi
     echo ">>> adding wheel to sudo"
-    echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/wheel
-    chmod 0400 /etc/sudoers.d/wheel
+    echo 's|# %wheel ALL=(ALL:ALL) ALL|%wheel ALL=(ALL:ALL) ALL|' /etc/sudoers
     echo ">>> creating user"
     echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user $user
     usermod -aG input,audio,video,netdev,usb,disk,lp,adm $user
@@ -1049,7 +1052,7 @@ EOF
     fi
 
     echo ">>> configuring pipewire"
-    cp /usr/share/pipewire/*.conf /etc/pipewire/
+    cp /usr/share/pipewire/*.conf /home/$user/.config/pipewire/
 
     if [ ! -d /usr/share/icons/windows-11-icons/ ]; then
         echo ">>> cloning Windows-11-icons"
@@ -1108,8 +1111,12 @@ update() {
     sudo apk fix
     sudo apk update
     sudo apk upgrade
-    sudo flatpak update -y
-    sudo flatpak uninstall -y --unused
+    if [ -f /etc/profile.d/flatpak.sh ]; then
+        flatpak_update
+    fi
+    if [ -f /etc/profile.d/google-chrome.sh ]; then
+        google_update
+    fi
     if [ -f /etc/profile.d/nvidia.sh ]; then
         nvidia
     fi
@@ -1266,24 +1273,69 @@ install_flatpak() {
     adduser $user flatpak
     xdg-user-dirs-update
 
+    cat > /etc/profile.d/flatpak.sh <<EOF
+flatpak_update() {
+    sudo flatpak update -y
+    sudo flatpak uninstall -y --unused
 }
-
-install_google_chrome() {
+EOF
 
     echo ">>> installing google-chrome from flatpak"
     flatpak install -y flathub com.google.Chrome
     flatpak override com.google.Chrome --filesystem=/home/$user/
 
+}
+
+install_google_chrome() {
+
+    echo ">>> installing rpm"
+    apk add rpm
+
     echo ">>> installing google-chrome dependencies"
     depend='ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib'
     apk add $depend
+
+    echo ">>> installing google-signing-key"
+    curl -o ~/ -LO https://dl-ssl.google.com/linux/linux_signing_key.pub
+    gpg --batch --import ~/linux_signing_key.pub
+    rm ~/*.pub
+
+    url="https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"
+
+    echo ">>> downloading google-chrome-stable"
+    curl -o /home/$user/ -LO $url
+
+    echo ">>> installing google-chrome"
+    rpm -qlp /home/$user/google-chrome-stable_current_x86_64.rpm
+    rm /home/$user/*.rpm
+
+    echo ">>> configuring google-chrome"
+    cp 
+
+    version=$(curl -s $url | head -c96 | cut -c 5-)
+
+    cat > /etc/profile.d/google-chrome.sh <<EOF
+version=\"$version\"
+google_update() {
+    current=\$(curl -s $url | head -c96 | cut -c 5-)
+    if grep -q $current /etc/profile.d/google-chrome.sh; then
+        echo ">>> downloading latest google-chrome-stable"
+        curl -o ~/ -LO $url
+        echo ">>> updating google-chrome"
+        rpm2cpio ~/google-chrome-stable_current_x86_64.rpm | sudo cpio -imdv
+        rm ~/google-chrome-stable_current_x86_64.rpm
+        sudo sed -i 's|\n.*;;$|;;|g' /etc/cron.daily/google-chrome
+        sudo sed -i 's|^version=".*"|version=\"$current\"|' /etc/profile.d/google-chrome.sh
+    fi
+}
+EOF
 
 }
 
 install_miner() {
  
     echo ">>> getting T-Rex latest release from github"
-    version=$(curl -s "https://api.github.com/repos/trexminer/T-Rex/releases/latest" | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+    version=$(curl -s https://api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
 
     if [ ! -f /usr/bin/t-rex ]; then
         echo ">>> downloading T-Rex $version"
@@ -1308,7 +1360,7 @@ trex() {
 }
 update_trex() {
     version="$version"
-    latest=\$(curl -s "https://api.github.com/repos/trexminer/T-Rex/releases/latest" | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+    latest=\$(curl -s https://api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
     if ! grep -q $latest <<< $version; then
         echo ">>> downloading T-Rex \$latest"
         curl -o ~/ -LO https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
@@ -1338,16 +1390,18 @@ EOF
 
 openwrt() {
 
+    version=$(apk search -e musl-dev)
+
     cat > /etc/profile.d/openwrt.sh << EOF
-version=$(apk search -e musl-dev)
+version="$version"
 openwrt() {
     if curl -s https://alpinelinux.org; then
         sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev
-        sudo sed -z 's|if wget.*\n.*\n.*\nfi||' -i /etc/profile.d/openwrt.sh
+        sudo sed -z 's|if curl.*\n.*\n.*\nfi||' -i /etc/profile.d/openwrt.sh
     fi
     if ! grep -q "\$(apk search -e musl-dev)" /etc/profile.d/openwrt.sh; then
         sudo sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
-        sudo sed -i 's|version=.*|version=\$(apk search -e musl-dev)|' /etc/profile.d/openwrt.sh
+        sudo sed -i 's|^version=".*"|version="\$(apk search -e musl-dev)"|' /etc/profile.d/openwrt.sh
     fi
     if [ -d ~/openwrt ]; then
         cd ~/openwrt && git pull
