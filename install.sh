@@ -1155,11 +1155,9 @@ custom_kernel() {
 
     cat > /etc/profile.d/kernel.sh <<EOF
 kernel() {
-
     echo ">>> installing required packages to build Linux kernel"
     depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
     apk add \$depend
-
     echo ">>> getting latest stable Linux kernel version"
     curl -o ~/Makefile -LO "https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/Makefile"
     #curl -o ~/Makefile -LO "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/Makefile"
@@ -1169,13 +1167,11 @@ kernel() {
     extraVersion=$(grep -E '^EXTRAVERSION = ' ~/Makefile | grep -o '-rc[0-9]{1,2}')
     rm ~/Makefile
     kernel="\${version}.\${patchLevel}.\${subLevel}\${extraVersion}"
-
     if [[ \$extraVersion ]]; then
         url="https://git.kernel.org/torvalds/t/linux-\${version}.\${patchLevel}-\${extraVersion}.tar.gz"
     else
         url="https://cdn.kernel.org/pub/linux/kernel/v\${version}.x/linux-\$kernel.tar.xz"
     fi
-
     echo ">>> downloading Linux-\$kernel source"
     curl -o ~/linux-\$kernel.tar.xz -LO \$url
     echo ">>> extracting Linux-\$kernel source"
@@ -1205,7 +1201,6 @@ kernel() {
     rm -r ~/Linux-\$kernel/
     echo ">>> deleting un-needed dependencies"
     apk del \$depend
-
 }
 EOF
 
@@ -1215,13 +1210,9 @@ build_zfs() {
 
     cat > /etc/profile.d/zfs-install.sh <<EOF
 zfs-install() {
-
-    echo ">>> installing required packages to build ZFS"
-    depend='installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
-    apk add \$depend
-
     echo ">>> installing zfs-src"
-    apk add akms zfs-src
+    depend='akms zfs-src installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
+    apk add \$depend
     echo ">>> building zfs-src"
     cd /usr/src/zfs/ && sh autogen.sh
     cd /usr/src/zfs/ && ./configure
@@ -1230,7 +1221,6 @@ zfs-install() {
     cd /usr/src/zfs/ && ldconfig
     cd /usr/src/zfs/ && depmod
     cd /root/
-
     echo ">>> deleting un-needed dependencies"
     apk del \$depend
 
@@ -1240,18 +1230,6 @@ EOF
 }
 
 install_nvidia() {
-
-    echo ">>> installing linux-lts-dev"
-    sudo apk add linux-lts-dev
-    echo ">>> installing linux-edge-dev"
-    sudo apk add linux-edge-dev
-
-    echo ">>> installing nvidia-src"
-    apk add akms nvidia-src
-
-    if [ -d /usr/src/nvidia-src/ ]; then
-        rm -r /usr/src/nvidia-src/*
-    fi
 
     version=$(apk search -e nvidia-src)
 
@@ -1269,12 +1247,14 @@ nvidia() {
     fi
 }
 install_modules() {
+    echo ">>> installing nvidia-src"
+    depend='nvidia-src akms linux-lts-dev linux-edge-dev'
+    apk add \$depend 
     echo '>>> building nvidia kernel modules'
     sudo akms install all
     sudo sed -i 's|^version=".*"|version="\$(apk search -e nvidia-src)"|' /etc/profile.d/nvidia.sh
-    if [ -d /usr/src/nvidia-src/ ]; then
-        rm -r /usr/src/nvidia-src/*
-    fi
+    echo ">>> deleting un-needed dependencies"
+    apk del \$depend
 }
 EOF
 
