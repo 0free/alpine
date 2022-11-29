@@ -515,12 +515,6 @@ setup_drive() {
     menu 'select a bootloader' bootloader ${bootloaders[@]}
     echo "bootloader=$bootloader" >> /root/list
 
-    kernels=(no "Linux-$kernel")
-    menu 'build a custom kernel?' choise ${kernels[@]}
-    if grep -q $kernel $choise; then
-        echo "kernel=$choise" >> /root/list
-    fi
-
     echo -e "\n"
 
     if ! test sgdisk; then
@@ -879,12 +873,13 @@ setup_desktop() {
 
     enable_services
     configure_alpine
+    custom_kernel
 
-    if ! grep -q qemu /root/list; then
-        if grep -q $kernel /root/list; then
-            custom_kernel
-            build_zfs
-        fi
+    if grep -q zfs /root/list; then
+        build_zfs
+    fi
+
+    if ! grep -q qemu /root/list; then   
         install_nvidia
     fi
 
@@ -1108,6 +1103,7 @@ export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
 update() {
+    echo ">>> updating alpineLinux packages"
     sudo apk fix
     sudo apk update
     sudo apk upgrade
@@ -1157,59 +1153,75 @@ EOF
 
 custom_kernel() {
 
-    echo ">>> getting latest stable Linux kernel version"
-    curl -o /home/$user/ -LO "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/Makefile?h=linux-6.0.y"
-    version=$(grep -E '^VERSION = ' /home/$user/Makefile | grep -o '[0-9]{1,4}')
-    patchLevel=$(grep -E '^PATCHLEVEL = ' /home/$user/Makefile | grep -o '[0-9]{1,4}')
-    subLevel=$(grep -E '^SUBLEVEL = ' /home/$user/Makefile | grep -o '[0-9]{1,4}')
-    rm /home/$user/Makefile
-    kernel="${version}.${patchLevel}.${subLevel}"
+    cat > /etc/profile.d/kernel.sh <<EOF
+kernel() {
 
-    kernel_url="https://cdn.kernel.org/pub/linux/kernel/v${kernel::1}.x/linux-$kernel.tar.xz"
-
-    echo ">>> installing required packages to build Linux-$kernel"
+    echo ">>> installing required packages to build Linux kernel"
     depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
-    apk add $depend
-    echo ">>> downloading Linux-$kernel source"
-    curl -o /home/$user/linux-$kernel.tar.xz -LO $kernel_url
-    echo ">>> extracting Linux-$kernel source"
-    tar -xf /home/$user/linux-$kernel.tar.xz -C /home/$user/
-    echo ">>> deleting *.tar.xz"
-    rm /home/$user/*.tar.xz
-    echo ">>> copying alpine linux-edge kernel configuration"
-    if [ -f /boot/config-virt ]; then
-        cp /boot/config-virt /home/$user/linux-$kernel/.config
-    elif [ -f /boot/config-edge ]; then
-        cp /boot/config-edge /home/$user/linux-$kernel/.config
+    apk add \$depend
+
+    echo ">>> getting latest stable Linux kernel version"
+    curl -o ~/Makefile -LO "https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/Makefile"
+    #curl -o ~/Makefile -LO "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/Makefile"
+    version=$(grep -E '^VERSION = ' ~/Makefile | grep -o '[0-9]{1,4}')
+    patchLevel=$(grep -E '^PATCHLEVEL = ' ~/Makefile | grep -o '[0-9]{1,4}')
+    subLevel=$(grep -E '^SUBLEVEL = ' ~/Makefile | grep -o '[0-9]{1,4}')
+    extraVersion=$(grep -E '^EXTRAVERSION = ' ~/Makefile | grep -o '-rc[0-9]{1,2}')
+    rm ~/Makefile
+    kernel="\${version}.\${patchLevel}.\${subLevel}\${extraVersion}"
+
+    if [[ \$extraVersion ]]; then
+        url="https://git.kernel.org/torvalds/t/linux-\${version}.\${patchLevel}-\${extraVersion}.tar.gz"
     else
-        cp /boot/config-lts /home/$user/linux-$kernel/.config
+        url="https://cdn.kernel.org/pub/linux/kernel/v\${version}.x/linux-\$kernel.tar.xz"
     fi
-    sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' /home/$user/linux-$kernel/.config
-    sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' /home/$user/linux-$kernel/.config
-    echo ">>> configuring Linux kernel"
-    cd /home/$user/linux-$kernel/ && make -j$(nproc) menuconfig
+
+    echo ">>> downloading Linux-\$kernel source"
+    curl -o ~/linux-\$kernel.tar.xz -LO \$url
+    echo ">>> extracting Linux-\$kernel source"
+    tar -xf ~/linux-\kernel.tar.xz -C ~/
+    echo ">>> deleting linux-\$kernel.tar.xz"
+    rm ~/linux-\$kernel.tar.xz
+    echo ">>> copying alpine linux kernel configuration"
+    if [ -f /boot/config-virt ]; then
+        cp /boot/config-virt ~/linux-\$kernel/.config
+    elif [ -f /boot/config-edge ]; then
+        cp /boot/config-edge ~/linux-\kernel/.config
+    else
+        cp /boot/config-lts ~/linux-\$kernel/.config
+    fi
+    sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' ~/linux-\$kernel/.config
+    sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' ~/linux-\$kernel/.config
+    echo ">>> configuring Linux-\$kernel"
+    cd ~/linux-\$kernel/ && make -j$(nproc) menuconfig
     echo ">>> making Linux kernel"
-    cd /home/$user/linux-$kernel/ && make -j$(nproc)
+    cd ~/linux-\$kernel/ && make -j$(nproc)
     echo ">>> installing modules"
-    cd /home/$user/linux-$kernel/ && make -j$(nproc) modules_install
-    cd /root/
-    echo ">>> installing Linux kernel"
-    installkernel $kernel /home/$user/linux-$kernel/arch/x86/boot/bzImage /home/$user/linux-$kernel/System.map /boot/
-    echo ">>> deleting Linux kernel source"
-    rm -r /home/$user/Linux-$kernel/
+    cd ~/linux-\$kernel/ && make -j$(nproc) modules_install
+    cd ~
+    echo ">>> installing Linux-\$kernel"
+    installkernel \$kernel ~/linux-\$kernel/arch/x86/boot/bzImage ~/linux-\$kernel/System.map /boot/
+    echo ">>> deleting Linux-\$kernel source"
+    rm -r ~/Linux-\$kernel/
     echo ">>> deleting un-needed dependencies"
-    apk del $depend
+    apk del \$depend
+
+}
+EOF
 
 }
 
 build_zfs() {
 
+    cat > /etc/profile.d/zfs-install.sh <<EOF
+zfs-install() {
+
     echo ">>> installing required packages to build ZFS"
     depend='installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
-    apk add $depend
+    apk add \$depend
 
     echo ">>> installing zfs-src"
-    apk add zfs-src
+    apk add akms zfs-src
     echo ">>> building zfs-src"
     cd /usr/src/zfs/ && sh autogen.sh
     cd /usr/src/zfs/ && ./configure
@@ -1220,7 +1232,10 @@ build_zfs() {
     cd /root/
 
     echo ">>> deleting un-needed dependencies"
-    apk del $depend
+    apk del \$depend
+
+}
+EOF
 
 }
 
@@ -1292,25 +1307,27 @@ install_google_chrome() {
     apk add rpm
 
     echo ">>> installing google-chrome dependencies"
-    depend='ca-certificates font-liberation libcurl libglibutil libwoff2common wget alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libc6-compat libdav1d libdrm libevent libexpat libgcc libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt mesa-gbm minizip nspr nss opus pango pipewire-libs re2 snappy wayland-libs-client xdg-utils zlib'
+    depend='alsa-lib ca-certificates alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-liberation font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libcurl libc6-compat libdav1d libdrm libevent libexpat libgcc libglibutil libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt libwoff2common mesa-gbm minizip nspr nss opkg opus pango pipewire-libs re2 snappy vulkan-loader wayland-libs-client xdg-utils wget zlib'
     apk add $depend
 
     echo ">>> installing google-signing-key"
-    curl -o ~/ -LO https://dl-ssl.google.com/linux/linux_signing_key.pub
-    gpg --batch --import ~/linux_signing_key.pub
-    rm ~/*.pub
+    curl -o /home/$user/google-key.pub -LO https://dl-ssl.google.com/linux/linux_signing_key.pub
+    gpg --batch --import /home/$user/google-key.pub
+    rm /home/$user/*.pub
 
     url="https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"
 
     echo ">>> downloading google-chrome-stable"
-    curl -o /home/$user/ -LO $url
+    curl -o /home/$user/google-chrome.rpm -LO $url
 
     echo ">>> installing google-chrome"
-    rpm -qlp /home/$user/google-chrome-stable_current_x86_64.rpm
+    rpm -qlp /home/$user/google-chrome.rpm
     rm /home/$user/*.rpm
 
     echo ">>> configuring google-chrome"
-    cp 
+	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
+		install -Dm644 /opt/google/chrome/product_logo_${i/x*/}.png /usr/share/icons/hicolor/$i/apps/google-chrome.png
+	done
 
     version=$(curl -s $url | head -c96 | cut -c 5-)
 
@@ -1320,12 +1337,17 @@ google_update() {
     current=\$(curl -s $url | head -c96 | cut -c 5-)
     if grep -q $current /etc/profile.d/google-chrome.sh; then
         echo ">>> downloading latest google-chrome-stable"
-        curl -o ~/ -LO $url
+        curl -o ~/google-chrome.rpm -LO $url
         echo ">>> updating google-chrome"
-        rpm2cpio ~/google-chrome-stable_current_x86_64.rpm | sudo cpio -imdv
-        rm ~/google-chrome-stable_current_x86_64.rpm
-        sudo sed -i 's|\n.*;;$|;;|g' /etc/cron.daily/google-chrome
+        rpm2cpio ~/google-chrome.rpm | sudo cpio -imdv
+        rm ~/google-chrome.rpm
+        sudo rm /etc/cron.daily/google-chrome
         sudo sed -i 's|^version=".*"|version=\"$current\"|' /etc/profile.d/google-chrome.sh
+        XDG_ICON_RESOURCE=\$(which xdg-icon-resource 2> /dev/null || true)
+        for icon in "/opt/google/chrome/product_logo_"*.png; do
+            size="${icon##*/product_logo_}"
+            "$XDG_ICON_RESOURCE" install --size "${size%%.png}" "$icon" "google-chrome"
+        done
     fi
 }
 EOF
@@ -1363,12 +1385,12 @@ update_trex() {
     latest=\$(curl -s https://api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
     if ! grep -q $latest <<< $version; then
         echo ">>> downloading T-Rex \$latest"
-        curl -o ~/ -LO https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
+        curl -o ~/trex.tar.gz -LO https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
         echo ">>> extracting T-Rex \$latest"
-        sudo tar -zxf t-rex-\$latest-linux.tar.gz t-rex -C /usr/bin/
+        sudo tar -zxf trex.tar.gz t-rex -C /usr/bin/
         sudo sed -Ei 's|^version=".*"|version="\$latest"|' /etc/prfile.d/trex.sh
         echo ">>> deleting T-Rex files"
-        rm ~/t-rex-\$latest-linux.tar.gz
+        rm ~/trex.tar.gz
     fi
 }
 EOF
