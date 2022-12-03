@@ -1379,6 +1379,7 @@ trex() {
             echo ">>> downloading t-rex config file"
             curl -o ~/config -LO https://raw.githubusercontent.com/0free/t-rex/$version/config
         fi
+        update
         /usr/bin/t-rex -c ~/config
         xdg-open http://127.0.0.1:8080
     fi
