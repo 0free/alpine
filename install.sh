@@ -6,7 +6,6 @@ pool='rpool'
 hostname='linux'
 user='user'
 password='0000'
-kernel='6.0.9'
 
 packages_list() {
 
@@ -164,7 +163,7 @@ packages_list() {
             plasma-integration plasma-browser-integration
             plasma-thunderbolt plasma-disks
             # system
-            systemsettings ksysguard
+            kwrited systemsettings ksysguard polkit-kde-agent-1
             # theme
             breeze-gtk breeze-icons
             # bluetooth
@@ -180,7 +179,7 @@ packages_list() {
             # audio
             kpipewire kmix
             # kde
-            kde-cli-tools ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker kmenuedit konsole kde-gtk-config
+            kde-cli-tools ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker libkscreen kmenuedit konsole kde-gtk-config khotkeys
             # file manager
             dolphin dolphin-plugins kfind
             # text
@@ -772,7 +771,7 @@ install_linux() {
     fi
 
     echo ">>> installing linux"
-    apk add --root=/mnt/ linux-firmware-none
+    apk add --root=/mnt/ linux-firmware-none kexec-tools
     apk add --root=/mnt/ $list
 
 }
@@ -996,8 +995,7 @@ enable_services() {
 
 configure_alpine() {
 
-    echo ">>> configuring alpine"
-
+    echo ">>> configuring openRC"
     sed -i 's|#unicode=.*|unicode="YES"|' /etc/rc.conf
     sed -i 's|#rc_parallel=.*|rc_parallel="YES"|' /etc/rc.conf
     sed -i 's|#rc_interactive=.*|rc_interactive="NO"|' /etc/rc.conf
@@ -1010,6 +1008,8 @@ configure_alpine() {
     sed -i 's|#rc_timeout_stopsec=.*|rc_timeout_Stopsec="0"|' /etc/rc.conf
     sed -i 's|#rc_send_sigkill=.*|rc_send_sigkill="YES"|' /etc/rc.conf
     sed -i 's|rc_tty_number=.*|rc_tty_number=0|' /etc/rc.conf
+
+    echo ">>> configuring alpineLinux"
 
     if [ -f /etc/profile.d/color_prompt.sh.disabled ]; then
         mv /etc/profile.d/color_prompt.sh.disabled /etc/profile.d/color_prompt.sh
@@ -1047,7 +1047,7 @@ EOF
     fi
 
     echo ">>> configuring pipewire"
-    cp /usr/share/pipewire/*.conf /home/$user/.config/pipewire/
+    cp /usr/share/pipewire/*.conf $H/.config/pipewire/
 
     if [ ! -d /usr/share/icons/windows-11-icons/ ]; then
         echo ">>> cloning Windows-11-icons"
@@ -1062,8 +1062,8 @@ EOF
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
 
-    if [ ! -d /home/$user/.config/ ]; then
-        mkdir /home/$user/.config/
+    if [ ! -d $H/.config/ ]; then
+        mkdir $H/.config/
     fi
 
     if grep -q gnome /root/list; then
@@ -1073,17 +1073,17 @@ if [ -f ~/dconf-settings.ini ]; then
     rm ~/dconf-settings.ini
 fi
 EOF
-        if [ ! -f /home/$user/dconf-settings.ini ]; then
+        if [ ! -f $H/dconf-settings.ini ]; then
             echo ">>> downloading gnome dconf-settings"
-            curl -o /home/$user/dconf-settings.ini -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+            curl -o $H/dconf-settings.ini -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
         fi
     fi
 
     if grep -q kde /root/list; then
-        if [ ! -f /home/$user/.config/kde.org/systemsettings.conf ]; then
+        if [ ! -f $H/.config/kde.org/systemsettings.conf ]; then
             echo ">>> configuring kde"
             git clone https://github.com/0free/kde.git
-            cp -rlf /kde/config/* /home/$user/.config/
+            cp -rlf /kde/config/* $H/.config/
             rm -r kde/
         fi
         if [ ! -d /etc/sddm.conf.d/ ]; then
@@ -1092,10 +1092,10 @@ EOF
     fi
 
     echo ">>> setting ~/"
-    chown -R $user:wheel /home/$user/
-    chown -R $user:wheel /home/$user/.config/
-    chmod -R 700 /home/$user/
-    chmod -R 700 /home/$user/.config/
+    chown -R $user:wheel $H/
+    chown -R $user:wheel $H/.config/
+    chmod -R 700 $H/
+    chmod -R 700 $H/.config/
 
     cat > /etc/profile.d/custom.sh <<EOF
 PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
@@ -1104,6 +1104,9 @@ export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
 update() {
     echo ">>> updating alpineLinux packages"
+    if [ -f /lib/apk/db/lock ]; then
+        sudo rm /lib/apk/db/lock
+    fi
     sudo apk fix
     sudo apk update
     sudo apk upgrade
@@ -1189,7 +1192,7 @@ kernel() {
     sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' ~/linux-\$kernel/.config
     sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' ~/linux-\$kernel/.config
     echo ">>> configuring Linux-\$kernel"
-    cd ~/linux-\$kernel/ && make -j$(nproc) menuconfig
+    cd ~/linux-\$kernel/ && make -j$(nproc) xconfig
     echo ">>> making Linux kernel"
     cd ~/linux-\$kernel/ && make -j$(nproc)
     echo ">>> installing modules"
@@ -1277,7 +1280,7 @@ EOF
 
     echo ">>> installing google-chrome from flatpak"
     flatpak install -y flathub com.google.Chrome
-    flatpak override com.google.Chrome --filesystem=/home/$user/
+    flatpak override com.google.Chrome --filesystem=$H/
 
 }
 
@@ -1291,18 +1294,18 @@ install_google_chrome() {
     apk add $depend
 
     echo ">>> installing google-signing-key"
-    curl -o /home/$user/google-key.pub -LO https://dl-ssl.google.com/linux/linux_signing_key.pub
-    gpg --batch --import /home/$user/google-key.pub
-    rm /home/$user/*.pub
+    curl -o $H/google-key.pub -LO https://dl-ssl.google.com/linux/linux_signing_key.pub
+    gpg --batch --import $H/google-key.pub
+    rm $H/*.pub
 
     url="https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"
 
     echo ">>> downloading google-chrome-stable"
-    curl -o /home/$user/google-chrome.rpm -LO $url
+    curl -o $H/google-chrome.rpm -LO $url
 
     echo ">>> installing google-chrome"
-    rpm -qlp /home/$user/google-chrome.rpm
-    rm /home/$user/*.rpm
+    rpm -qlp $H/google-chrome.rpm
+    rm $H/*.rpm
 
     echo ">>> configuring google-chrome"
 	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
@@ -1344,8 +1347,28 @@ install_miner() {
         curl -o /root/t-rex.tar.gz -LO https://trex-miner.com/download/t-rex-$version-linux.tar.gz
         echo ">>> extracting T-Rex $version"
         tar -zxf /root/t-rex.tar.gz t-rex -C /usr/bin/
-        echo ">>> deleting T-Rex files"
+        echo ">>> deleting T-Rex file"
         rm /root/t-rex.tar.gz
+    fi
+
+    if grep -q gnome /root/list; then
+        cat > $H/.config/autostart/terminal.desktop <<EOF
+[Desktop Entry]
+Name=terminal
+Type=Application
+Exec=gnome-terminal -e trex
+X-GNOME-Autostart-enabled=true
+EOF
+    fi
+
+    if grep -q kde /root/list; then
+        cat > $H/.config/autostart/konsole.desktop <<EOF
+[Desktop Entry]
+Name=konsole
+Type=Application
+Exec=konsole -e trex
+X-KDE-Autostart-enabled=true
+EOF
     fi
 
     cat > /etc/profile.d/t-rex.sh << EOF
@@ -1369,7 +1392,7 @@ update_trex() {
         echo ">>> extracting T-Rex \$latest"
         sudo tar -zxf trex.tar.gz t-rex -C /usr/bin/
         sudo sed -Ei 's|^version=".*"|version="\$latest"|' /etc/prfile.d/trex.sh
-        echo ">>> deleting T-Rex files"
+        echo ">>> deleting T-Rex file"
         rm ~/trex.tar.gz
     fi
 }
@@ -1409,7 +1432,7 @@ openwrt() {
         cd ~/openwrt && git pull
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        make menuconfig
+        make xconfig
         make -j$(nproc)
     else
         git clone -b master https://git.openwrt.org/openwrt/openwrt.git
@@ -1639,8 +1662,8 @@ EOF
         mkdir -p /boot/efi/fwupd/
         cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/efi/fwupd/
         cat > /boot/loader/entries/fwupd.conf <<EOF
-title   update firmware
-efi     /fwupd/fwupdx64.efi
+title       firmware-update
+efi         /fwupd/fwupdx64.efi
 EOF
     fi
 
@@ -1650,10 +1673,11 @@ EOF
 version="$version"
 gummiboot() {
     if curl -s alpinelinux.org; then
-        if ! grep -q "\$(apk search -e gummiboot)" /etc/profile.d/gummiboot.sh; then
+        latest=\$(apk search -e gummiboot)
+        if ! grep -q \$latest /etc/profile.d/gummiboot.sh; then
             sudo apk update gummiboot
             sudo cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
-            sudo sed -i 's|^version=".*"|version="\$(apk search -e guammiboot)"|' /etc/profile.d/gummiboot.sh
+            sudo sed -i 's|^version=".*"|version="\$latest"|' /etc/profile.d/gummiboot.sh
         fi
     fi
 }
@@ -1730,12 +1754,8 @@ install_refind() {
 
     echo ">>> installing rEFInd bootloader"
     apk add refind
-
     refind-install --root /boot
-
-    if [ -f /boot/efi/refind/refind_x64.efi ]; then
-        cp /boot/efi/refind/refind_x64.efi /boot/efi/refind/bootx64.efi
-    fi
+    cp /boot/efi/refind/refind_x64.efi /boot/efi/refind/bootx64.efi
 
     if [ ! -d /boot/efi/refind/drivers_x64/ ]; then
         mkdir -p /boot/efi/refind/drivers_x64/
@@ -1916,6 +1936,7 @@ else
             setup_bootloader
         elif [[ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]]; then
             user=$(ls /home)
+            H="/home/$user"
             setup_desktop
         else
             configure
