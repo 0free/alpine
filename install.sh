@@ -671,9 +671,9 @@ install_base() {
 
     echo ">>> updating packages"
     cat > /etc/apk/repositories <<EOF
-http://dl-cdn.alpinelinux.org/alpine/edge/main
-http://dl-cdn.alpinelinux.org/alpine/edge/community
-http://dl-cdn.alpinelinux.org/alpine/edge/testing
+dl-cdn.alpinelinux.org/alpine/edge/main
+dl-cdn.alpinelinux.org/alpine/edge/community
+dl-cdn.alpinelinux.org/alpine/edge/testing
 #dl-cdn.alpinelinux.org/alpine/latest-stable/main
 #dl-cdn.alpinelinux.org/alpine/latest-stable/community
 EOF
@@ -1380,7 +1380,7 @@ trex() {
         fi
         update
         /usr/bin/t-rex -c ~/config
-        xdg-open http://127.0.0.1:8080
+        xdg-open 127.0.0.1:8080
     fi
 }
 update_trex() {
