@@ -1237,7 +1237,7 @@ install_nvidia() {
     cat > /etc/profile.d/nvidia.sh <<EOF
 version='$version'
 nvidia() {
-    if curl -s alpinelinux.org; then
+    if curl -s -o /dev/null alpinelinux.org; then
         if find /lib/modules/ -type f -name nvidia.ko.gz | grep -q nvidia; then
             if ! grep -q \$(apk search -e nvidia-src) /etc/profile.d/nvidia.sh; then
                 install_modules
@@ -1310,12 +1310,12 @@ install_google_chrome() {
 		install -Dm644 /opt/google/chrome/product_logo_${i/x*/}.png /usr/share/icons/hicolor/$i/apps/google-chrome.png
 	done
 
-    version=$(curl -s $url | head -c96 | cut -c 5-)
+    version=$(curl -s -o /dev/null $url | head -c96 | cut -c 5-)
 
     cat > /etc/profile.d/google-chrome.sh <<EOF
 version='$version'
 google_update() {
-    current=\$(curl -s $url | head -c96 | cut -c 5-)
+    current=\$(curl -s -o /dev/null $url | head -c96 | cut -c 5-)
     if grep -q $current /etc/profile.d/google-chrome.sh; then
         echo ">>> downloading latest google-chrome-stable"
         curl -o ~/google-chrome.rpm -LO $url
@@ -1338,7 +1338,7 @@ EOF
 install_miner() {
  
     echo ">>> getting T-Rex latest release from github"
-    version=$(curl -s api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+    version=$(curl -s -o /dev/null api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
 
     if [ ! -f /usr/bin/t-rex ]; then
         echo ">>> downloading T-Rex $version"
@@ -1373,7 +1373,7 @@ EOF
     cat > /etc/profile.d/t-rex.sh << EOF
 version="$version"
 trex() {
-    if curl -s alpinelinux.org; then
+    if curl -s -o /dev/null alpinelinux.org; then
         if [ ! -f ~/config ]; then
             echo ">>> downloading t-rex config file"
             curl -o ~/config -LO raw.githubusercontent.com/0free/t-rex/$version/config
@@ -1384,7 +1384,7 @@ trex() {
     fi
 }
 update_trex() {
-    latest=\$(curl -s api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+    latest=\$(curl -s -o /dev/null api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
     if ! grep -q $latest <<< $version; then
         echo ">>> downloading T-Rex \$latest"
         curl -o ~/trex.tar.gz -LO trex-miner.com/download/t-rex-\$latest-linux.tar.gz
@@ -1403,7 +1403,7 @@ create_iso() {
 
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
-    if curl -s alpinelinux.org; then
+    if curl -s -o /dev/null alpinelinux.org; then
         curl -o ~/iso.sh -LO raw.githubusercontent.com/0free/alpine/1/iso.sh
         sh iso.sh
     fi
@@ -1419,7 +1419,7 @@ openwrt() {
     cat > /etc/profile.d/openwrt.sh << EOF
 version='$version'
 openwrt() {
-    if curl -s alpinelinux.org; then
+    if curl -s -o /dev/null alpinelinux.org; then
         sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev
         sudo sed -z 's|if curl.*\n.*\n.*\nfi||' -i /etc/profile.d/openwrt.sh
     fi
@@ -1671,7 +1671,7 @@ EOF
     cat > /etc/profile.d/gummiboot.sh <<EOF
 version='$version'
 gummiboot() {
-    if curl -s alpinelinux.org; then
+    if curl -s -o /dev/null alpinelinux.org; then
         latest=\$(apk search -e gummiboot)
         if ! grep -q \$latest /etc/profile.d/gummiboot.sh; then
             sudo cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
