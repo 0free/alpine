@@ -1421,7 +1421,7 @@ version='$version'
 openwrt() {
     if curl -s -o /dev/null alpinelinux.org; then
         sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev
-        sudo sed -z 's|if curl.*\n.*\n.*\nfi||' -i /etc/profile.d/openwrt.sh
+        sudo sed -i 's|if curl.*\n.*\n.*\nfi||' /etc/profile.d/openwrt.sh
     fi
     if ! grep -q \$(apk search -e musl-dev) /etc/profile.d/openwrt.sh; then
         sudo sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
