@@ -1235,7 +1235,7 @@ install_nvidia() {
     version=$(apk search -e nvidia-src)
 
     cat > /etc/profile.d/nvidia.sh <<EOF
-version="$version"
+version='$version'
 nvidia() {
     if curl -s alpinelinux.org; then
         if find /lib/modules/ -type f -name nvidia.ko.gz | grep -q nvidia; then
@@ -1253,7 +1253,7 @@ install_modules() {
     apk add \$depend 
     echo '>>> building nvidia kernel modules'
     sudo akms install all
-    sudo sed -i 's|^version=".*"|version="\$(apk search -e nvidia-src)"|' /etc/profile.d/nvidia.sh
+    sudo sed -i "s|^version='.*'|version='\$(apk search -e nvidia-src)'|" /etc/profile.d/nvidia.sh
     echo ">>> deleting un-needed dependencies"
     apk del \$depend
 }
@@ -1313,7 +1313,7 @@ install_google_chrome() {
     version=$(curl -s $url | head -c96 | cut -c 5-)
 
     cat > /etc/profile.d/google-chrome.sh <<EOF
-version=\"$version\"
+version='$version'
 google_update() {
     current=\$(curl -s $url | head -c96 | cut -c 5-)
     if grep -q $current /etc/profile.d/google-chrome.sh; then
@@ -1323,7 +1323,7 @@ google_update() {
         rpm2cpio ~/google-chrome.rpm | sudo cpio -imdv
         rm ~/google-chrome.rpm
         sudo rm /etc/cron.daily/google-chrome
-        sudo sed -i 's|^version=".*"|version=\"$current\"|' /etc/profile.d/google-chrome.sh
+        sudo sed -i "s|^version='.*'|version='\$current'|" /etc/profile.d/google-chrome.sh
         XDG_ICON_RESOURCE=\$(which xdg-icon-resource 2> /dev/null || true)
         for icon in "/opt/google/chrome/product_logo_"*.png; do
             size="${icon##*/product_logo_}"
@@ -1417,15 +1417,15 @@ openwrt() {
     version=$(apk search -e musl-dev)
 
     cat > /etc/profile.d/openwrt.sh << EOF
-version="$version"
+version='$version'
 openwrt() {
     if curl -s alpinelinux.org; then
         sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev
         sudo sed -z 's|if curl.*\n.*\n.*\nfi||' -i /etc/profile.d/openwrt.sh
     fi
-    if ! grep -q "\$(apk search -e musl-dev)" /etc/profile.d/openwrt.sh; then
+    if ! grep -q \$(apk search -e musl-dev) /etc/profile.d/openwrt.sh; then
         sudo sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
-        sudo sed -i 's|^version=".*"|version="\$(apk search -e musl-dev)"|' /etc/profile.d/openwrt.sh
+        sudo sed -i "s|^version='.*'|version='\$(apk search -e musl-dev)'|" /etc/profile.d/openwrt.sh
     fi
     if [ -d ~/openwrt ]; then
         cd ~/openwrt && git pull
@@ -1669,14 +1669,13 @@ EOF
     version=$(apk search -e gummiboot)
 
     cat > /etc/profile.d/gummiboot.sh <<EOF
-version="$version"
+version='$version'
 gummiboot() {
     if curl -s alpinelinux.org; then
         latest=\$(apk search -e gummiboot)
         if ! grep -q \$latest /etc/profile.d/gummiboot.sh; then
-            sudo apk update gummiboot
             sudo cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
-            sudo sed -i 's|^version=".*"|version="\$latest"|' /etc/profile.d/gummiboot.sh
+            sudo sed -i "s|^version='.*'|version='\$latest'|" /etc/profile.d/gummiboot.sh
         fi
     fi
 }
