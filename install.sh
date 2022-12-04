@@ -674,8 +674,8 @@ install_base() {
 http://dl-cdn.alpinelinux.org/alpine/edge/main
 http://dl-cdn.alpinelinux.org/alpine/edge/community
 http://dl-cdn.alpinelinux.org/alpine/edge/testing
-#https://dl-cdn.alpinelinux.org/alpine/latest-stable/main
-#https://dl-cdn.alpinelinux.org/alpine/latest-stable/community
+#dl-cdn.alpinelinux.org/alpine/latest-stable/main
+#dl-cdn.alpinelinux.org/alpine/latest-stable/community
 EOF
 
     echo ">>> installing alpine-base"
@@ -866,6 +866,8 @@ create_user() {
         zfs allow $user create,mount,mountpoint,snapshot $pool
     fi
 
+    mkdir -p $H/.config/autostart/
+
 }
 
 setup_desktop() {
@@ -1051,7 +1053,7 @@ EOF
 
     if [ ! -d /usr/share/icons/windows-11-icons/ ]; then
         echo ">>> cloning Windows-11-icons"
-        git clone https://github.com/0free/windows-11-icons.git
+        git clone github.com/0free/windows-11-icons.git
         rm -r windows-11-icons/.git
         cp -rlf windows-11-icons/ /usr/share/icons/
         rm -r windows-11-icons/
@@ -1062,10 +1064,6 @@ EOF
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
 
-    if [ ! -d $H/.config/ ]; then
-        mkdir $H/.config/
-    fi
-
     if grep -q gnome /root/list; then
         cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
@@ -1075,14 +1073,14 @@ fi
 EOF
         if [ ! -f $H/dconf-settings.ini ]; then
             echo ">>> downloading gnome dconf-settings"
-            curl -o $H/dconf-settings.ini -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+            curl -o $H/dconf-settings.ini -LO raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
         fi
     fi
 
     if grep -q kde /root/list; then
         if [ ! -f $H/.config/kde.org/systemsettings.conf ]; then
             echo ">>> configuring kde"
-            git clone https://github.com/0free/kde.git
+            git clone github.com/0free/kde.git
             cp -rlf /kde/config/* $H/.config/
             rm -r kde/
         fi
@@ -1162,8 +1160,8 @@ kernel() {
     depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
     apk add \$depend
     echo ">>> getting latest stable Linux kernel version"
-    curl -o ~/Makefile -LO "https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/Makefile"
-    #curl -o ~/Makefile -LO "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/Makefile"
+    curl -o ~/Makefile -LO "git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/Makefile"
+    #curl -o ~/Makefile -LO "git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/Makefile"
     version=$(grep -E '^VERSION = ' ~/Makefile | grep -o '[0-9]{1,4}')
     patchLevel=$(grep -E '^PATCHLEVEL = ' ~/Makefile | grep -o '[0-9]{1,4}')
     subLevel=$(grep -E '^SUBLEVEL = ' ~/Makefile | grep -o '[0-9]{1,4}')
@@ -1171,9 +1169,9 @@ kernel() {
     rm ~/Makefile
     kernel="\${version}.\${patchLevel}.\${subLevel}\${extraVersion}"
     if [[ \$extraVersion ]]; then
-        url="https://git.kernel.org/torvalds/t/linux-\${version}.\${patchLevel}-\${extraVersion}.tar.gz"
+        url="git.kernel.org/torvalds/t/linux-\${version}.\${patchLevel}-\${extraVersion}.tar.gz"
     else
-        url="https://cdn.kernel.org/pub/linux/kernel/v\${version}.x/linux-\$kernel.tar.xz"
+        url="cdn.kernel.org/pub/linux/kernel/v\${version}.x/linux-\$kernel.tar.xz"
     fi
     echo ">>> downloading Linux-\$kernel source"
     curl -o ~/linux-\$kernel.tar.xz -LO \$url
@@ -1267,7 +1265,7 @@ install_flatpak() {
 
     echo ">>> installing flatpak"
     apk add flatpak flatpak-bash-completion xdg-user-dirs
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    flatpak remote-add --if-not-exists flathub flathub.org/repo/flathub.flatpakrepo
     adduser $user flatpak
     xdg-user-dirs-update
 
@@ -1294,11 +1292,11 @@ install_google_chrome() {
     apk add $depend
 
     echo ">>> installing google-signing-key"
-    curl -o $H/google-key.pub -LO https://dl-ssl.google.com/linux/linux_signing_key.pub
+    curl -o $H/google-key.pub -LO dl-ssl.google.com/linux/linux_signing_key.pub
     gpg --batch --import $H/google-key.pub
     rm $H/*.pub
 
-    url="https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"
+    url="dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"
 
     echo ">>> downloading google-chrome-stable"
     curl -o $H/google-chrome.rpm -LO $url
@@ -1340,11 +1338,11 @@ EOF
 install_miner() {
  
     echo ">>> getting T-Rex latest release from github"
-    version=$(curl -s https://api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+    version=$(curl -s api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
 
     if [ ! -f /usr/bin/t-rex ]; then
         echo ">>> downloading T-Rex $version"
-        curl -o /root/t-rex.tar.gz -LO https://trex-miner.com/download/t-rex-$version-linux.tar.gz
+        curl -o /root/t-rex.tar.gz -LO trex-miner.com/download/t-rex-$version-linux.tar.gz
         echo ">>> extracting T-Rex $version"
         tar -zxf /root/t-rex.tar.gz t-rex -C /usr/bin/
         echo ">>> deleting T-Rex file"
@@ -1367,9 +1365,10 @@ EOF
 Name=konsole
 Type=Application
 Exec=konsole -e trex
-X-KDE-Autostart-enabled=true
 EOF
     fi
+
+    sudo chmod +x $H/.config/autostart/*.desktop
 
     cat > /etc/profile.d/t-rex.sh << EOF
 version="$version"
@@ -1377,7 +1376,7 @@ trex() {
     if curl -s alpinelinux.org; then
         if [ ! -f ~/config ]; then
             echo ">>> downloading t-rex config file"
-            curl -o ~/config -LO https://raw.githubusercontent.com/0free/t-rex/$version/config
+            curl -o ~/config -LO raw.githubusercontent.com/0free/t-rex/$version/config
         fi
         update
         /usr/bin/t-rex -c ~/config
@@ -1385,11 +1384,10 @@ trex() {
     fi
 }
 update_trex() {
-    version="$version"
-    latest=\$(curl -s https://api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+    latest=\$(curl -s api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
     if ! grep -q $latest <<< $version; then
         echo ">>> downloading T-Rex \$latest"
-        curl -o ~/trex.tar.gz -LO https://trex-miner.com/download/t-rex-\$latest-linux.tar.gz
+        curl -o ~/trex.tar.gz -LO trex-miner.com/download/t-rex-\$latest-linux.tar.gz
         echo ">>> extracting T-Rex \$latest"
         sudo tar -zxf trex.tar.gz t-rex -C /usr/bin/
         sudo sed -Ei 's|^version=".*"|version="\$latest"|' /etc/prfile.d/trex.sh
@@ -1405,8 +1403,8 @@ create_iso() {
 
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
-    if curl -s https://alpinelinux.org; then
-        curl -o ~/iso.sh -LO https://raw.githubusercontent.com/0free/alpine/1/iso.sh
+    if curl -s alpinelinux.org; then
+        curl -o ~/iso.sh -LO raw.githubusercontent.com/0free/alpine/1/iso.sh
         sh iso.sh
     fi
 }
@@ -1421,7 +1419,7 @@ openwrt() {
     cat > /etc/profile.d/openwrt.sh << EOF
 version="$version"
 openwrt() {
-    if curl -s https://alpinelinux.org; then
+    if curl -s alpinelinux.org; then
         sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev
         sudo sed -z 's|if curl.*\n.*\n.*\nfi||' -i /etc/profile.d/openwrt.sh
     fi
@@ -1436,9 +1434,9 @@ openwrt() {
         make xconfig
         make -j$(nproc)
     else
-        git clone -b master https://git.openwrt.org/openwrt/openwrt.git
-        echo "src-git-full packages https://git.openwrt.org/feed/packages.git" > ~/openwrt/feeds.conf
-        echo "src-git-full luci https://git.openwrt.org/project/luci.git" >> ~/openwrt/feeds.conf
+        git clone -b master git.openwrt.org/openwrt/openwrt.git
+        echo "src-git-full packages git.openwrt.org/feed/packages.git" > ~/openwrt/feeds.conf
+        echo "src-git-full luci git.openwrt.org/project/luci.git" >> ~/openwrt/feeds.conf
         openwrt
     fi
 }
@@ -1700,7 +1698,7 @@ install_grub() {
 
     if [ ! -d /boot/grub/themes/grub-theme/ ]; then
         echo ">>> cloning grub-theme"
-        git clone https://github.com/0free/grub-theme.git
+        git clone github.com/0free/grub-theme.git
         rm -r grub-theme/.git/
         mv grub-theme/ /boot/grub/themes/
     fi
@@ -1871,7 +1869,7 @@ install_clover() {
 
     if [ ! -d CloverBootLoader/ ]; then
         echo ">>> cloning CloverBootLoader"
-        git clone https://github.com/0free/CloverBootLoader.git
+        git clone github.com/0free/CloverBootLoader.git
         rm -r CloverBootLoader/.git/
         echo ">>> copying clover bootloader"
         cp -rlf CloverBootLoader/* /boot/
