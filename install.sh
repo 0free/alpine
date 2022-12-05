@@ -1431,7 +1431,7 @@ openwrt() {
         cd ~/openwrt && git pull
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        make xconfig
+        make menu config
         make -j$(nproc)
     else
         git clone -b master git.openwrt.org/openwrt/openwrt.git
@@ -1532,7 +1532,7 @@ setup_bootloader() {
 
     find_windows
 
-    param="rootfstype=$filesystem rw loglevel=0 quiet mitigations=off modules=sd-mod,usb-storage"
+    param="rootfstype=$filesystem rw loglevel=0 quiet mitigations=off modules=sd-mod,usb-storage amd_iommu=on amd_iommu=pt intel_iommu=on intel_iommu=pt"
 
     if grep -q zfs /root/list; then
         disk="root=$pool $param"
