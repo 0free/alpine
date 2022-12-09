@@ -50,7 +50,7 @@ packages_list() {
         # git
         git git-bash-completion
         # compression
-        brotli-libs zstd zlib zip lz4 lzo unzip xz bzip2
+        brotli-libs zstd zlib zip lz4 lzo unzip xz bzip2 gzip
         # disks
         e2fsprogs lvm2 gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
         udisks2 udisks2-bash-completion 
@@ -1053,7 +1053,7 @@ EOF
 
     if [ ! -d /usr/share/icons/windows-11-icons/ ]; then
         echo ">>> cloning Windows-11-icons"
-        git clone github.com/0free/windows-11-icons.git
+        git clone https://github.com/0free/windows-11-icons.git
         rm -r windows-11-icons/.git
         cp -rlf windows-11-icons/ /usr/share/icons/
         rm -r windows-11-icons/
@@ -1080,7 +1080,7 @@ EOF
     if grep -q kde /root/list; then
         if [ ! -f $H/.config/kde.org/systemsettings.conf ]; then
             echo ">>> configuring kde"
-            git clone github.com/0free/kde.git
+            git clone https://github.com/0free/kde.git
             cp -rlf /kde/config/* $H/.config/
             rm -r kde/
         fi
@@ -1314,11 +1314,12 @@ install_google_chrome() {
 
     cat > /etc/profile.d/google-chrome.sh <<EOF
 version='$version'
+url='$url'
 google_update() {
-    current=\$(curl -s -o /dev/null $url | head -c96 | cut -c 5-)
-    if grep -q $current /etc/profile.d/google-chrome.sh; then
+    current=\$(curl -s -o /dev/null \$url | head -c96 | cut -c 5-)
+    if grep -q \$current /etc/profile.d/google-chrome.sh; then
         echo ">>> downloading latest google-chrome-stable"
-        curl -o ~/google-chrome.rpm -LO $url
+        curl -o ~/google-chrome.rpm -LO \$url
         echo ">>> updating google-chrome"
         rpm2cpio ~/google-chrome.rpm | sudo cpio -imdv
         rm ~/google-chrome.rpm
@@ -1376,7 +1377,7 @@ trex() {
     if curl -s -o /dev/null alpinelinux.org; then
         if [ ! -f ~/config ]; then
             echo ">>> downloading t-rex config file"
-            curl -o ~/config -LO raw.githubusercontent.com/0free/t-rex/$version/config
+            curl -o ~/config -LO raw.githubusercontent.com/0free/t-rex/\$version/config
         fi
         update
         /usr/bin/t-rex -c ~/config
@@ -1385,7 +1386,7 @@ trex() {
 }
 update_trex() {
     latest=\$(curl -s -o /dev/null api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
-    if ! grep -q $latest <<< $version; then
+    if ! grep -q \$latest <<< \$version; then
         echo ">>> downloading T-Rex \$latest"
         curl -o ~/trex.tar.gz -LO trex-miner.com/download/t-rex-\$latest-linux.tar.gz
         echo ">>> extracting T-Rex \$latest"
@@ -1420,7 +1421,7 @@ openwrt() {
 version='$version'
 openwrt() {
     if curl -s -o /dev/null alpinelinux.org; then
-        sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev
+        sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev gzip
         sudo sed -i 's|if curl.*\n.*\n.*\nfi||' /etc/profile.d/openwrt.sh
     fi
     if ! grep -q \$(apk search -e musl-dev) /etc/profile.d/openwrt.sh; then
@@ -1431,10 +1432,10 @@ openwrt() {
         cd ~/openwrt && git pull
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        make menu config
+        make menuconfig
         make -j$(nproc)
     else
-        git clone -b master git.openwrt.org/openwrt/openwrt.git
+        git clone -b 22.03 https://git.openwrt.org/openwrt/openwrt.git
         echo "src-git-full packages git.openwrt.org/feed/packages.git" > ~/openwrt/feeds.conf
         echo "src-git-full luci git.openwrt.org/project/luci.git" >> ~/openwrt/feeds.conf
         openwrt
@@ -1697,7 +1698,7 @@ install_grub() {
 
     if [ ! -d /boot/grub/themes/grub-theme/ ]; then
         echo ">>> cloning grub-theme"
-        git clone github.com/0free/grub-theme.git
+        git clone https://github.com/0free/grub-theme.git
         rm -r grub-theme/.git/
         mv grub-theme/ /boot/grub/themes/
     fi
@@ -1868,7 +1869,7 @@ install_clover() {
 
     if [ ! -d CloverBootLoader/ ]; then
         echo ">>> cloning CloverBootLoader"
-        git clone github.com/0free/CloverBootLoader.git
+        git clone https://github.com/0free/CloverBootLoader.git
         rm -r CloverBootLoader/.git/
         echo ">>> copying clover bootloader"
         cp -rlf CloverBootLoader/* /boot/
