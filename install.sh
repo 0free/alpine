@@ -55,7 +55,6 @@ packages_list() {
         e2fsprogs lvm2 gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
         udisks2 udisks2-bash-completion 
         # network
-        ethtool ethtool-bash-completion
         networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind
         # firewall
         ufw ufw-openrc ufw-bash-completion
@@ -111,8 +110,6 @@ packages_list() {
             vulkan-loader vulkan-tools
             # wireless
             wireless-regdb iwd iwd-openrc
-            # network
-            ethtool ethtool-bash-completion
             rsync rsync-openrc
             networkmanager-wwan networkmanager-wifi networkmanager-openvpn networkmanager-initrd-generator
         )
