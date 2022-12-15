@@ -669,11 +669,11 @@ install_base() {
 
     echo ">>> updating packages"
     cat > /etc/apk/repositories <<EOF
-dl-cdn.alpinelinux.org/alpine/edge/main
-dl-cdn.alpinelinux.org/alpine/edge/community
-dl-cdn.alpinelinux.org/alpine/edge/testing
-#dl-cdn.alpinelinux.org/alpine/latest-stable/main
-#dl-cdn.alpinelinux.org/alpine/latest-stable/community
+https://dl-cdn.alpinelinux.org/alpine/edge/main
+https://dl-cdn.alpinelinux.org/alpine/edge/community
+https://dl-cdn.alpinelinux.org/alpine/edge/testing
+#https://dl-cdn.alpinelinux.org/alpine/latest-stable/main
+#https://dl-cdn.alpinelinux.org/alpine/latest-stable/community
 EOF
 
     echo ">>> installing alpine-base"
