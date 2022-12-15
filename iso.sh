@@ -51,7 +51,7 @@ profile_linux() {
     kernel_addons='zfs'
     apks="\$apks
         alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
-        alsa-lib alsa-plugins-pulse
+        alsaconf alsa-lib alsa-tools alsa-tools-gui alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
         bash bash-completion
         attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
         brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
@@ -82,6 +82,7 @@ profile_linux() {
         gnome-control-center gnome-control-center-bash-completion
         gsettings-desktop-schemas
         pinentry-gnome
+        pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez pipewire-media-session wireplumber
         gnome-terminal gnome-disk-utility gnome-system-monitor gedit
         nautilus
         network-manager-applet
