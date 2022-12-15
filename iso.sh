@@ -99,7 +99,7 @@ EOF
 chmod 700 ~/aports/scripts/mkimg.linux.sh
 
 sed -i 's|wireless-regdb||' ~/aports/scripts/mkimg.base.sh
-sed -i 's|linux-firmware |linux-firmware-none |' ~/aports/scripts/mkimg.base.sh
+sed -i 's|linux-firmware | |' ~/aports/scripts/mkimg.base.sh
 sed -i 's|timeout=1|timeout=0|' ~/aports/scripts/mkimg.base.sh
 sed -i 's|"alpine-${profile_abbrev:-$PROFILE} $RELEASE $ARCH"|"alpineLinux"|g' ~/aports/scripts/mkimg.base.sh
 
