@@ -667,7 +667,7 @@ mount_boot() {
 
 install_base() {
 
-    echo ">>> updating packages"
+    echo ">>> creating repositories"
     cat > /etc/apk/repositories <<EOF
 https://dl-cdn.alpinelinux.org/alpine/edge/main
 https://dl-cdn.alpinelinux.org/alpine/edge/community
