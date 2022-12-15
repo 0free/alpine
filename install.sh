@@ -332,8 +332,6 @@ packages_list() {
             rust rustfmt rust-analysis cargo
             # go
             go
-            # php
-            phpmyadmin composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
             # android
             gradle android-tools android-tools-bash-completion go-mtpfs scrcpy scrcpy-bash-completion
             # iPhone/iPod/mac
@@ -383,13 +381,17 @@ packages_list() {
     fi
 
     if grep -q server /root/list; then
+        if grep -q workstation /root/list; then
+            packages+=(
+                # php
+                phpmyadmin composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
+            )
+        fi
         packages+=(
             # system
             rsyslog rsyslog-openrc rsyslog-mysql rsyslog-tls rsyslog-http
             # SSL/TLS
             certbot
-            # php
-            phpmyadmin composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
             # database
             mariadb
             # mail
