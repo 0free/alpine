@@ -1080,11 +1080,11 @@ EOF
     fi
 
     if grep -q kde /root/list; then
-        if [ ! -f $H/.config/kde.org/systemsettings.conf ]; then
+        if [ ! -d $H/.config/kde.org/ ]; then
             echo ">>> configuring kde"
-            git clone https://github.com/0free/kde.git
-            cp -rlf /kde/config/* $H/.config/
-            rm -r kde/
+            git clone https://github.com/0free/kde-settings.git
+            cp -rlf /kde-settings/config/* $H/.config/
+            rm -r kde-settings/
         fi
         if [ ! -d /etc/sddm.conf.d/ ]; then
             mkdir /etc/sddm.conf.d/
