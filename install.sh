@@ -133,7 +133,7 @@ packages_list() {
             # nautilus
             nautilus
             # text
-            gedit gedit-plugins py3-cairo
+            gedit py3-cairo
             # firmware
             gnome-firmware-updater
             # gnome theme
