@@ -110,6 +110,7 @@ packages_list() {
             vulkan-loader vulkan-tools
             # wireless
             wireless-regdb iwd iwd-openrc
+            # network
             rsync rsync-openrc
             networkmanager-wwan networkmanager-wifi networkmanager-openvpn networkmanager-initrd-generator
         )
@@ -332,7 +333,7 @@ packages_list() {
             # go
             go
             # php
-            composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
+            phpmyadmin composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
             # android
             gradle android-tools android-tools-bash-completion go-mtpfs scrcpy scrcpy-bash-completion
             # iPhone/iPod/mac
@@ -388,9 +389,7 @@ packages_list() {
             # SSL/TLS
             certbot
             # php
-            php81 php81-bcmath php81-brotli php81-bz2 php81-cgi php81-curl php81-common php81-phpdbg php81-dom php81-exif php81-fileinfo php81-fpm php81-gd php81-gettext php81-iconv php81-intl php81-litespeed php81-mbstring php81-memcache php81-memcached php81-mysqli php81-mysqlnd php81-opcache php81-openssl php81-phar php81-pear php81-redis php81-session php81-snmp php81-soap php81-xml php81-zip php81-pecl-imagick
-            # php admin
-            phpmyadmin
+            phpmyadmin composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
             # database
             mariadb
             # mail
@@ -1061,6 +1060,10 @@ EOF
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
 
+    echo ">>> configuring extlinux"
+    sed -i "s|overwrite=1|overwrite=0|" /etc/update-extlinux.conf
+    sed -i "s|root=|root=$(blkid $rootDrive -o export | grep ^UUID=)|" /etc/update-extlinux.conf
+
     if grep -q gnome /root/list; then
         cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
@@ -1402,6 +1405,7 @@ create_iso() {
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
     if curl -s -o /dev/null alpinelinux.org; then
+        cd ~
         curl -o ~/iso.sh -LO raw.githubusercontent.com/0free/alpine/1/iso.sh
         sh iso.sh
     fi
@@ -1882,8 +1886,10 @@ install_clover() {
 
 finish() {
 
-    echo ">>> cleaning files"
+    echo ">>> removing un-needed packages"
     apk del *-doc
+    apk del syslinux
+    echo ">>> cleaning files"
     find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o iname *.docbook \) -type f -exec rm {} \;
 
     echo ">>> installation is completed"
