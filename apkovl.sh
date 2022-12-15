@@ -52,7 +52,7 @@ EOF
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
-alsa-lib alsa-plugins-pulse
+alsaconf alsa-lib alsa-tools alsa-tools-gui alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
 bash bash-completion
 attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
 brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
@@ -69,6 +69,7 @@ ibus ibus-bash-completion
 iptables iptables-openrc
 iwd iwd-openrc wireless-regdb
 linux-pam
+linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
 mesa mesa-dri-gallium
 musl musl-locales musl-utils
 networkmanager networkmanager-bash-completion networkmanager-common networkmanager-elogind networkmanager-openrc networkmanager-wifi
@@ -81,6 +82,7 @@ gnome-control-center gnome-control-center-bash-completion
 gnome-tweaks gnome-shell-extensions arc-dark-gnome
 gsettings-desktop-schemas
 pinentry-gnome
+pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez pipewire-media-session wireplumber
 gnome-terminal gnome-disk-utility gnome-system-monitor gedit
 nautilus
 network-manager-applet
