@@ -1891,6 +1891,9 @@ finish() {
     echo ">>> removing un-needed packages"
     apk del *-doc
     apk del syslinux
+    if ! grep -q grub /root/list; then
+        apk del grub*
+    fi
     echo ">>> cleaning files"
     find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o iname *.docbook \) -type f -exec rm {} \;
 
