@@ -1338,7 +1338,7 @@ EOF
 install_miner() {
  
     echo ">>> getting T-Rex latest release from github"
-    version=$(curl -s -o /dev/null api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+    version=$(curl -s https://api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
 
     if [ ! -f /usr/bin/t-rex ]; then
         echo ">>> downloading T-Rex $version"
