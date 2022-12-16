@@ -1047,6 +1047,7 @@ EOF
     fi
 
     echo ">>> configuring pipewire"
+    mkdir -p $H/.config/pipewire/
     cp /usr/share/pipewire/*.conf $H/.config/pipewire/
 
     if [ ! -d /usr/share/icons/windows-11-icons/ ]; then
