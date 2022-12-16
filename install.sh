@@ -856,7 +856,7 @@ create_user() {
         userdel $user
     fi
     echo ">>> adding wheel to sudo"
-    echo 's|# %wheel ALL=(ALL:ALL) ALL|%wheel ALL=(ALL:ALL) ALL|' /etc/sudoers
+    sed -i 's|# %wheel ALL=(ALL:ALL) ALL|%wheel ALL=(ALL:ALL) ALL|' /etc/sudoers
     echo ">>> creating user"
     echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user $user
     usermod -aG input,audio,video,netdev,usb,disk,lp,adm $user
@@ -983,8 +983,8 @@ enable_services() {
         rc-update add postfix default
         rc-update add dovecot default
         rc-update add opendkim default
-        mkdir /var/mysql && chown -R mysql:mysql /var/mysql
-        mkdir /var/log/mysql && chown -R mysql:mysql /var/log/mysql
+        mkdir -p /var/mysql && chown -R mysql:mysql /var/mysql
+        mkdir -p /var/log/mysql && chown -R mysql:mysql /var/log/mysql
     fi
 
     rc-update add mount-ro shutdown
@@ -1086,9 +1086,7 @@ EOF
             cp -rlf /kde-settings/config/* $H/.config/
             rm -r kde-settings/
         fi
-        if [ ! -d /etc/sddm.conf.d/ ]; then
-            mkdir /etc/sddm.conf.d/
-        fi
+        mkdir -p /etc/sddm.conf.d/
     fi
 
     echo ">>> setting ~/"
@@ -1501,15 +1499,9 @@ make_initramfs() {
     kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
     kernel_virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
 
-    if [ ! -d /lib/modules/$kernel_virt ]; then
-        mkdir /lib/modules/$kernel_virt
-    fi
-    if [ ! -d /lib/modules/$kernel_edge ]; then
-        mkdir /lib/modules/$kernel_edge
-    fi
-    if [ ! -d  /lib/modules/$kernel_lts ]; then
-        mkdir /lib/modules/$kernel_lts
-    fi
+    mkdir -p /lib/modules/$kernel_virt
+    mkdir -p /lib/modules/$kernel_edge
+    mkdir -p /lib/modules/$kernel_lts
 
     if [ -f /boot/vmlinuz ]; then
         echo ">>> building linux-$kernel initial ramdisk"
@@ -1528,7 +1520,7 @@ make_initramfs() {
         mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-edge $kernel_edge
     fi
 
-    mkdir /boot/efi/
+    mkdir -p /boot/efi/
 
 }
 
@@ -1570,9 +1562,7 @@ find_windows() {
                 p=/dev/$p
                 if ! df | grep -q $p; then
                     if [[ $p != $bootDrive ]]; then
-                        if [ ! -d /windows/ ]; then
-                            mkdir /windows/
-                        fi
+                        mkdir -p /windows/
                         mount -r $p /windows/
                         if [ -f /windows/EFI/Microsoft/Boot/BCD ]; then
                             echo ">>> copying Windows Boot Manager"
@@ -1599,7 +1589,7 @@ install_gummiboot() {
     echo ">>> installing gummiboot"
     apk add gummiboot
 
-    mkdir /boot/efi/alpineLinux/
+    mkdir -p /boot/efi/alpineLinux/
     cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
 
     efibootmgr -c -d $drive -p 1 -t 0 -L 'alpineLinux' -l '\EFI\alpineLinux\bootx64.efi'
@@ -1695,9 +1685,7 @@ install_grub() {
     echo ">>> installing grub bootloader"
     grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id="alpine linux" $drive
 
-    if [ ! -d /boot/grub/themes/ ]; then
-        mkdir /boot/grub/themes
-    fi
+    mkdir -p /boot/grub/themes
 
     if [ ! -d /boot/grub/themes/grub-theme/ ]; then
         echo ">>> cloning grub-theme"
