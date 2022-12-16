@@ -505,9 +505,9 @@ setup_drive() {
     if [[ $filesystem == zfs ]]; then
         bootloaders=(gummiboot grub)
     elif [[ $filesystem == btrfs ]]; then
-        bootloaders=(gummiboot grub rEFInd)
+        bootloaders=(gummiboot grub rEFInd syslinux)
     else
-        bootloaders=(gummiboot grub rEFInd clover)
+        bootloaders=(gummiboot clover grub rEFInd syslinux)
     fi
     menu 'select a bootloader' bootloader ${bootloaders[@]}
     echo "bootloader=$bootloader" >> /root/list
@@ -688,7 +688,8 @@ EOF
     chmod 0666 /mnt/dev/null
 
     echo ">>> loading modules"
-    modprobe efivars
+    modprobe efivarfs
+    modprobe efi-pstore
 
     set_network
     set_fstab
@@ -898,7 +899,7 @@ setup_desktop() {
 
     make_initramfs
 
-    if test mountpoint -q /mnt/boot; then
+    if mountpoint -q /mnt/boot; then
         setup_bootloader
     fi
 
@@ -1060,6 +1061,10 @@ EOF
         rm -r windows-11-icons/
     fi
 
+    echo ">>> disabling IPv6"
+    echo 'ipv6' >> /etc/modules
+    echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.d/01-disable-ipv6.conf
+
     echo ">>> configuring firewall"
     sed -i 's|IPV6=yes|IPV6=no|' /etc/default/ufw
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
@@ -1116,8 +1121,8 @@ update() {
     if [ -f /etc/profile.d/nvidia.sh ]; then
         nvidia
     fi
-    if [ -f /etc/profile.d/gummiboot.sh ]; then
-        gummiboot
+    if [ -f /etc/profile.d/bootloader.sh ]; then
+        bootloader
     fi
     if [ -f /etc/profile.d/trex.sh ]; then
         update_trex
@@ -1543,6 +1548,8 @@ setup_bootloader() {
         install_refind
     elif grep -q clover /root/list; then
         install_clover
+    elif grep -q syslinux /root/list; then
+        install_syslinux
     fi
 
     finish
@@ -1673,6 +1680,52 @@ gummiboot() {
     fi
 }
 EOF
+
+}
+
+install_syslinux() {
+
+    echo ">>> installing syslinux"
+    apk add syslinux
+    extlinux --install /boot
+
+    echo ">>> configuring extlinux"
+    sed -i "s|overwrite=1|overwrite=0|" /etc/update-extlinux.conf
+    sed -i "s|root=.*|root=$(blkid $rootDrive -o export | grep ^UUID=)|" /etc/update-extlinux.conf
+
+    cat > /boot/extlinux.conf <<EOF
+timeout 1
+prompt 1
+default 'alpineLinux LTS'
+EOF
+
+    if [ -f /boot/vmlinuz-virt ]; then
+        cat >> /boot/extlinux.conf <<EOF
+label 'alpineLinux virt'
+      kernel /vmlinuz-virt
+      appendinitrd=/initramfs-virt $disk
+EOF
+    fi
+    if [ -f /boot/vmlinuz-edge ]; then
+        cat >> /boot/extlinux.conf <<EOF
+label 'alpineLinux edge'
+      kernel /vmlinuz-edge
+      append initrd=/initramfs-edge $disk
+EOF
+    fi
+    if [ -f /boot/vmlinuz-lts ]; then
+        cat >> /boot/extlinux.conf <<EOF
+label 'alpineLinux LTS'
+      kernel /vmlinuz-lts
+      appendinitrd=/initramfs-lts $disk
+EOF
+    fi
+
+    mkdir -p /boot/efi/syslinux/
+    cp /usr/share/syslinux/efi64/* /boot/efi/syslinux/
+    cp /boot/extlinux.conf /boot/efi/syslinux/syslinux.cfg
+
+    update-extlinux
 
 }
 
@@ -1877,11 +1930,13 @@ finish() {
 
     echo ">>> configuring extlinux"
     sed -i "s|overwrite=1|overwrite=0|" /etc/update-extlinux.conf
-    sed -i "s|root=|root=$(blkid $rootDrive -o export | grep ^UUID=)|" /etc/update-extlinux.conf
+    sed -i "s|root=.*|root=$(blkid $rootDrive -o export | grep ^UUID=)|" /etc/update-extlinux.conf
 
     echo ">>> removing un-needed packages"
     apk del *-doc
-    apk del syslinux
+    if ! grep -q syslinux /root/list; then
+        apk del syslinux
+    fi
     if ! grep -q grub /root/list; then
         apk del grub*
     fi
