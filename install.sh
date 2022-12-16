@@ -1301,7 +1301,7 @@ install_google_chrome() {
     curl -o $H/google-chrome.rpm -LO $url
 
     echo ">>> installing google-chrome"
-    rpm -i --nodeps $H/google-chrome.rpm
+    rpm -i --nodeps --replacepkgs $H/google-chrome.rpm
     rm $H/*.rpm
 
     echo ">>> configuring google-chrome"
