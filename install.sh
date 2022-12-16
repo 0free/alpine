@@ -1301,7 +1301,7 @@ install_google_chrome() {
     curl -o $H/google-chrome.rpm -LO $url
 
     echo ">>> installing google-chrome"
-    rpm -qlp $H/google-chrome.rpm
+    rpm -i --nodeps $H/google-chrome.rpm
     rm $H/*.rpm
 
     echo ">>> configuring google-chrome"
@@ -1340,13 +1340,13 @@ install_miner() {
     echo ">>> getting T-Rex latest release from github"
     version=$(curl -s -o /dev/null api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
 
-    if [ ! -f /usr/bin/t-rex ]; then
+    if [ ! -f /usr/bin/trex ]; then
         echo ">>> downloading T-Rex $version"
-        curl -o /root/t-rex.tar.gz -LO trex-miner.com/download/t-rex-$version-linux.tar.gz
+        curl -o /root/trex.tar.gz -LO trex-miner.com/download/t-rex-$version-linux.tar.gz
         echo ">>> extracting T-Rex $version"
-        tar -zxf /root/t-rex.tar.gz t-rex -C /usr/bin/
+        tar -zxf /root/trex.tar.gz t-rex -C /usr/bin/
         echo ">>> deleting T-Rex file"
-        rm /root/t-rex.tar.gz
+        rm /root/trex.tar.gz
     fi
 
     if grep -q gnome /root/list; then
@@ -1354,7 +1354,7 @@ install_miner() {
 [Desktop Entry]
 Name=terminal
 Type=Application
-Exec=gnome-terminal -e trex
+Exec=gnome-terminal -e t-rex -c ~/config
 X-GNOME-Autostart-enabled=true
 EOF
     fi
@@ -1364,13 +1364,13 @@ EOF
 [Desktop Entry]
 Name=konsole
 Type=Application
-Exec=konsole -e trex
+Exec=konsole -e t-rex -c ~/config
 EOF
     fi
 
     sudo chmod +x $H/.config/autostart/*.desktop
 
-    cat > /etc/profile.d/t-rex.sh << EOF
+    cat > /etc/profile.d/trex.sh << EOF
 version="$version"
 trex() {
     if curl -s -o /dev/null alpinelinux.org; then
