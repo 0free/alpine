@@ -1063,10 +1063,6 @@ EOF
     sed -i 's|"DROP"|"REJECT"|g' /etc/default/ufw
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
 
-    echo ">>> configuring extlinux"
-    sed -i "s|overwrite=1|overwrite=0|" /etc/update-extlinux.conf
-    sed -i "s|root=|root=$(blkid $rootDrive -o export | grep ^UUID=)|" /etc/update-extlinux.conf
-
     if grep -q gnome /root/list; then
         cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
@@ -1266,7 +1262,7 @@ install_flatpak() {
 
     echo ">>> installing flatpak"
     apk add flatpak flatpak-bash-completion xdg-user-dirs
-    flatpak remote-add --if-not-exists flathub flathub.org/repo/flathub.flatpakrepo
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     adduser $user flatpak
     xdg-user-dirs-update
 
@@ -1876,6 +1872,10 @@ install_clover() {
 }
 
 finish() {
+
+    echo ">>> configuring extlinux"
+    sed -i "s|overwrite=1|overwrite=0|" /etc/update-extlinux.conf
+    sed -i "s|root=|root=$(blkid $rootDrive -o export | grep ^UUID=)|" /etc/update-extlinux.conf
 
     echo ">>> removing un-needed packages"
     apk del *-doc
