@@ -1340,7 +1340,7 @@ install_miner() {
     echo ">>> getting T-Rex latest release from github"
     version=$(curl -s -o /dev/null api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
 
-    if [ ! -f /usr/bin/trex ]; then
+    if [ ! -f /usr/bin/t-rex ]; then
         echo ">>> downloading T-Rex $version"
         curl -o /root/trex.tar.gz -LO trex-miner.com/download/t-rex-$version-linux.tar.gz
         echo ">>> extracting T-Rex $version"
