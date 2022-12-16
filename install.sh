@@ -700,6 +700,8 @@ set_network() {
 
     echo ">>> adding name resolution"
     cat > /mnt/etc/resolv.conf <<EOF
+nameserver 94.140.14.49
+nameserver 94.140.14.59
 nameserver 10.0.254.3
 nameserver 1.0.0.1
 nameserver 8.8.8.8
