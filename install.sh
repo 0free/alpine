@@ -10,78 +10,78 @@ password='0000'
 packages_list() {
 
     packages=(
-        # alpine
+        #alpine
         alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release
-        # openrc
+        #openrc
         openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
-        # busybox
+        #busybox
         busybox busybox-openrc busybox-mdev-openrc busybox-binsh busybox-suid
-        # musl
+        #musl
         musl musl-utils musl-locales
-        # glibc
+        #glibc
         gcompat
-        # dbus
+        #dbus
         dbus dbus-openrc dbus-libs dbus-x11
-        # ibus
+        #ibus
         ibus ibus-bash-completion
-        # udev
+        #udev
         udev-init-scripts udev-init-scripts-openrc
-        # eudev
+        #eudev
         eudev eudev-openrc eudev-libs
-        # hardware
+        #hardware
         hwids-net hwids-pci hwids-udev hwids-usb
-        # xorg
+        #xorg
         xauth xinit xorg-server xorg-server-common
-        # wayland
+        #wayland
         xwayland
-        # mesa
+        #mesa
         mesa-dri-gallium
-        # polkit/elogind
+        #polkit/elogind
         polkit-openrc polkit-common polkit-elogind polkit-elogind-libs
         elogind elogind-openrc elogind-bash-completion
-        # input
+        #input
         xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
-        # base
+        #base
         sudo bash bash-completion binutils fakeroot file fortify-headers g++ gcc libc-dev patch remake-make shadow rsyslog rsyslog-openrc sed attr dialog which grep pciutils usbutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
-        # util-linux
+        #util-linux
         util-linux util-linux-openrc util-linux-login util-linux-misc util-linux-bash-completion
-        # utilities
+        #utilities
         openssl ncurses-dev
-        # git
+        #git
         git git-bash-completion
-        # compression
+        #compression
         brotli-libs zstd zlib zip lz4 lzo unzip xz bzip2 gzip
-        # disks
+        #disks
         e2fsprogs lvm2 gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
         udisks2 udisks2-bash-completion 
-        # network
+        #network
         networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind
-        # firewall
+        #firewall
         ufw ufw-openrc ufw-bash-completion
         iptables iptables-openrc
-        # pipewire
+        #pipewire
         pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez
         pipewire-media-session wireplumber
-        # alsa
+        #alsa
         alsaconf alsa-lib alsa-tools alsa-tools-gui alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf 
-        # bluetooth
+        #bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
-        # intel hda
+        #intel hda
         sof-firmware sof-bin
-        # fonts
+        #fonts
         font-hack font-adobe-source-code-pro
         font-noto-arabic
         font-opensans font-xfree86-type1
         ttf-font-awesome ttf-dejavu ttf-freefont ttf-droid
-        # timezone
+        #timezone
         tzdata
-        # efi
+        #efi
         efibootmgr
     )
 
     if grep -q btrfs /root/list; then
         packages+=(
-            # btrfs
+            #btrfs
             btrfs-progs btrfs-progs-extra btrfs-progs-libs btrfs-progs-bash-completion
             snapper snapper-bash-completion
         )
@@ -97,20 +97,20 @@ packages_list() {
         )
     else
         packages+=(
-            # hardware
+            #hardware
             bolt pciutils
-            # firmware
+            #firmware
             fwupd fwupd-openrc fwupd-efi
-            # mesa
+            #mesa
             mesa mesa-dri-gallium mesa-va-gallium mesa-vdpau-gallium mesa-gl mesa-glapi mesa-egl mesa-gles mesa-gbm
             mesa-vulkan-layers mesa-libd3dadapter9
-            # intel GPU
+            #intel GPU
             mesa-vulkan-intel intel-media-driver
-            # vulkan
+            #vulkan
             vulkan-loader vulkan-tools
-            # wireless
+            #wireless
             wireless-regdb iwd iwd-openrc
-            # network
+            #network
             rsync rsync-openrc
             networkmanager-wwan networkmanager-wifi networkmanager-openvpn networkmanager-initrd-generator
         )
@@ -118,71 +118,71 @@ packages_list() {
 
     if grep -q gnome /root/list; then
         packages+=(
-            # gnome session
+            #gnome session
             gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session
             gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus
             gnome-control-center gnome-control-center-bash-completion
             gnome-tweaks gnome-colors-common gsettings-desktop-schemas
             tracker tracker-bash-completion
-            # connector
+            #connector
             chrome-gnome-shell gnome-browser-connector
-            # theme
+            #theme
             adwaita-icon-theme hicolor-icon-theme
-            # gnome tools
+            #gnome tools
             gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
-            # nautilus
+            #nautilus
             nautilus
-            # text
+            #text
             gedit py3-cairo
-            # firmware
+            #firmware
             gnome-firmware-updater
-            # gnome theme
+            #gnome theme
             arc-theme arc-dark arc-dark-gnome
-            # gedit spell check
+            #gedit spell check
             aspell-en hunspell-en nuspell
-            # network
+            #network
             network-manager-applet
-            # firewall
+            #firewall
             gufw
-            # colord
+            #colord
             colord colord-bash-completion colord-gtk
         )
     fi
 
     if grep -q kde /root/list; then
         packages+=(
-            # sddm
+            #sddm
             sddm sddm-openrc sddm-kcm sddm-breeze
-            # plasma
+            #plasma
             plasma-desktop
             plasma-workspace plasma-workspace-lang plasma-workspace-libs
             plasma-settings
             plasma-framework
             plasma-integration plasma-browser-integration
             plasma-thunderbolt plasma-disks
-            # system
+            #system
             kwrited systemsettings ksysguard polkit-kde-agent-1
-            # theme
+            #theme
             breeze-gtk breeze-icons
-            # bluetooth
+            #bluetooth
             bluedevil
-            # power
+            #power
             powerdevil
-            # wayland
+            #wayland
             kwayland
-            # network
+            #network
             plasma-nm
-            # firewall
+            #firewall
             iproute2 net-tools
-            # audio
+            #audio
             kpipewire kmix
-            # kde
+            #kde
             kde-cli-tools ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker libkscreen kmenuedit konsole kde-gtk-config khotkeys
-            # file manager
+            #file manager
             dolphin dolphin-plugins kfind
-            # text
+            #text
             kate kate-common hunspell-en
-            # archive
+            #archive
             ark
         )
     fi
@@ -191,184 +191,184 @@ packages_list() {
 
         if grep -q gnome /root/list; then
             packages+=(
-                # gnome apps
+                #gnome apps
                 gnome-software gnome-software-plugin-apk gnome-software-plugin-flatpak gnome-photos gnome-music gnome-clocks gnome-contacts gnome-calculator gnome-maps gnome-logs gnome-remote-desktop gnome-screenshot gnome-boxes gnome-calendar gnome-sound-recorder gnome-font-viewer gnome-colors gnome-bluetooth gnome-podcasts gnome-characters gnome-builder gnome-shortwave getting-things-gnome sushi simple-scan
-                # config
+                #config
                 dconf dconf-bash-completion
-                # web
+                #web
                 epiphany
-                # documents
+                #documents
                 evince evince-nautilus
-                # photos
+                #photos
                 gthumb eog shotwell
-                # mail
+                #mail
                 geary
-                # sound
+                #sound
                 gnome-metronome lollypop
-                # other
+                #other
                 glade ghex baobab confy
-                # bluetooth
+                #bluetooth
                 blueman
-                # flatpak
+                #flatpak
                 xdg-desktop-portal xdg-desktop-portal-gnome xdg-desktop-portal-gtk xdg-user-dirs
             )
         fi
 
         if grep -q kde /root/list; then
             packages+=(
-                # plasma
+                #plasma
                 plasma-systemmonitor plasma-firewall
                 plasma-camera plasma-videoplayer plasma-phonebook
-                # kde
+                #kde
                 kactivities kactivities-stats kactivitymanagerd ksystemstats
                 shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool krename kcolorchooser kunitconversion
-                # widgets
+                #widgets
                 kconfigwidgets
-                # print
+                #print
                 print-manager
-                # screen
+                #screen
                 spectacle kscreenlocker kruler
-                # image
+                #image
                 gwenview
-                # audio
+                #audio
                 juk kwave elisa
-                # video
+                #video
                 kmediaplayer kdenlive dragon haruna
-                # YouTube
+                #YouTube
                 plasmatube audiotube
-                # camera
+                #camera
                 kamera kamoso
-                # spelling
+                #spelling
                 sonnet
-                # office
+                #office
                 kcalc okular skanlite
-                # input
+                #input
                 plasma-remotecontrollers
-                # draw
+                #draw
                 kolourpaint
-                # math
+                #math
                 cantor kalgebra kig kmplot
-                # music
+                #music
                 minuet
-                # flatpak
+                #flatpak
                 xdg-desktop-portal xdg-desktop-portal-kde xdg-user-dirs
-                # hex
+                #hex
                 okteta
             )
         fi
 
         packages+=(
-            # shell
+            #shell
             starship starship-bash-completion
-            # wine
+            #wine
             wine vkd3d
-            # thumbnail
+            #thumbnail
             ffmpegthumbnailer
-            # mkimage
+            #mkimage
             abuild alpine-sdk apk-tools mkinitfs xorriso squashfs-tools
-            # fonts tools
+            #fonts tools
             font-manager font-viewer
-            # office
+            #office
             libreoffice-base libreoffice-common libreoffice-writer libreoffice-math libreoffice-calc libreoffice-draw libreoffice-lang-en_us libreoffice-lang-ar
-            # google
+            #google
             google-authenticator
-            # mail
+            #mail
             thunderbird
-            # music
+            #music
             amberol musescore
-            # audio
+            #audio
             ardour tenacity calf calf-jack calf-lv2
-            # video edit
+            #video edit
             shotcut pitivi x265
-            # video subtitle
+            #video subtitle
             gaupol
-            # book
+            #book
             foliate
-            # openvc
+            #openvc
             opencv py3-opencv
-            # python
+            #python
             black
-            # JavaScript
+            #JavaScript
             npm npm-bash-completion nodejs esbuild reason
-            # code
+            #code
             code-oss code-oss-bash-completion lapce codeblocks
-            # code format
+            #code format
             prettier tidyhtml
-            # html/css to pdf
+            #html/css to pdf
             weasyprint
-            # screenshot
+            #screenshot
             flameshot
-            # electronic
+            #electronic
             kicad
-            # screen
+            #screen
             obs-studio kooha peek
-            # video
+            #video
             mplayer totem celluloid
-            # photos
+            #photos
             krita gimp inkscape gmic curtail
-            # printer
+            #printer
             cups cups-openrc cups-pdf bluez-cups
-            # driver
+            #driver
             xinput gkraken ccid solaar razercfg razercfg-gui razergenie openrazer piper
-            # math
+            #math
             mathjax2
-            # finance
+            #finance
             homebank
-            # 2d
+            #2d
             tiled
-            # 3d
+            #3d
             blender freecad godot leocad solvespace goxel
-            # 3d printer
+            #3d printer
             cura
-            # text editor
+            #text editor
             kakoune
-            # mauikit
+            #mauikit
             mauikit mauikit-accounts mauikit-filebrowsing mauikit-imagetools mauikit-texteditor
-            # bitcoin
+            #bitcoin
             bitcoin bitcoin-openrc
-            # game emu
+            #game emu
             pcsx2 dolphin-emu xwiimote pcsxr
-            # rust
+            #rust
             rust rustfmt rust-analysis cargo
-            # go
+            #go
             go
-            # android
+            #android
             gradle android-tools android-tools-bash-completion go-mtpfs scrcpy scrcpy-bash-completion
-            # iPhone/iPod/mac
+            #iPhone/iPod/mac
             ifuse ideviceinstaller idevicerestore libirecovery libirecovery-progs libideviceactivation libimobiledevice libimobiledevice-progs
-            # pdf
+            #pdf
             corepdf pdfarranger poppler
-            # drives
+            #drives
             onedrive onedrive-openrc
-            # twitter
+            #twitter
             cawbird
-            # Corsair
+            #Corsair
             ckb-next
-            # RGB
+            #RGB
             openrgb
-            # plan
+            #plan
             planner
-            # music player
+            #music player
             amberol sublime-music
-            # music server
+            #music server
             navidrome navidrome-openrc
-            # youtube
+            #youtube
             ffmpeg yt-dlp yt-dlp-bash-completion pipe-viewer-gtk audiotube tartube youtube-viewer-gtk
-            # javascript/css
+            #javascript/css
             minify minify-bash-completion
-            # photos
+            #photos
             darktable
-            # drawing
+            #drawing
             drawing
-            # remote
+            #remote
             remmina
-            # touch
+            #touch
             touchegg touchegg-openrc
-            # CPU
+            #CPU
             corectrl
-            # cctv
+            #cctv
             zoneminder zoneminder-openrc
-            # iso
+            #iso
             thumbdrives
         )
 
@@ -383,29 +383,29 @@ packages_list() {
     if grep -q server /root/list; then
         if grep -q workstation /root/list; then
             packages+=(
-                # php
+                #php
                 phpmyadmin composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
             )
         fi
         packages+=(
-            # system
+            #system
             rsyslog rsyslog-openrc rsyslog-mysql rsyslog-tls rsyslog-http
-            # SSL/TLS
+            #SSL/TLS
             certbot
-            # database
+            #database
             mariadb
-            # mail
+            #mail
             postfix postfix-openrc postfix-mysql postfix-pcre postfixadmin
             dovecot dovecot-openrc dovecot-submissiond dovecot-ldap dovecot-lmtpd dovecot-pop3d dovecot-sql dovecot-mysql
             opendkim opendkim-utils
             cyrus-sasl
-            # tools
+            #tools
             imagemagick redis redis-openrc memcached memcached-openrc
-            # server
+            #server
             litespeed litespeed-openrc
-            # http
+            #http
             hetty
-            # cab
+            #cab
             cabextract
         )
     fi
@@ -1336,7 +1336,7 @@ EOF
 }
 
 install_miner() {
- 
+
     echo ">>> getting T-Rex latest release from github"
     version=$(curl -s https://api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
 
