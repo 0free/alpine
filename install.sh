@@ -403,8 +403,6 @@ packages_list() {
             imagemagick redis redis-openrc memcached memcached-openrc
             #server
             litespeed litespeed-openrc
-            #http
-            hetty
             #cab
             cabextract
         )
@@ -1689,6 +1687,12 @@ install_syslinux() {
     apk add syslinux
     extlinux --install /boot
 
+    mkdir -p /boot/efi/syslinux/
+    cp /usr/share/syslinux/efi64/* /boot/efi/syslinux/
+    cp /boot/extlinux.conf /boot/efi/syslinux/syslinux.cfg
+    cp /usr/share/syslinux/efi64/syslinux.efi /boot/efi/syslinux/bootx64.efi
+    mv /boot/efi/syslinux/*.efi /boot/efi/syslinux/bootx64.efi
+
     echo ">>> configuring extlinux"
     sed -i "s|overwrite=1|overwrite=0|" /etc/update-extlinux.conf
     sed -i "s|root=.*|root=$(blkid $rootDrive -o export | grep ^UUID=)|" /etc/update-extlinux.conf
@@ -1696,34 +1700,35 @@ install_syslinux() {
     cat > /boot/extlinux.conf <<EOF
 timeout 1
 prompt 1
+MENU TITLE alpineLinux Boot Menu
+MENU AUTOBOOT booting in # seconds
 default 'alpineLinux LTS'
 EOF
 
     if [ -f /boot/vmlinuz-virt ]; then
         cat >> /boot/extlinux.conf <<EOF
 label 'alpineLinux virt'
-      kernel /vmlinuz-virt
-      appendinitrd=/initramfs-virt $disk
+      linux /vmlinuz-virt
+      initrd /initramfs-virt
+      append $disk
 EOF
     fi
     if [ -f /boot/vmlinuz-edge ]; then
         cat >> /boot/extlinux.conf <<EOF
 label 'alpineLinux edge'
-      kernel /vmlinuz-edge
-      append initrd=/initramfs-edge $disk
+      linux /vmlinuz-edge
+      initrd /initramfs-edge
+      append $disk
 EOF
     fi
     if [ -f /boot/vmlinuz-lts ]; then
         cat >> /boot/extlinux.conf <<EOF
 label 'alpineLinux LTS'
-      kernel /vmlinuz-lts
-      appendinitrd=/initramfs-lts $disk
+      linux /vmlinuz-lts
+      initrd /initramfs-lts
+      append $disk
 EOF
     fi
-
-    mkdir -p /boot/efi/syslinux/
-    cp /usr/share/syslinux/efi64/* /boot/efi/syslinux/
-    cp /boot/extlinux.conf /boot/efi/syslinux/syslinux.cfg
 
     update-extlinux
 
