@@ -501,11 +501,11 @@ setup_drive() {
     echo "desktop=$desktop" >> /root/list
 
     if [[ $filesystem == zfs ]]; then
-        bootloaders=(gummiboot grub)
+        bootloaders=(gummiboot clover grub)
     elif [[ $filesystem == btrfs ]]; then
-        bootloaders=(gummiboot grub rEFInd)
+        bootloaders=(gummiboot clover rEFInd grub)
     else
-        bootloaders=(gummiboot syslinux grub rEFInd clover)
+        bootloaders=(gummiboot syslinux clover rEFInd grub)
     fi
     menu 'select a bootloader' bootloader ${bootloaders[@]}
     echo "bootloader=$bootloader" >> /root/list
@@ -1087,7 +1087,7 @@ if [ -f ~/dconf-settings.ini ]; then
 fi
 EOF
             echo ">>> downloading gnome dconf-settings"
-            curl -o $H/dconf-settings.ini -LO raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+            curl -o $H/dconf-settings.ini -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
         fi
     fi
 
@@ -1245,7 +1245,7 @@ install_flatpak() {
     xdg-user-dirs-update
 
     cat > /etc/profile.d/flatpak.sh <<EOF
-flatpak_update() {
+flatpak-update() {
     sudo flatpak update -y
     sudo flatpak uninstall -y --unused
 }
@@ -1293,7 +1293,7 @@ install_google_chrome() {
     cat > /etc/profile.d/google-chrome.sh <<EOF
 version='$version'
 url='$url'
-google_update() {
+google-update() {
     current=\$(curl -s -o /dev/null \$url | head -c96 | cut -c 5-)
     if grep -q \$current /etc/profile.d/google-chrome.sh; then
         echo ">>> downloading latest google-chrome-stable"
@@ -1355,7 +1355,7 @@ trex() {
     if curl -s -o /dev/null alpinelinux.org; then
         if [ ! -f ~/config ]; then
             echo ">>> downloading t-rex config file"
-            curl -o ~/config -LO raw.githubusercontent.com/0free/t-rex/\$version/config
+            curl -o ~/config -LO https://raw.githubusercontent.com/0free/t-rex/\$version/config
         fi
         update
         /usr/bin/t-rex -c ~/config
@@ -1363,7 +1363,7 @@ trex() {
     fi
 }
 update_trex() {
-    latest=\$(curl -s -o /dev/null api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+    latest=\$(curl -s https://api.github.com/repos/trexminer/T-Rex/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
     if ! grep -q \$latest <<< \$version; then
         echo ">>> downloading T-Rex \$latest"
         curl -o ~/trex.tar.gz -LO trex-miner.com/download/t-rex-\$latest-linux.tar.gz
@@ -1383,7 +1383,7 @@ create_iso() {
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
     if curl -s -o /dev/null alpinelinux.org; then
-        curl -o ~/iso.sh -LO raw.githubusercontent.com/0free/alpine/1/iso.sh
+        curl -o ~/iso.sh -LO https://raw.githubusercontent.com/0free/alpine/1/iso.sh
         sh ~/iso.sh
     fi
 }
@@ -1789,8 +1789,9 @@ install_refind() {
         echo ">>> copying rEFInd drivers"
         cp /usr/share/refind/drivers_x86_64/*.efi /boot/efi/refind/drivers_x64/
         echo ">>> downloading efifs drivers"
-        curl -o /boot/efi/refind/drivers_x64/xfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
-        curl -o /boot/efi/refind/drivers_x64/zfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
+        version=$(curl -s https://api.github.com/repos/pbatard/efifs/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+        curl -o /boot/efi/refind/drivers_x64/xfs_x64.efi -LO https://github.com/pbatard/efifs/releases/download/$version/xfs_x64.efi
+        curl -o /boot/efi/refind/drivers_x64/zfs_x64.efi -LO https://github.com/pbatard/efifs/releases/download/$version/zfs_x64.efi
     fi
 
     echo ">>> configuring rEFInd bootloader"
@@ -1900,13 +1901,15 @@ install_clover() {
         git clone https://github.com/0free/CloverBootLoader.git
         rm -r CloverBootLoader/.git/
         echo ">>> copying clover bootloader"
-        cp -rlf CloverBootLoader/* /boot/
+        mkdir -p /boot/efi/clover/
+        cp -rlf CloverBootLoader/* /boot/efi/clover/
         rm -r CloverBootLoader/
         echo ">>> downloading efifs drivers"
-        curl -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/btrfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/btrfs_x64.efi
-        curl -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/ntfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/ntfs_x64.efi
-        curl -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/xfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/xfs_x64.efi
-        curl -o /boot/EFI/CLOVER/drivers/off/UEFI/FileSystem/zfs_x64.efi -LO github.com/pbatard/efifs/releases/download/v1.9/zfs_x64.efi
+        version=$(curl -s https://api.github.com/repos/pbatard/efifs/releases/latest | grep '"tag_name":' | sed -E 's|.*"([^"]+)".*|\1|')
+        curl -o /boot/efi/clover/drivers/off/btrfs_x64.efi -LO https://github.com/pbatard/efifs/releases/download/$version/btrfs_x64.efi
+        curl -o /boot/efi/clover/drivers/off/ntfs_x64.efi -LO https://github.com/pbatard/efifs/releases/download/$version/ntfs_x64.efi
+        curl -o /boot/efi/clover/drivers/off/xfs_x64.efi -LO https://github.com/pbatard/efifs/releases/download/$version/xfs_x64.efi
+        curl -o /boot/efi/clover/drivers/off/zfs_x64.efi -LO https://github.com/pbatard/efifs/releases/download/$version/zfs_x64.efi
     fi
 
 }
@@ -1958,13 +1961,13 @@ EOF
 
     if [ -f /etc/profile.d/flatpak.sh ]; then
         cat >> /etc/profile.d/commands.sh <<EOF
-        flatpak_update
+        flatpak-update
 EOF
     fi
 
     if [ -f /etc/profile.d/google-chrome.sh ]; then
         cat >> /etc/profile.d/commands.sh <<EOF
-        google_update
+        google-update
 EOF
     fi
 
@@ -1986,9 +1989,9 @@ EOF
 EOF
     fi
 
-    if [ -f /etc/profile.d/bootloader.sh ]; then
+    if [ -f /etc/profile.d/gummiboot.sh ]; then
         cat >> /etc/profile.d/commands.sh <<EOF
-        bootloader
+        gummiboot
 EOF
     fi
 
