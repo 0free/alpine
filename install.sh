@@ -1399,8 +1399,7 @@ openwrt() {
 version='$version'
 openwrt() {
     if curl -s -o /dev/null alpinelinux.org; then
-        sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev gzip
-        sudo sed -i 's|.*sudo apk.*||' /etc/profile.d/openwrt.sh
+        sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev gzip && sudo sed -i 's|.*sudo apk.*||' /etc/profile.d/openwrt.sh
         if ! grep -q \$(apk search -e musl-dev) /etc/profile.d/openwrt.sh; then
             sudo sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
             sudo sed -i "s|^version='.*'|version='\$(apk search -e musl-dev)'|" /etc/profile.d/openwrt.sh
@@ -1996,11 +1995,16 @@ EOF
     fi
 
     if [ -f /usr/bin/fwupdmgr ]; then
-    cat >> /etc/profile.d/commands.sh <<EOF
+        cat >> /etc/profile.d/commands.sh <<EOF
         fwupdmgr get-devices
         fwupdmgr refresh
         fwupdmgr get-updates
         fwupdmgr update
+EOF
+    fi
+
+    if [ -f /etc/profile.d/fwupd.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
         update-firmware
 EOF
     fi
