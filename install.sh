@@ -484,7 +484,7 @@ setup_drive() {
     fi
 
     if [[ ! $swapDrive ]]; then
-        swapSizes=(disable 1GiB 2GiB 3GiB 4GiB)
+        swapSizes=(no-swap 1GiB 2GiB 3GiB 4GiB)
         menu 'select swap partition size in MB' swapSize ${swapSizes[@]} 
     fi
 
@@ -542,6 +542,8 @@ setup_drive() {
             swapDrive=$(ls $drive* | grep -E "${drive}${i}|${drive}p${i}")
             echo ">>> creating swap filesystem"
             mkswap $swapDrive
+            echo "swapDrive=$swapDrive" >> /root/list
+            echo "swapSize=$swapSize" >> /root/list
         fi
 
         echo ">>> creating root partition"
@@ -559,8 +561,6 @@ setup_drive() {
     mdev -s && mdev -s
 
     echo "bootDrive=$bootDrive" >> /root/list
-    echo "swapDrive=$swapDrive" >> /root/list
-    echo "swapSize=$swapSize" >> /root/list
     echo "rootDrive=$rootDrive" >> /root/list
 
     echo ">>> creating root filesystem"
@@ -729,7 +729,7 @@ set_fstab() {
 
     echo "$(blkid "$bootDrive" -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
 
-    if grep -q swapSize /root/list; then
+    if grep -q swapDrive /root/list; then
         echo "$(blkid $swapDrive -o export | grep ^UUID=) none swap sw 0 0" >> /mnt/etc/fstab
     fi
 
@@ -1150,52 +1150,54 @@ EOF
 
     cat >> /etc/profile.d/commands.sh <<EOF
 update() {
-    echo ">>> updating alpineLinux packages"
-    if [ -f /lib/apk/db/lock ]; then
-        sudo rm /lib/apk/db/lock
-    fi
-    sudo apk fix
-    sudo apk update
-    sudo apk upgrade
+    if curl -s -o /dev/null alpinelinux.org; then
+        echo ">>> updating alpineLinux packages"
+        if [ -f /lib/apk/db/lock ]; then
+            sudo rm /lib/apk/db/lock
+        fi
+        sudo apk fix
+        sudo apk update
+        sudo apk upgrade
 EOF
 
     if [ -f /etc/profile.d/flatpak.sh ]; then
         cat >> /etc/profile.d/commands.sh <<EOF
-    flatpak_update
+        flatpak_update
 EOF
     fi
 
     if [ -f /etc/profile.d/google-chrome.sh ]; then
         cat >> /etc/profile.d/commands.sh <<EOF
-    google_update
+        google_update
 EOF
     fi
 
     if [ -f /etc/profile.d/zfs.sh ]; then
         cat >> /etc/profile.d/commands.sh <<EOF
-    zfs-install
+        zfs-install
 EOF
     fi
 
     if [ -f /etc/profile.d/nvidia.sh ]; then
         cat >> /etc/profile.d/commands.sh <<EOF
-    nvidia
+        nvidia
 EOF
     fi
 
     if [ -f /etc/profile.d/bootloader.sh ]; then
         cat >> /etc/profile.d/commands.sh <<EOF
-    bootloader
+        bootloader
 EOF
     fi
 
     if [ -f /etc/profile.d/trex.sh ]; then
         cat >> /etc/profile.d/commands.sh <<EOF
-    update_trex
+        update_trex
 EOF
     fi
 
     cat >> /etc/profile.d/commands.sh <<EOF
+    fi
 }
 EOF
 
@@ -1263,23 +1265,24 @@ build_zfs() {
     cat > /etc/profile.d/zfs.sh <<EOF
 version='$version'
 zfs-install() {
-    echo ">>> installing zfs-src"
-    depend='akms zfs-src installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
-    apk add \$depend
-    echo ">>> building zfs-src"
-    cd /usr/src/zfs/ && sh autogen.sh
-    cd /usr/src/zfs/ && ./configure
-    cd /usr/src/zfs/ && make -s -j"$(nproc)"
-    cd /usr/src/zfs/ && make install
-    cd /usr/src/zfs/ && ldconfig
-    cd /usr/src/zfs/ && depmod
-    cd /root/
-    echo '>>> building kernel modules'
-    sudo akms install all
-    sudo sed -i "s|^version='.*'|version='\$(apk search -e zfs-src)'|" /etc/profile.d/nvidia.sh
-    echo ">>> cleaning packages"
-    apk del \$depend
-
+    if ! grep -q \$(apk search -e zfs-src) /etc/profile.d/zfs.sh; then
+        echo ">>> installing zfs-src"
+        depend='akms zfs-src installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
+        apk add \$depend
+        echo ">>> building zfs-src"
+        cd /usr/src/zfs/ && sh autogen.sh
+        cd /usr/src/zfs/ && ./configure
+        cd /usr/src/zfs/ && make -s -j"$(nproc)"
+        cd /usr/src/zfs/ && make install
+        cd /usr/src/zfs/ && ldconfig
+        cd /usr/src/zfs/ && depmod
+        cd /root/
+        echo '>>> building kernel modules'
+        sudo akms install all
+        sudo sed -i "s|^version='.*'|version='\$(apk search -e zfs-src)'|" /etc/profile.d/zfs.sh
+        echo ">>> cleaning packages"
+        apk del \$depend
+    fi
 }
 EOF
 
@@ -1293,10 +1296,8 @@ install_nvidia() {
 version='$version'
 nvidia() {
     if find /lib/modules/ -type f -name nvidia.ko.gz | grep -q nvidia; then
-        if curl -s -o /dev/null alpinelinux.org; then
-            if ! grep -q \$(apk search -e nvidia-src) /etc/profile.d/nvidia.sh; then
-                install_modules
-            fi
+        if ! grep -q \$(apk search -e nvidia-src) /etc/profile.d/nvidia.sh; then
+            install_modules
         fi
     else
         install_modules
@@ -1333,7 +1334,9 @@ EOF
 
     echo ">>> installing google-chrome from flatpak"
     flatpak install -y flathub com.google.Chrome
+    echo ">>> adding access for google-chrome"
     flatpak override com.google.Chrome --filesystem=$H/
+    flatpak override com.google.Chrome --filesystem=/media/
 
 }
 
