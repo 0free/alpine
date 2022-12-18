@@ -503,9 +503,9 @@ setup_drive() {
     if [[ $filesystem == zfs ]]; then
         bootloaders=(gummiboot grub)
     elif [[ $filesystem == btrfs ]]; then
-        bootloaders=(gummiboot grub rEFInd syslinux)
+        bootloaders=(gummiboot grub rEFInd)
     else
-        bootloaders=(gummiboot clover grub rEFInd syslinux)
+        bootloaders=(gummiboot syslinux grub rEFInd clover)
     fi
     menu 'select a bootloader' bootloader ${bootloaders[@]}
     echo "bootloader=$bootloader" >> /root/list
@@ -877,7 +877,11 @@ setup_desktop() {
 
     enable_services
     configure_alpine
-    custom_commands
+
+    if [ -f /etc/lightdm/lightdm.conf ]; then
+        configure_lightdm
+    fi
+
     custom_kernel
 
     if grep -q zfs /root/list; then
@@ -902,7 +906,7 @@ setup_desktop() {
 
     make_initramfs
 
-    if mountpoint -q /mnt/boot; then
+    if lsblk -o mountpoint | grep -q /mnt/boot; then
         setup_bootloader
     fi
 
@@ -912,90 +916,91 @@ enable_services() {
 
     echo ">>> enabling services"
 
-    rc-update add devfs sysinit
-    rc-update add dmesg sysinit
-    rc-update add mdev sysinit
-    rc-update add hwdrivers sysinit
+    rc-update -q add devfs sysinit
+    rc-update -q add dmesg sysinit
+    rc-update -q add mdev sysinit
+    rc-update -q add hwdrivers sysinit
 
-    rc-update add udev sysinit
-    rc-update add udev-trigger sysinit
-    rc-update add udev-settle sysinit
-    rc-update add udev-postmount sysinit
+    rc-update -q add udev sysinit
+    rc-update -q add udev-trigger sysinit
+    rc-update -q add udev-settle sysinit
+    rc-update -q add udev-postmount sysinit
 
-    rc-update add dbus sysinit
+    rc-update -q add dbus sysinit
 
-    rc-update add procfs boot
-    rc-update add devfs boot
-    rc-update add sysfs boot
-    rc-update add root boot
+    rc-update -q add procfs boot
+    rc-update -q add devfs boot
+    rc-update -q add sysfs boot
+    rc-update -q add root boot
 
-    rc-update add modules boot
-    rc-update add cgroups boot
-    rc-update add mtab boot
-    rc-update add hwclock boot
-    rc-update add lvm boot
-    rc-update add swap boot
-    rc-update add localmount boot
-    rc-update add sysctl boot
-    rc-update add hostname boot
-    rc-update add bootmisc boot
-    rc-update add syslog boot
-    rc-update add networking boot
+    rc-update -q add modules boot
+    rc-update -q add cgroups boot
+    rc-update -q add mtab boot
+    rc-update -q add hwclock boot
+    rc-update -q add lvm boot
+    rc-update -q add swap boot
+    rc-update -q add localmount boot
+    rc-update -q add sysctl boot
+    rc-update -q add hostname boot
+    rc-update -q add bootmisc boot
+    rc-update -q add syslog boot
+    rc-update -q add networking boot
+    rc-update -q add urandom boot
 
     if grep -q zfs /root/list; then
-        rc-update add zfs-import boot
-        rc-update add zfs-mount sysinit
-        rc-update add zfs-share boot
-        rc-update add zfs-zed boot
-        rc-update add zfs-load-key boot
+        rc-update -q add zfs-import boot
+        rc-update -q add zfs-mount sysinit
+        rc-update -q add zfs-share boot
+        rc-update -q add zfs-zed boot
+        rc-update -q add zfs-load-key boot
     fi
 
-    rc-update add acpid default
-    rc-update add crond default
+    rc-update -q add acpid default
+    rc-update -q add crond default
 
-    rc-update add elogind default
-    rc-update add polkit default
+    rc-update -q add elogind default
+    rc-update -q add polkit default
 
-    rc-update add networkmanager default
-    rc-update add networkmanager-dispatcher default
+    rc-update -q add networkmanager default
+    rc-update -q add networkmanager-dispatcher default
 
-    rc-update add alsa default
-    rc-update add bluealsa default
-    rc-update add bluetooth default
-    rc-update add ufw default
+    rc-update -q add alsa default
+    rc-update -q add bluealsa default
+    rc-update -q add bluetooth default
+    rc-update -q add ufw default
 
     if ! grep -q qemu /root/list; then
-        rc-update add iwd default
-        rc-update add rsyncd default
-        rc-update add fwupd default
+        rc-update -q add iwd default
+        rc-update -q add rsyncd default
+        rc-update -q add fwupd default
     fi
 
     if grep -q gnome /root/list; then
-        rc-update add gdm default
-        rc-update add agetty default
+        rc-update -q add gdm default
+        rc-update -q add agetty default
     fi
 
     if grep -q kde /root/list; then
-        rc-update add sddm default
+        rc-update -q add sddm default
     fi
 
     if grep -q workstation /root/list; then
-        rc-update add cupsd default
+        rc-update -q add cupsd default
     fi
 
     if grep -q server /root/list; then
-        rc-update add mariadb default
-        rc-update add litespeed default
-        rc-update add postfix default
-        rc-update add dovecot default
-        rc-update add opendkim default
+        rc-update -q add mariadb default
+        rc-update -q add litespeed default
+        rc-update -q add postfix default
+        rc-update -q add dovecot default
+        rc-update -q add opendkim default
         mkdir -p /var/mysql && chown -R mysql:mysql /var/mysql
         mkdir -p /var/log/mysql && chown -R mysql:mysql /var/log/mysql
     fi
 
-    rc-update add mount-ro shutdown
-    rc-update add killprocs shutdown
-    rc-update add savecache shutdown
+    rc-update -q add mount-ro shutdown
+    rc-update -q add killprocs shutdown
+    rc-update -q add savecache shutdown
 
 }
 
@@ -1104,102 +1109,16 @@ EOF
 
 }
 
-custom_commands() {
+configure_lightdm() {
 
-    echo ">>> adding custom commands"
-    cat > /etc/profile.d/commands.sh <<EOF
-PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
-export QT_IM_MODULE=ibus
-export GTK_IM_MODULE=ibus
-export XMODIFIERS=@im=ibus
-search() {
-    apk search
-}
-install() {
-    sudo apk add
-}
-remove() {
-    sudo apk del
-}
-c() {
-    clear all
-}
-disk() {
-    lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
-}
-EOF
-
-    if [ -f /usr/bin/fwupdmgr ]; then
-    cat >> /etc/profile.d/commands.sh <<EOF
-fwupd() {
-    fwupdmgr get-devices
-    fwupdmgr refresh
-    fwupdmgr get-updates
-    fwupdmgr update
-}
-EOF
-    fi
-
-    if [ -f /usr/bin/yt-dlp ]; then
-    cat >> /etc/profile.d/commands.sh <<EOF
-youtube() {
-    yt-dlp -o '~/%(title)s.%(ext)s' -f 'bv[vcodec~="^((he|a)vc|h26[45])"][height<=1080][fps<=60]+ba' --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:'-ss 00:00:00 -to 03:00:00'
-}
-EOF
-    fi
-
-    cat >> /etc/profile.d/commands.sh <<EOF
-update() {
-    if curl -s -o /dev/null alpinelinux.org; then
-        echo ">>> updating alpineLinux packages"
-        if [ -f /lib/apk/db/lock ]; then
-            sudo rm /lib/apk/db/lock
-        fi
-        sudo apk fix
-        sudo apk update
-        sudo apk upgrade
-EOF
-
-    if [ -f /etc/profile.d/flatpak.sh ]; then
-        cat >> /etc/profile.d/commands.sh <<EOF
-        flatpak_update
-EOF
-    fi
-
-    if [ -f /etc/profile.d/google-chrome.sh ]; then
-        cat >> /etc/profile.d/commands.sh <<EOF
-        google_update
-EOF
-    fi
-
-    if [ -f /etc/profile.d/zfs.sh ]; then
-        cat >> /etc/profile.d/commands.sh <<EOF
-        zfs-install
-EOF
-    fi
-
-    if [ -f /etc/profile.d/nvidia.sh ]; then
-        cat >> /etc/profile.d/commands.sh <<EOF
-        nvidia
-EOF
-    fi
-
-    if [ -f /etc/profile.d/bootloader.sh ]; then
-        cat >> /etc/profile.d/commands.sh <<EOF
-        bootloader
-EOF
-    fi
-
-    if [ -f /etc/profile.d/trex.sh ]; then
-        cat >> /etc/profile.d/commands.sh <<EOF
-        update_trex
-EOF
-    fi
-
-    cat >> /etc/profile.d/commands.sh <<EOF
-    fi
-}
-EOF
+    echo ">>> configuring lightdm"
+    sed -i 's|#allow-guest=.*|allow-guest=false|' /etc/lightdm/lightdm.conf
+    sed -i 's|#autologin-guest=.*|autologin-guest=false|' /etc/lightdm/lightdm.conf
+    sed -i "s|#autologin-user=.*|autologin-user=$user|" /etc/lightdm/lightdm.conf
+    sed -i 's|#autologin-user-timeout=.*|autologin-user-timeout=0|' /etc/lightdm/lightdm.conf
+    sed -i 's|#autologin-in-background=.*|autologin-in-background=false|' /etc/lightdm/lightdm.conf
+    sed -i 's|#user-session=.*|user-session=default|' /etc/lightdm/lightdm.conf
+    sed -i 's|#greeter-session=.*|greeter-session=slick-greeter|' /etc/lightdm/lightdm.conf
 
 }
 
@@ -1360,8 +1279,9 @@ install_google_chrome() {
     curl -o $H/google-chrome.rpm -LO $url
 
     echo ">>> installing google-chrome"
-    rpm -i --nodeps --replacepkgs $H/google-chrome.rpm
-    rm $H/*.rpm
+    rpm2cpio ~/google-chrome.rpm | cpio -imdv
+    rm ~/google-chrome.rpm
+    rm /etc/cron.daily/google-chrome
 
     echo ">>> configuring google-chrome"
 	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
@@ -1384,9 +1304,9 @@ google_update() {
         sudo rm /etc/cron.daily/google-chrome
         sudo sed -i "s|^version='.*'|version='\$current'|" /etc/profile.d/google-chrome.sh
         XDG_ICON_RESOURCE=\$(which xdg-icon-resource 2> /dev/null || true)
-        for icon in "/opt/google/chrome/product_logo_"*.png; do
+        for icon in /opt/google/chrome/product_logo_*.png; do
             size="${icon##*/product_logo_}"
-            "$XDG_ICON_RESOURCE" install --size "${size%%.png}" "$icon" "google-chrome"
+            \$XDG_ICON_RESOURCE install --size \${size%%.png} \$icon 'google-chrome'
         done
     fi
 }
@@ -1430,7 +1350,7 @@ EOF
     sudo chmod +x $H/.config/autostart/*.desktop
 
     cat > /etc/profile.d/trex.sh << EOF
-version="$version"
+version='$version'
 trex() {
     if curl -s -o /dev/null alpinelinux.org; then
         if [ ! -f ~/config ]; then
@@ -1449,7 +1369,7 @@ update_trex() {
         curl -o ~/trex.tar.gz -LO trex-miner.com/download/t-rex-\$latest-linux.tar.gz
         echo ">>> extracting T-Rex \$latest"
         sudo tar -zxf trex.tar.gz t-rex -C /usr/bin/
-        sudo sed -Ei 's|^version=".*"|version="\$latest"|' /etc/prfile.d/trex.sh
+        sudo sed -Ei "s|^version='.*'|version='\$latest'|" /etc/prfile.d/trex.sh
         echo ">>> deleting T-Rex file"
         rm ~/trex.tar.gz
     fi
@@ -1463,9 +1383,8 @@ create_iso() {
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
     if curl -s -o /dev/null alpinelinux.org; then
-        cd ~
         curl -o ~/iso.sh -LO raw.githubusercontent.com/0free/alpine/1/iso.sh
-        sh iso.sh
+        sh ~/iso.sh
     fi
 }
 EOF
@@ -1481,39 +1400,26 @@ version='$version'
 openwrt() {
     if curl -s -o /dev/null alpinelinux.org; then
         sudo apk add gcc g++ argp-standalone musl-dev musl-fts-dev musl-obstack-dev musl-libintl rsync tar libcap-dev gzip
-        sudo sed -i 's|if curl.*\n.*\n.*\nfi||' /etc/profile.d/openwrt.sh
-    fi
-    if ! grep -q \$(apk search -e musl-dev) /etc/profile.d/openwrt.sh; then
-        sudo sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
-        sudo sed -i "s|^version='.*'|version='\$(apk search -e musl-dev)'|" /etc/profile.d/openwrt.sh
-    fi
-    if [ -d ~/openwrt ]; then
-        cd ~/openwrt && git pull
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        make menuconfig
-        make -j$(nproc)
-    else
-        git clone -b 22.03 https://git.openwrt.org/openwrt/openwrt.git
-        echo "src-git-full packages git.openwrt.org/feed/packages.git" > ~/openwrt/feeds.conf
-        echo "src-git-full luci git.openwrt.org/project/luci.git" >> ~/openwrt/feeds.conf
-        openwrt
+        sudo sed -i 's|.*sudo apk.*||' /etc/profile.d/openwrt.sh
+        if ! grep -q \$(apk search -e musl-dev) /etc/profile.d/openwrt.sh; then
+            sudo sed -i 's|calloc|xcalloc|g' /usr/include/sched.h
+            sudo sed -i "s|^version='.*'|version='\$(apk search -e musl-dev)'|" /etc/profile.d/openwrt.sh
+        fi
+        if [ -d ~/openwrt ]; then
+            cd ~/openwrt && git pull
+            ./scripts/feeds update -a
+            ./scripts/feeds install -a
+            make menuconfig
+            make -j$(nproc)
+        else
+            git clone -b master https://git.openwrt.org/openwrt/openwrt.git
+            echo "src-git-full packages https://git.openwrt.org/feed/packages.git" > ~/openwrt/feeds.conf
+            echo "src-git-full luci https://git.openwrt.org/project/luci.git" >> ~/openwrt/feeds.conf
+            openwrt
+        fi
     fi
 }
 EOF
-
-}
-
-configure_lightdm() {
-
-    echo ">>> configuring lightdm"
-    sed -i 's|#allow-guest=.*|allow-guest=false|' /etc/lightdm/lightdm.conf
-    sed -i 's|#autologin-guest=.*|autologin-guest=false|' /etc/lightdm/lightdm.conf
-    sed -i "s|#autologin-user=.*|autologin-user=$user|" /etc/lightdm/lightdm.conf
-    sed -i 's|#autologin-user-timeout=.*|autologin-user-timeout=0|' /etc/lightdm/lightdm.conf
-    sed -i 's|#autologin-in-background=.*|autologin-in-background=false|' /etc/lightdm/lightdm.conf
-    sed -i 's|#user-session=.*|user-session=default|' /etc/lightdm/lightdm.conf
-    sed -i 's|#greeter-session=.*|greeter-session=slick-greeter|' /etc/lightdm/lightdm.conf
 
 }
 
@@ -1594,16 +1500,20 @@ setup_bootloader() {
         disk="root=$(blkid $rootDrive -o export | grep ^UUID=) $param"
     fi
 
+    if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
+        firmware_update
+    fi
+
     if grep -q gummiboot /root/list; then
         install_gummiboot
+    elif grep -q syslinux /root/list; then
+        install_syslinux
     elif grep -q grub /root/list; then
         install_grub
     elif grep -q rEFInd /root/list; then
         install_refind
     elif grep -q clover /root/list; then
         install_clover
-    elif grep -q syslinux /root/list; then
-        install_syslinux
     fi
 
     finish
@@ -1641,6 +1551,25 @@ find_windows() {
             done
         fi
     done
+
+}
+
+firmware_update() {
+
+    mkdir -p /boot/efi/fwupd/
+    cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/efi/fwupd/
+
+    version=$(apk search -e fwupd)
+    cat > /etc/profile.d/fwupd.sh <<EOF
+version='$version'
+update-firmware() {
+    latest=\$(apk search -e fwupd)
+    if ! grep -q \$latest /etc/profile.d/fwupd.sh; then
+        sudo cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/efi/fwupd/
+        sudo sed -i "s|^version='.*'|version='\$latest'|" /etc/profile.d/fwupd.sh
+    fi
+}
+EOF
 
 }
 
@@ -1710,27 +1639,22 @@ options     $disk
 EOF
     fi
 
-    if [ -f /usr/libexec/fwupd/efi/fwupdx64.efi ]; then
+    if [ -f /boot/fwupd/efi/fwupdx64.efi ]; then
         echo ">>> adding fwupd to gummiboot"
-        mkdir -p /boot/efi/fwupd/
-        cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/efi/fwupd/
         cat > /boot/loader/entries/fwupd.conf <<EOF
 title       firmware-update
-efi         /fwupd/fwupdx64.efi
+efi         /efi/fwupd/fwupdx64.efi
 EOF
     fi
 
     version=$(apk search -e gummiboot)
-
     cat > /etc/profile.d/gummiboot.sh <<EOF
 version='$version'
 gummiboot() {
-    if curl -s -o /dev/null alpinelinux.org; then
-        latest=\$(apk search -e gummiboot)
-        if ! grep -q \$latest /etc/profile.d/gummiboot.sh; then
-            sudo cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
-            sudo sed -i "s|^version='.*'|version='\$latest'|" /etc/profile.d/gummiboot.sh
-        fi
+    latest=\$(apk search -e gummiboot)
+    if ! grep -q \$latest /etc/profile.d/gummiboot.sh; then
+        sudo cp /usr/lib/gummiboot/gummibootx64.efi	/boot/efi/alpineLinux/bootx64.efi
+        sudo sed -i "s|^version='.*'|version='\$latest'|" /etc/profile.d/gummiboot.sh
     fi
 }
 EOF
@@ -1742,10 +1666,10 @@ install_syslinux() {
     echo ">>> installing syslinux"
     apk add syslinux
     extlinux --install /boot
+    dd bs=440 conv=notrunc count=1 if=/usr/share/syslinux/gptmbr.bin of=$drive
 
     mkdir -p /boot/efi/syslinux/
     cp /usr/share/syslinux/efi64/* /boot/efi/syslinux/
-    cp /boot/extlinux.conf /boot/efi/syslinux/syslinux.cfg
     cp /usr/share/syslinux/efi64/syslinux.efi /boot/efi/syslinux/bootx64.efi
     mv /boot/efi/syslinux/*.efi /boot/efi/syslinux/bootx64.efi
 
@@ -1756,8 +1680,8 @@ install_syslinux() {
     cat > /boot/extlinux.conf <<EOF
 timeout 1
 prompt 1
-MENU TITLE alpineLinux Boot Menu
-MENU AUTOBOOT booting in # seconds
+MENU TITLE 'a l p i n e  L i n u x'
+MENU AUTOBOOT 'booting in # seconds'
 default 'alpineLinux LTS'
 EOF
 
@@ -1786,7 +1710,7 @@ label 'alpineLinux LTS'
 EOF
     fi
 
-    update-extlinux
+    cp /boot/extlinux.conf /boot/efi/syslinux/syslinux.cfg
 
 }
 
@@ -1987,13 +1911,113 @@ install_clover() {
 
 }
 
+custom_commands() {
+
+    echo ">>> adding custom commands"
+    cat > /etc/profile.d/commands.sh <<EOF
+PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
+export QT_IM_MODULE=ibus
+export GTK_IM_MODULE=ibus
+export XMODIFIERS=@im=ibus
+search() {
+    apk search
+}
+install() {
+    sudo apk add
+}
+remove() {
+    sudo apk del
+}
+c() {
+    clear all
+}
+disk() {
+    lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
+}
+EOF
+
+    if [ -f /usr/bin/yt-dlp ]; then
+    cat >> /etc/profile.d/commands.sh <<EOF
+youtube() {
+    yt-dlp -o '~/%(title)s.%(ext)s' -f 'bv[vcodec~="^((he|a)vc|h26[45])"][height<=1080][fps<=60]+ba' --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:'-ss 00:00:00 -to 03:00:00'
+}
+EOF
+    fi
+
+    cat >> /etc/profile.d/commands.sh <<EOF
+update() {
+    if curl -s -o /dev/null alpinelinux.org; then
+        echo ">>> updating alpineLinux packages"
+        if [ -f /lib/apk/db/lock ]; then
+            sudo rm /lib/apk/db/lock
+        fi
+        sudo apk fix
+        sudo apk update
+        sudo apk upgrade
+EOF
+
+    if [ -f /etc/profile.d/flatpak.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+        flatpak_update
+EOF
+    fi
+
+    if [ -f /etc/profile.d/google-chrome.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+        google_update
+EOF
+    fi
+
+    if [ -f /etc/profile.d/zfs.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+        zfs-install
+EOF
+    fi
+
+    if [ -f /etc/profile.d/nvidia.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+        nvidia
+EOF
+    fi
+
+    if [ -f /etc/profile.d/trex.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+        update_trex
+EOF
+    fi
+
+    if [ -f /etc/profile.d/bootloader.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+        bootloader
+EOF
+    fi
+
+    if [ -f /usr/bin/fwupdmgr ]; then
+    cat >> /etc/profile.d/commands.sh <<EOF
+        fwupdmgr get-devices
+        fwupdmgr refresh
+        fwupdmgr get-updates
+        fwupdmgr update
+        update-firmware
+EOF
+    fi
+
+    cat >> /etc/profile.d/commands.sh <<EOF
+    fi
+}
+EOF
+
+}
+
 finish() {
+
+    custom_commands
 
     echo ">>> configuring extlinux"
     sed -i "s|overwrite=1|overwrite=0|" /etc/update-extlinux.conf
     sed -i "s|root=.*|root=$(blkid $rootDrive -o export | grep ^UUID=)|" /etc/update-extlinux.conf
 
-    echo ">>> removing un-needed packages"
+    echo ">>> cleaning packages"
     apk del *-doc
     if ! grep -q syslinux /root/list; then
         apk del syslinux
