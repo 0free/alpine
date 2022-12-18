@@ -560,6 +560,7 @@ setup_drive() {
 
     echo "bootDrive=$bootDrive" >> /root/list
     echo "swapDrive=$swapDrive" >> /root/list
+    echo "swapSize=$swapSize" >> /root/list
     echo "rootDrive=$rootDrive" >> /root/list
 
     echo ">>> creating root filesystem"
@@ -728,7 +729,9 @@ set_fstab() {
 
     echo "$(blkid "$bootDrive" -o export | grep ^UUID=) /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0" >> /mnt/etc/fstab
 
-    echo "$(blkid $swapDrive -o export | grep ^UUID=) none swap sw 0 0" >> /mnt/etc/fstab
+    if grep -q swapSize /root/list; then
+        echo "$(blkid $swapDrive -o export | grep ^UUID=) none swap sw 0 0" >> /mnt/etc/fstab
+    fi
 
 }
 
@@ -747,14 +750,12 @@ install_linux() {
     if grep -q qemu /root/list; then
         list='linux-virt'
         if grep -q zfs /root/list; then
-            list+=' zfs-virt zfs zfs-openrc zfs-libs zfs-udev'
+            list+=' zfs-virt'
         fi
     else
+        list='linux-lts linux-edge'
         if grep -q zfs /root/list; then
-            list='linux-lts'
-            list+=' zfs-lts zfs zfs-openrc zfs-libs zfs-udev'
-        else
-            list='linux-lts linux-edge'
+            list+=' zfs-lts'  
         fi
         list+=' amd-ucode intel-ucode'
         list+=' linux-firmware-intel'
@@ -767,6 +768,10 @@ install_linux() {
         list+=' linux-firmware-rtl_bt'
         list+=' linux-firmware-rtl_nic'
         list+=' linux-pam'
+    fi
+
+    if grep -q zfs /root/list; then
+        list+=' zfs zfs-openrc zfs-libs zfs-udev'
     fi
 
     echo ">>> installing linux"
@@ -864,7 +869,6 @@ create_user() {
     if grep -q zfs /root/list; then
         zfs allow $user create,mount,mountpoint,snapshot $pool
     fi
-
     mkdir -p $H/.config/autostart/
 
 }
@@ -873,6 +877,7 @@ setup_desktop() {
 
     enable_services
     configure_alpine
+    custom_commands
     custom_kernel
 
     if grep -q zfs /root/list; then
@@ -1069,13 +1074,13 @@ EOF
     sed -i 's|ENABLED=no|ENABLED=yes|' /etc/ufw/ufw.conf
 
     if grep -q gnome /root/list; then
-        cat > /etc/profile.d/gnome.sh <<EOF
+        if [ ! -f $H/dconf-settings.ini ]; then
+            cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
     dconf load / < ~/dconf-settings.ini
     rm ~/dconf-settings.ini
 fi
 EOF
-        if [ ! -f $H/dconf-settings.ini ]; then
             echo ">>> downloading gnome dconf-settings"
             curl -o $H/dconf-settings.ini -LO raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
         fi
@@ -1097,35 +1102,16 @@ EOF
     chmod -R 700 $H/
     chmod -R 700 $H/.config/
 
-    cat > /etc/profile.d/custom.sh <<EOF
+}
+
+custom_commands() {
+
+    echo ">>> adding custom commands"
+    cat > /etc/profile.d/commands.sh <<EOF
 PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
-update() {
-    echo ">>> updating alpineLinux packages"
-    if [ -f /lib/apk/db/lock ]; then
-        sudo rm /lib/apk/db/lock
-    fi
-    sudo apk fix
-    sudo apk update
-    sudo apk upgrade
-    if [ -f /etc/profile.d/flatpak.sh ]; then
-        flatpak_update
-    fi
-    if [ -f /etc/profile.d/google-chrome.sh ]; then
-        google_update
-    fi
-    if [ -f /etc/profile.d/nvidia.sh ]; then
-        nvidia
-    fi
-    if [ -f /etc/profile.d/bootloader.sh ]; then
-        bootloader
-    fi
-    if [ -f /etc/profile.d/trex.sh ]; then
-        update_trex
-    fi
-}
 search() {
     apk search
 }
@@ -1136,19 +1122,80 @@ remove() {
     sudo apk del
 }
 c() {
-    clear
+    clear all
 }
 disk() {
     lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
 }
+EOF
+
+    if [ -f /usr/bin/fwupdmgr ]; then
+    cat >> /etc/profile.d/commands.sh <<EOF
 fwupd() {
     fwupdmgr get-devices
     fwupdmgr refresh
     fwupdmgr get-updates
     fwupdmgr update
 }
+EOF
+    fi
+
+    if [ -f /usr/bin/yt-dlp ]; then
+    cat >> /etc/profile.d/commands.sh <<EOF
 youtube() {
     yt-dlp -o '~/%(title)s.%(ext)s' -f 'bv[vcodec~="^((he|a)vc|h26[45])"][height<=1080][fps<=60]+ba' --merge-output-format mp4 --downloader ffmpeg --external-downloader ffmpeg --external-downloader-args ffmpeg:'-ss 00:00:00 -to 03:00:00'
+}
+EOF
+    fi
+
+    cat >> /etc/profile.d/commands.sh <<EOF
+update() {
+    echo ">>> updating alpineLinux packages"
+    if [ -f /lib/apk/db/lock ]; then
+        sudo rm /lib/apk/db/lock
+    fi
+    sudo apk fix
+    sudo apk update
+    sudo apk upgrade
+EOF
+
+    if [ -f /etc/profile.d/flatpak.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+    flatpak_update
+EOF
+    fi
+
+    if [ -f /etc/profile.d/google-chrome.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+    google_update
+EOF
+    fi
+
+    if [ -f /etc/profile.d/zfs.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+    zfs-install
+EOF
+    fi
+
+    if [ -f /etc/profile.d/nvidia.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+    nvidia
+EOF
+    fi
+
+    if [ -f /etc/profile.d/bootloader.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+    bootloader
+EOF
+    fi
+
+    if [ -f /etc/profile.d/trex.sh ]; then
+        cat >> /etc/profile.d/commands.sh <<EOF
+    update_trex
+EOF
+    fi
+
+    cat >> /etc/profile.d/commands.sh <<EOF
 }
 EOF
 
@@ -1211,7 +1258,10 @@ EOF
 
 build_zfs() {
 
-    cat > /etc/profile.d/zfs-install.sh <<EOF
+    version=$(apk search -e zfs-src)
+
+    cat > /etc/profile.d/zfs.sh <<EOF
+version='$version'
 zfs-install() {
     echo ">>> installing zfs-src"
     depend='akms zfs-src installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
@@ -1224,7 +1274,10 @@ zfs-install() {
     cd /usr/src/zfs/ && ldconfig
     cd /usr/src/zfs/ && depmod
     cd /root/
-    echo ">>> deleting un-needed dependencies"
+    echo '>>> building kernel modules'
+    sudo akms install all
+    sudo sed -i "s|^version='.*'|version='\$(apk search -e zfs-src)'|" /etc/profile.d/nvidia.sh
+    echo ">>> cleaning packages"
     apk del \$depend
 
 }
@@ -1239,8 +1292,8 @@ install_nvidia() {
     cat > /etc/profile.d/nvidia.sh <<EOF
 version='$version'
 nvidia() {
-    if curl -s -o /dev/null alpinelinux.org; then
-        if find /lib/modules/ -type f -name nvidia.ko.gz | grep -q nvidia; then
+    if find /lib/modules/ -type f -name nvidia.ko.gz | grep -q nvidia; then
+        if curl -s -o /dev/null alpinelinux.org; then
             if ! grep -q \$(apk search -e nvidia-src) /etc/profile.d/nvidia.sh; then
                 install_modules
             fi
@@ -1253,10 +1306,10 @@ install_modules() {
     echo ">>> installing nvidia-src"
     depend='nvidia-src akms linux-lts-dev linux-edge-dev'
     apk add \$depend 
-    echo '>>> building nvidia kernel modules'
+    echo '>>> building kernel modules'
     sudo akms install all
     sudo sed -i "s|^version='.*'|version='\$(apk search -e nvidia-src)'|" /etc/profile.d/nvidia.sh
-    echo ">>> deleting un-needed dependencies"
+    echo ">>> cleaning packages"
     apk del \$depend
 }
 EOF
