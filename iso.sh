@@ -58,7 +58,7 @@ profile_linux() {
         btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
         dbus dbus-libs dbus-openrc dbus-x11
         dosfstools e2fsprogs exfatprogs f2fs-tools gptfdisk hfsprogs jfsutils lvm2 mmc-utils mtools ntfs-3g ntfs-3g-progs sfdisk sgdisk squashfs-tools udftools udisks2 udisks2-bash-completion xfsprogs
-        efibootmgr
+        efibootmgr efivar-libs
         elogind elogind-bash-completion elogind-openrc
         ethtool ethtool-bash-completion
         eudev eudev-libs eudev-openrc
