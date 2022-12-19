@@ -1373,6 +1373,7 @@ EOF
 
 create_iso() {
 
+    echo "adding iso script"
     cat > /etc/profile.d/iso.sh << EOF
 iso() {
     if curl -s -o /dev/null alpinelinux.org; then
@@ -1386,8 +1387,8 @@ EOF
 
 openwrt() {
 
+    echo ">>> adding openwrt script"
     version=$(apk search -e musl-dev)
-
     cat > /etc/profile.d/openwrt.sh << EOF
 version='$version'
 openwrt() {
@@ -1450,15 +1451,9 @@ make_initramfs() {
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
-    lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
-    edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
-    virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
-
-    for k in lts edge virt; do
-        if [ -f /boot/vmlinuz-$k ]; then
-            echo ">>> building linux $k initial ramdisk"
-            mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-$k $k
-        fi
+    for k in $(ls /lib/modules/); do
+        echo ">>> building linux-$k initial ramdisk"
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-$(echo $k | sed 's|[0-9.-]||g') $k
     done
 
     mkdir -p /boot/efi/
