@@ -1168,9 +1168,13 @@ kernel() {
     cd ~
     echo ">>> installing Linux-\$kernel"
     installkernel \$kernel ~/linux-\$kernel/arch/x86/boot/bzImage ~/linux-\$kernel/System.map /boot/
+    if [ -f /boot/vmlinuz ]; then
+        echo ">>> building linux-\$kernel initial ramdisk"
+        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs \$kernel
+    fi
     echo ">>> deleting Linux-\$kernel source"
     rm -r ~/Linux-\$kernel/
-    echo ">>> deleting un-needed dependencies"
+    echo ">>> cleaning packages"
     apk del \$depend
 }
 EOF
@@ -1458,30 +1462,16 @@ make_initramfs() {
     echo ">>> configuring mkinitfs"
     echo "features=\"$list\"" > /etc/mkinitfs/mkinitfs.conf
 
-    kernel_lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
-    kernel_edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
-    kernel_virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
+    lts=$(echo $(apk search -e linux-lts | sed 's|linux-lts-||' | sed 's|r||')-lts)
+    edge=$(echo $(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
+    virt=$(echo $(apk search -e linux-virt | sed 's|linux-virt-||' | sed 's|r||')-virt)
 
-    mkdir -p /lib/modules/$kernel_virt
-    mkdir -p /lib/modules/$kernel_edge
-    mkdir -p /lib/modules/$kernel_lts
-
-    if [ -f /boot/vmlinuz ]; then
-        echo ">>> building linux-$kernel initial ramdisk"
-        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs $kernel
-    fi
-    if [ -f /boot/vmlinuz-virt ]; then
-        echo ">>> building linux VirtualMachine initial ramdisk"
-        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-virt $kernel_virt
-    fi
-    if [ -f /boot/vmlinuz-lts ]; then
-        echo ">>> building linux LTS initial ramdisk"
-        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-lts $kernel_lts
-    fi
-    if [ -f /boot/vmlinuz-edge ]; then
-        echo ">>> building linux edge initial ramdisk"
-        mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-edge $kernel_edge
-    fi
+    for k in lts edge virt; do
+        if [ -f /boot/vmlinuz-$k ]; then
+            echo ">>> building linux $k initial ramdisk"
+            mkinitfs -b / -c /etc/mkinitfs/mkinitfs.conf -f /etc/fstab -o /boot/initramfs-$k $k
+        fi
+    done
 
     mkdir -p /boot/efi/
 
@@ -1669,7 +1659,6 @@ install_syslinux() {
 
     mkdir -p /boot/efi/syslinux/
     cp /usr/share/syslinux/efi64/* /boot/efi/syslinux/
-    cp /usr/share/syslinux/efi64/syslinux.efi /boot/efi/syslinux/bootx64.efi
     mv /boot/efi/syslinux/*.efi /boot/efi/syslinux/bootx64.efi
 
     echo ">>> configuring extlinux"
@@ -1835,7 +1824,7 @@ EOF
 
     if [ -f /boot/initramfs ]; then
         cat >> /boot/efi/refind/refind.conf <<EOF
-menuentry "alpine Linux edge" {
+menuentry "alpine Linux" {
     icon /EFI/refind/icons/os_linux.png
     volume $uuid
     loader /vmlinuz
