@@ -1236,7 +1236,6 @@ install_flatpak() {
     apk add flatpak flatpak-bash-completion xdg-user-dirs
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     adduser $user flatpak
-    xdg-user-dirs-update
 
     cat > /etc/profile.d/flatpak.sh <<EOF
 flatpak-update() {
@@ -1273,8 +1272,8 @@ install_google_chrome() {
     curl -o $H/google-chrome.rpm -LO $url
 
     echo ">>> installing google-chrome"
-    rpm2cpio ~/google-chrome.rpm | cpio -imdv
-    rm ~/google-chrome.rpm
+    rpm2cpio $H/google-chrome.rpm | cpio -imdv
+    rm $H/google-chrome.rpm
     rm /etc/cron.daily/google-chrome
 
     echo ">>> configuring google-chrome"
