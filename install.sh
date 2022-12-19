@@ -667,12 +667,13 @@ mount_boot() {
 install_base() {
 
     echo ">>> creating repositories"
+    url='https://dl-cdn.alpinelinux.org/alpine'
     cat > /etc/apk/repositories <<EOF
-https://dl-cdn.alpinelinux.org/alpine/edge/main
-https://dl-cdn.alpinelinux.org/alpine/edge/community
-https://dl-cdn.alpinelinux.org/alpine/edge/testing
-#https://dl-cdn.alpinelinux.org/alpine/latest-stable/main
-#https://dl-cdn.alpinelinux.org/alpine/latest-stable/community
+$url/edge/main
+$url/edge/community
+$url/edge/testing
+#$url/latest-stable/main
+#$url/latest-stable/community
 EOF
 
     echo ">>> installing alpine-base"
@@ -703,8 +704,6 @@ set_network() {
 nameserver 94.140.14.49
 nameserver 94.140.14.59
 nameserver 10.0.254.3
-nameserver 1.0.0.1
-nameserver 8.8.8.8
 EOF
 
     echo ">>> adding interfaces"
@@ -775,7 +774,7 @@ install_linux() {
     fi
 
     echo ">>> installing linux"
-    apk add --root=/mnt/ linux-firmware-none kexec-tools
+    apk add --root=/mnt/ linux-firmware-none
     apk add --root=/mnt/ $list
 
 }
@@ -786,9 +785,8 @@ install_packages() {
     packages_list
 
     list=''
-    for i in ${!packages[@]}; do
-        list+=${packages[$i]}
-        list+=' '
+    for p in ${packages[@]}; do
+        list+="$p "
     done
     echo ">>> installing packages"
     apk add --root=/mnt/ $list
@@ -802,9 +800,6 @@ set_timezone() {
     if [ -f /mnt/usr/share/zoneinfo/$timezone ]; then
         install -Dm 0644 /mnt/usr/share/zoneinfo/$timezone /mnt/etc/localtime
         echo $timezone > /mnt/etc/timezone
-    else
-        read -rp " --- timezone Asia/Muscat: " timezone
-        set_timezone
     fi
 
 }
@@ -826,8 +821,7 @@ change_root() {
 
     echo ">>> changing root"
     echo '' > /mnt/root/chroot
-    dir=(proc dev sys)
-    for d in ${dir[@]}; do
+    for d in proc dev sys; do
         mount --bind /$d/ /mnt/$d/
     done
     chroot /mnt/ /bin/bash /root/install.sh
@@ -945,11 +939,10 @@ enable_services() {
     rc-update -q add bootmisc boot
     rc-update -q add syslog boot
     rc-update -q add networking boot
-    rc-update -q add urandom boot
 
     if grep -q zfs /root/list; then
-        rc-update -q add zfs-import boot
         rc-update -q add zfs-mount sysinit
+        rc-update -q add zfs-import boot
         rc-update -q add zfs-share boot
         rc-update -q add zfs-zed boot
         rc-update -q add zfs-load-key boot
@@ -1021,9 +1014,20 @@ configure_alpine() {
     sed -i 's|rc_tty_number=.*|rc_tty_number=0|' /etc/rc.conf
 
     echo ">>> configuring alpineLinux"
-
     if [ -f /etc/profile.d/color_prompt.sh.disabled ]; then
         mv /etc/profile.d/color_prompt.sh.disabled /etc/profile.d/color_prompt.sh
+    fi
+
+    if [ -d /etc/NetworkManager/ ]; then
+        cat > /etc/NetworkManager/NetworkManager.conf <<EOF
+[main]
+dhcp=internal
+plugins=ifupdown,keyfile
+[ifupdown]
+managed=true
+[device]
+wifi.backend=iwd
+EOF
     fi
 
     echo ">>> setting locales"
@@ -1040,18 +1044,6 @@ EOF
     cat > /etc/default/locale <<EOF
 LANG=en_US.UTF-8
 EOF
-
-    if [ -d /etc/NetworkManager/ ]; then
-        cat > /etc/NetworkManager/NetworkManager.conf <<EOF
-[main]
-dhcp=internal
-plugins=ifupdown,keyfile
-[ifupdown]
-managed=true
-[device]
-wifi.backend=iwd
-EOF
-    fi
 
     if ! grep -q snd_seq /etc/modules; then
         echo snd_seq >> /etc/modules
@@ -1080,14 +1072,14 @@ EOF
 
     if grep -q gnome /root/list; then
         if [ ! -f $H/dconf-settings.ini ]; then
+            echo ">>> downloading gnome dconf-settings"
+            curl -o $H/dconf-settings.ini -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
             cat > /etc/profile.d/gnome.sh <<EOF
 if [ -f ~/dconf-settings.ini ]; then
     dconf load / < ~/dconf-settings.ini
     rm ~/dconf-settings.ini
 fi
 EOF
-            echo ">>> downloading gnome dconf-settings"
-            curl -o $H/dconf-settings.ini -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
         fi
     fi
 
@@ -1184,7 +1176,6 @@ EOF
 build_zfs() {
 
     version=$(apk search -e zfs-src)
-
     cat > /etc/profile.d/zfs.sh <<EOF
 version='$version'
 zfs-install() {
@@ -1214,7 +1205,6 @@ EOF
 install_nvidia() {
 
     version=$(apk search -e nvidia-src)
-
     cat > /etc/profile.d/nvidia.sh <<EOF
 version='$version'
 nvidia() {
@@ -1255,9 +1245,9 @@ flatpak-update() {
 }
 EOF
 
-    echo ">>> installing google-chrome from flatpak"
+    echo ">>> installing google-chrome from flathub"
     flatpak install -y flathub com.google.Chrome
-    echo ">>> adding access for google-chrome"
+    echo ">>> adding access to google-chrome"
     flatpak override com.google.Chrome --filesystem=$H/
     flatpak override com.google.Chrome --filesystem=/media/
 
@@ -1309,7 +1299,7 @@ google-update() {
         sudo sed -i "s|^version='.*'|version='\$current'|" /etc/profile.d/google-chrome.sh
         XDG_ICON_RESOURCE=\$(which xdg-icon-resource 2> /dev/null || true)
         for icon in /opt/google/chrome/product_logo_*.png; do
-            size="${icon##*/product_logo_}"
+            size="\${icon##*/product_logo_}"
             \$XDG_ICON_RESOURCE install --size \${size%%.png} \$icon 'google-chrome'
         done
     fi
@@ -1454,9 +1444,8 @@ make_initramfs() {
     fi
 
     list=''
-    for i in ${!modules[@]}; do
-        list+=${modules[$i]}
-        list+=' '
+    for m in ${modules[@]}; do
+        list+="$m "
     done
 
     echo ">>> configuring mkinitfs"
@@ -1513,7 +1502,6 @@ find_windows() {
 
     echo ">>> looking for Windows"
     drives=($(ls /dev/ | grep -E '^nvme[0-9]n[1-9]$|^sd[a-z]$'))
-
     for d in ${drives[@]}; do
         if ls /dev/ | grep -Eq "$d.*p1|$d.*1"; then
             partitions=($(ls /dev/ | grep -E "$d.*p1|$d.*1"))
@@ -1547,7 +1535,6 @@ firmware_update() {
 
     mkdir -p /boot/efi/fwupd/
     cp /usr/libexec/fwupd/efi/fwupdx64.efi /boot/efi/fwupd/
-
     version=$(apk search -e fwupd)
     cat > /etc/profile.d/fwupd.sh <<EOF
 version='$version'
