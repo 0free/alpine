@@ -687,9 +687,8 @@ EOF
     cp /dev/null /mnt/dev/null
     chmod 0666 /mnt/dev/null
 
-    echo ">>> loading modules"
+    echo ">>> loading efi modules"
     modprobe efivarfs
-    modprobe efi-pstore
 
     set_network
     set_fstab
@@ -821,7 +820,7 @@ change_root() {
 
     echo ">>> changing root"
     echo '' > /mnt/root/chroot
-    for d in proc dev sys; do
+    for d in proc dev sys sys/firmware/efi/efivars; do
         mount --bind /$d/ /mnt/$d/
     done
     chroot /mnt/ /bin/bash /root/install.sh
@@ -900,7 +899,7 @@ setup_desktop() {
 
     make_initramfs
 
-    if lsblk -o mountpoint | grep -q /mnt/boot; then
+    if mountpoint -q /mnt/boot/; then
         setup_bootloader
     fi
 
