@@ -2001,7 +2001,8 @@ finish() {
     find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o -iname *.docbook \) -type f -exec rm {} \;
 
     echo ">>> installation is completed"
-    echo '' > /reboot
+    echo $filesystem > /reboot
+    exit 0
 
 }
 
@@ -2012,25 +2013,21 @@ if [ -f /mnt/lib/apk/db/lock ]; then
 fi
 
 if [ -f /mnt/reboot ]; then
-    if grep -q zfs /root/list; then
-        umount_zfs=''
-    fi
     echo ">>> cleaning /root/"
     rm -rf /mnt/root/.*
     rm -rf /mnt/root/*
     echo ">>> un-mounting"
     for d in /mnt/boot/ /mnt/sys/ /mnt/dev/ /mnt/proc/; do
         if mountpoint -q $d; then
-            fuser -km $d
-            umount $d
+            umount -Rfl $d
         fi
     done
-    if [[ -n $umount_zfs ]]; then
+    if grep -q zfs /mnt/reboot; then
         echo ">>> un-mounting ZFS pool"
         zfs umount -a
         zpool export -a
     else
-        umount /mnt/
+        umount -Rfl /mnt/
     fi
     echo ">>> rebooting"
     reboot -f
