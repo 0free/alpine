@@ -1989,10 +1989,6 @@ finish() {
 
     custom_commands
 
-    echo ">>> configuring extlinux"
-    sed -i "s|overwrite=1|overwrite=0|" /etc/update-extlinux.conf
-    sed -i "s|root=.*|root=$(blkid $rootDrive -o export | grep ^UUID=)|" /etc/update-extlinux.conf
-
     echo ">>> cleaning packages"
     apk del *-doc
     if ! grep -q syslinux /root/list; then
