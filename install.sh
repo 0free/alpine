@@ -2016,7 +2016,8 @@ if [ -f /mnt/reboot ]; then
         umount_zfs=''
     fi
     echo ">>> cleaning /root/"
-    rm -r /mnt/root/*
+    rm -rf /mnt/root/.*
+    rm -rf /mnt/root/*
     echo ">>> un-mounting"
     for d in /mnt/boot/ /mnt/sys/ /mnt/dev/ /mnt/proc/; do
         if mountpoint -q $d; then
@@ -2024,11 +2025,11 @@ if [ -f /mnt/reboot ]; then
             umount $d
         fi
     done
-    if [[ $umount_zfs ]]; then
+    fuser -km /mnt/
+    if [[ -n $umount_zfs ]]; then
         zfs umount -a
         zpool export -a
     else
-        fuser -km /mnt/
         umount /mnt/
     fi
     echo ">>> rebooting"
