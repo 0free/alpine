@@ -2020,7 +2020,9 @@ if [ -f /mnt/root/reboot ]; then
     rm -r /mnt/root/*
     echo ">>> un-mounting"
     for d in /mnt/boot/ /mnt/sys/ /mnt/dev/ /mnt/proc/; do
-        umount -Rf $d
+        if mountpoint -q $d; then
+            umount -Rf $d
+        fi
     done
     if [[ $umount_zfs ]]; then
         zfs umount -a
