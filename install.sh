@@ -2001,7 +2001,7 @@ finish() {
     find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o -iname *.docbook \) -type f -exec rm {} \;
 
     echo ">>> installation is completed"
-    echo '' > $H/reboot
+    echo '' > /reboot
 
 }
 
@@ -2026,6 +2026,7 @@ if [ -f /mnt/reboot ]; then
         fi
     done
     if [[ -n $umount_zfs ]]; then
+        echo ">>> un-mounting ZFS pool"
         zfs umount -a
         zpool export -a
     else
