@@ -2013,19 +2013,23 @@ if [ -f /mnt/lib/apk/db/lock ]; then
 fi
 
 if [ -f /mnt/root/reboot ]; then
-    rm /mnt/root/install.sh
-    rm /mnt/root/reboot
-    echo ">>> un-mounting & reboot"
-    dir=(/mnt/boot/ /mnt/sys/ /mnt/dev/ /mnt/proc/)
-    for d in ${dir[@]}; do
-        umount $d
-    done
-    umount -Rf /mnt/
     if grep -q zfs /root/list; then
+        umount_zfs=''
+    fi
+    echo ">>> cleaning /root/"
+    rm -r /mnt/root/*
+    echo ">>> un-mounting"
+    for d in /mnt/boot/ /mnt/sys/ /mnt/dev/ /mnt/proc/; do
+        umount -Rf $d
+    done
+    if [[ $umount_zfs ]]; then
         zfs umount -a
         zpool export -a
+    else
+        umount -Rf /mnt/
     fi
-    reboot
+    echo ">>> rebooting"
+    reboot -f
 elif [ -f /mnt/root/chroot ]; then
     if [ -f /mnt/root/list ]; then
         cp /mnt/root/list /root/list
@@ -2045,7 +2049,7 @@ else
         if [ -d /boot/efi/ ]; then
             setup_bootloader
         elif [[ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]]; then
-            user=$(ls /home)
+            user=$(ls /home/)
             H="/home/$user"
             setup_desktop
         else
