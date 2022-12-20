@@ -2001,8 +2001,7 @@ finish() {
     find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o -iname *.docbook \) -type f -exec rm {} \;
 
     echo ">>> installation is completed"
-    echo '' > /root/reboot
-    exit 0
+    echo '' > /reboot
 
 }
 
@@ -2012,7 +2011,7 @@ if [ -f /mnt/lib/apk/db/lock ]; then
     rm /mnt/lib/apk/db/lock
 fi
 
-if [ -f /mnt/root/reboot ]; then
+if [ -f /mnt/reboot ]; then
     if grep -q zfs /root/list; then
         umount_zfs=''
     fi
