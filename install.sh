@@ -2021,14 +2021,16 @@ if [ -f /mnt/root/reboot ]; then
     echo ">>> un-mounting"
     for d in /mnt/boot/ /mnt/sys/ /mnt/dev/ /mnt/proc/; do
         if mountpoint -q $d; then
-            umount -Rf $d
+            fuser -km $d
+            umount $d
         fi
     done
     if [[ $umount_zfs ]]; then
         zfs umount -a
         zpool export -a
     else
-        umount -Rf /mnt/
+        fuser -km /mnt/
+        umount /mnt/
     fi
     echo ">>> rebooting"
     reboot -f
