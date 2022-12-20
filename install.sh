@@ -2001,8 +2001,8 @@ finish() {
     find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o -iname *.docbook \) -type f -exec rm {} \;
 
     echo ">>> installation is completed"
-    echo $filesystem > /reboot
-    exit 0
+    cp /root/list /reboot
+    exit
 
 }
 
