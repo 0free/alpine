@@ -886,7 +886,10 @@ setup_desktop() {
         install_nvidia
     fi
 
-    install_flatpak
+    if ! grep server /root/list; then
+        install_flatpak
+    fi
+
     install_google_chrome
 
     if grep -q miner /root/list; then
@@ -1993,7 +1996,7 @@ finish() {
     echo ">>> cleaning packages"
     apk del *-doc
     if ! grep -q syslinux /root/list; then
-        apk del syslinux
+        apk del syslinux*
     fi
     if ! grep -q grub /root/list; then
         apk del grub*
