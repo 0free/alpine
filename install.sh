@@ -1212,7 +1212,9 @@ install_nvidia() {
 version='$version'
 nvidia() {
     if find /lib/modules/ -type f -name nvidia.ko.gz | grep -q nvidia; then
-        if ! grep -q \$(apk search -e nvidia-src) /etc/profile.d/nvidia.sh; then
+        if grep -q \$(apk search -e nvidia-src) /etc/profile.d/nvidia.sh; then
+            echo ">>> nvidia driver is up-to-date"
+        else
             install_modules
         fi
     else
@@ -1269,7 +1271,7 @@ install_google_chrome() {
     gpg --batch --import $H/google-key.pub
     rm $H/*.pub
 
-    url="dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"
+    url='https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm'
 
     echo ">>> downloading google-chrome-stable"
     curl -o $H/google-chrome.rpm -LO $url
@@ -1290,8 +1292,10 @@ install_google_chrome() {
 version='$version'
 url='$url'
 google-update() {
-    current=\$(curl -s -o /dev/null \$url | head -c96 | cut -c 5-)
+    current=\$(curl -s \$url | head -c96 | cut -c 5-)
     if grep -q \$current /etc/profile.d/google-chrome.sh; then
+        echo ">>> google-chrome is up-to-date"
+    else
         echo ">>> downloading latest google-chrome-stable"
         curl -o ~/google-chrome.rpm -LO \$url
         echo ">>> updating google-chrome"
