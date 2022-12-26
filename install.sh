@@ -6,6 +6,7 @@ pool='rpool'
 hostname='linux'
 user='user'
 password='0000'
+mirror='rsync://uk.alpinelinux.org'
 
 packages_list() {
 
@@ -668,13 +669,12 @@ mount_boot() {
 install_base() {
 
     echo ">>> creating repositories"
-    url='https://dl-cdn.alpinelinux.org/alpine'
     cat > /etc/apk/repositories <<EOF
-$url/edge/main
-$url/edge/community
-$url/edge/testing
-#$url/latest-stable/main
-#$url/latest-stable/community
+$mirror/edge/main
+$mirror/edge/community
+$mirror/edge/testing
+#$mirror/latest-stable/main
+#$mirror/latest-stable/community
 EOF
 
     echo ">>> installing alpine-base"
@@ -985,13 +985,12 @@ enable_services() {
     fi
 
     if grep -q server /root/list; then
+        setup_mariadb
         rc-update -q add mariadb default
         rc-update -q add litespeed default
         rc-update -q add postfix default
         rc-update -q add dovecot default
         rc-update -q add opendkim default
-        mkdir -p /var/mysql && chown -R mysql:mysql /var/mysql
-        mkdir -p /var/log/mysql && chown -R mysql:mysql /var/log/mysql
     fi
 
     rc-update -q add mount-ro shutdown
@@ -1101,6 +1100,18 @@ EOF
     chown -R $user:wheel $H/.config/
     chmod -R 700 $H/
     chmod -R 700 $H/.config/
+
+}
+
+setup_mariadb() {
+
+    echo ">>> setting mariadb"
+    mkdir -p /var/lib/mysql/
+    chown -R mysql:mysql /var/lib/mysql/
+    mkdir -p /var/log/mysql/
+    chown -R mysql:mysql /var/log/mysql/
+    /etc/init.d/mariadb setup
+    /usr/bin/mysql_install_db --default=/mysql.cnf
 
 }
 
