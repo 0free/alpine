@@ -6,7 +6,7 @@ pool='rpool'
 hostname='linux'
 user='user'
 password='0000'
-mirror='rsync://uk.alpinelinux.org'
+mirror='https://uk.alpinelinux.org/alpine'
 
 packages_list() {
 
@@ -54,7 +54,9 @@ packages_list() {
         brotli-libs zstd zlib zip lz4 lzo unzip xz bzip2 gzip
         #disks
         e2fsprogs lvm2 gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
-        udisks2 udisks2-bash-completion 
+        udisks2 udisks2-bash-completion
+        #rsync
+        rsync rsync-openrc
         #network
         networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind
         #firewall
@@ -112,7 +114,6 @@ packages_list() {
             #wireless
             wireless-regdb iwd iwd-openrc
             #network
-            rsync rsync-openrc
             networkmanager-wwan networkmanager-wifi networkmanager-openvpn networkmanager-initrd-generator
         )
     fi
@@ -964,10 +965,10 @@ enable_services() {
     rc-update -q add bluealsa default
     rc-update -q add bluetooth default
     rc-update -q add ufw default
+    rc-update -q add rsyncd default
 
     if ! grep -q qemu /root/list; then
         rc-update -q add iwd default
-        rc-update -q add rsyncd default
         rc-update -q add fwupd default
     fi
 
