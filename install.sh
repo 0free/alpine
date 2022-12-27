@@ -880,7 +880,9 @@ setup_desktop() {
     custom_kernel
 
     if grep -q zfs /root/list; then
-        build_zfs
+        if ! grep qemu /root/list ; then
+            build_zfs
+        fi
     fi
 
     if ! grep -q qemu /root/list; then   
@@ -1207,7 +1209,8 @@ zfs-install() {
         cd /usr/src/zfs/ && depmod
         cd /root/
         echo '>>> building kernel modules'
-        sudo akms install all
+        kernel_edge=$(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
+        sudo akms install -k \$kernel_edge all
         sudo sed -i "s|^version='.*'|version='\$(apk search -e zfs-src)'|" /etc/profile.d/zfs.sh
         echo ">>> cleaning packages"
         apk del \$depend
