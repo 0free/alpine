@@ -1923,8 +1923,10 @@ install() {
 remove() {
     sudo apk del
 }
-c() {
-    clear all
+clean() {
+    sudo apk del grub* *-doc
+    sudo rm -rf /var/tmp/*
+    find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o -iname *.docbook \) -type f -exec rm {} \;
 }
 disk() {
     lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
