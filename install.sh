@@ -1114,7 +1114,7 @@ setup_mariadb() {
     mkdir -p /var/log/mysql/
     chown -R mysql:mysql /var/log/mysql/
     /etc/init.d/mariadb setup
-    /usr/bin/mysql_install_db --default=/mysql.cnf
+    /usr/bin/mysql_install_db --defaults-file=/mysql.cnf
 
 }
 
@@ -1274,32 +1274,31 @@ EOF
 
 install_google_chrome() {
 
-    echo ">>> installing rpm"
-    apk add rpm
-
     echo ">>> installing google-chrome dependencies"
     depend='alsa-lib ca-certificates alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-liberation font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libcurl libc6-compat libdav1d libdrm libevent libexpat libgcc libglibutil libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt libwoff2common mesa-gbm minizip nspr nss opkg opus pango pipewire-libs re2 snappy vulkan-loader wayland-libs-client xdg-utils wget zlib'
     apk add $depend
 
     echo ">>> installing google-signing-key"
-    curl -o $H/google-key.pub -LO dl-ssl.google.com/linux/linux_signing_key.pub
+    curl -o $H/google-key.pub -LO https://dl.google.com/linux/linux_signing_key.pub
     gpg --batch --import $H/google-key.pub
     rm $H/*.pub
 
-    url='https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm'
+    url='https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb'
 
     echo ">>> downloading google-chrome-stable"
-    curl -o $H/google-chrome.rpm -LO $url
+    curl -o $H/google-chrome.deb -LO $url
 
     echo ">>> installing google-chrome"
-    rpm2cpio $H/google-chrome.rpm | cpio -imdv
-    rm $H/google-chrome.rpm
+    tar -xf $H/google-chrome.deb data.tar.xz -C $H/
+    rm $H/google-chrome.deb
+    tar -xf ~/data.tar.xz -C /
     rm /etc/cron.daily/google-chrome
 
     echo ">>> configuring google-chrome"
 	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
 		install -Dm644 /opt/google/chrome/product_logo_${i/x*/}.png /usr/share/icons/hicolor/$i/apps/google-chrome.png
 	done
+    sudo rm /opt/google/chrome/product_logo_*.{png,xpm}
 
     version=$(curl -s -o /dev/null $url | head -c96 | cut -c 5-)
 
@@ -1312,10 +1311,11 @@ google-update() {
         echo ">>> google-chrome is up-to-date"
     else
         echo ">>> downloading latest google-chrome-stable"
-        curl -o ~/google-chrome.rpm -LO \$url
+        curl -o ~/google-chrome.deb -LO \$url
         echo ">>> updating google-chrome"
-        rpm2cpio ~/google-chrome.rpm | sudo cpio -imdv
-        rm ~/google-chrome.rpm
+        tar -xf ~/google-chrome.deb data.tar.xz -C ~/
+        rm ~/google-chrome.deb
+        sudo tar -xf ~/data.tar.xz -C /
         sudo rm /etc/cron.daily/google-chrome
         sudo sed -i "s|^version='.*'|version='\$current'|" /etc/profile.d/google-chrome.sh
         XDG_ICON_RESOURCE=\$(which xdg-icon-resource 2> /dev/null || true)
@@ -1323,6 +1323,7 @@ google-update() {
             size="\${icon##*/product_logo_}"
             \$XDG_ICON_RESOURCE install --size \${size%%.png} \$icon 'google-chrome'
         done
+        sudo rm /opt/google/chrome/product_logo_*.{png,xpm}
     fi
 }
 EOF
@@ -2021,6 +2022,7 @@ finish() {
         apk del grub*
     fi
     echo ">>> cleaning files"
+    rm -rf /var/tmp/*
     find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o -iname *.docbook \) -type f -exec rm {} \;
 
     echo ">>> installation is completed"
