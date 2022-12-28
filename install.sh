@@ -1289,10 +1289,12 @@ install_google_chrome() {
     curl -o $H/google-chrome.deb -LO $url
 
     echo ">>> installing google-chrome"
-    tar -xf $H/google-chrome.deb data.tar.xz -C $H/
+    ar -x $H/google-chrome.deb data.tar.xz
     rm $H/google-chrome.deb
-    tar -xf ~/data.tar.xz -C /
-    rm /etc/cron.daily/google-chrome
+    tar -xf $H/data.tar.xz ./opt/
+    mv $H/opt/google/ /opt/
+    rm -r $h/opt/
+    chown -R root:root /opt/
 
     echo ">>> configuring google-chrome"
 	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
@@ -1313,10 +1315,12 @@ google-update() {
         echo ">>> downloading latest google-chrome-stable"
         curl -o ~/google-chrome.deb -LO \$url
         echo ">>> updating google-chrome"
-        tar -xf ~/google-chrome.deb data.tar.xz -C ~/
+        ar -x ~/google-chrome.deb data.tar.xz
         rm ~/google-chrome.deb
-        sudo tar -xf ~/data.tar.xz -C /
-        sudo rm /etc/cron.daily/google-chrome
+        tar -xf ~/data.tar.xz ./opt/
+        sudo mv ~/opt/google/ /opt/
+        rm -r ~/opt/
+        sudo chown -R root:root /opt/
         sudo sed -i "s|^version='.*'|version='\$current'|" /etc/profile.d/google-chrome.sh
         XDG_ICON_RESOURCE=\$(which xdg-icon-resource 2> /dev/null || true)
         for icon in /opt/google/chrome/product_logo_*.png; do
