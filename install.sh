@@ -1292,9 +1292,13 @@ install_google_chrome() {
     ar -x $H/google-chrome.deb data.tar.xz
     rm $H/google-chrome.deb
     tar -xf $H/data.tar.xz ./opt/
+    tar -xf $H/data.tar.xz ./usr/share/applications/google-chrome.desktop
     mv $H/opt/google/ /opt/
-    rm -r $h/opt/
+    mv $H/usr/share/applications/google-chrome.desktop /usr/share/applications/
+    rm -r $H/opt/
+    rm -r $H/usr/
     chown -R root:root /opt/
+    ln -s /opt/google/chrome/chrome /usr/bin/google-chrome-stable
 
     echo ">>> configuring google-chrome"
 	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
