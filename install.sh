@@ -1307,8 +1307,6 @@ install_google_chrome() {
 	done
     sudo rm /opt/google/chrome/product_logo_*.png
 
-    sed -i -e '|Exec=|i\StartupWMClass=Google-chrome' /usr/share/applications/google-chrome.desktop
-
     version=$(curl -s -o /dev/null $url | head -c96 | cut -c 5-)
 
     cat > /etc/profile.d/google-chrome.sh <<EOF
