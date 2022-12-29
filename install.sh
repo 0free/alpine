@@ -1940,13 +1940,13 @@ clean() {
     find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o -iname *.docbook \) -type f -exec rm {} \;
 EOF
 
-    if grep -q grup /root/list; then
+    if grep -Eq 'grup|syslinux' /root/list; then
         cat > /etc/profile.d/commands.sh <<EOF
-    sudo apk del grub* *-doc
 }
 EOF
     else
         cat > /etc/profile.d/commands.sh <<EOF
+    sudo apk del grub* syslinux* *-doc
 }
 EOF
     fi
