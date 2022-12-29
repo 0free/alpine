@@ -1275,7 +1275,7 @@ EOF
 install_google_chrome() {
 
     echo ">>> installing google-chrome dependencies"
-    depend='alsa-lib ca-certificates alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-liberation font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libcurl libc6-compat libdav1d libdrm libevent libexpat libgcc libglibutil libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxslt libwoff2common mesa-gbm minizip nspr nss opkg opus pango pipewire-libs re2 snappy vulkan-loader wayland-libs-client xdg-utils wget zlib'
+    depend='alsa-lib ca-certificates alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-liberation font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libcurl libc6-compat libdav1d libdrm libevent libexpat libgcc libglibutil libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxscrnsaver libxtst libxslt libwoff2common mesa-gbm minizip nspr nss opus pango pipewire-libs re2 snappy vulkan-loader wayland-libs-client xdg-utils wget zlib'
     apk add $depend
 
     echo ">>> installing google-signing-key"
@@ -1294,6 +1294,7 @@ install_google_chrome() {
     tar -xf $H/data.tar.xz ./opt/
     tar -xf $H/data.tar.xz ./usr/share/applications/google-chrome.desktop
     mv $H/opt/google/ /opt/
+    rm -r /opt/google/chrome/cron/
     mv $H/usr/share/applications/google-chrome.desktop /usr/share/applications/
     rm -r $H/opt/
     rm -r $H/usr/
@@ -1304,7 +1305,9 @@ install_google_chrome() {
 	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
 		install -Dm644 /opt/google/chrome/product_logo_${i/x*/}.png /usr/share/icons/hicolor/$i/apps/google-chrome.png
 	done
-    sudo rm /opt/google/chrome/product_logo_*.{png,xpm}
+    sudo rm /opt/google/chrome/product_logo_*.png
+
+    sed -i -e '|Exec=|i\StartupWMClass=Google-chrome' /usr/share/applications/google-chrome.desktop
 
     version=$(curl -s -o /dev/null $url | head -c96 | cut -c 5-)
 
@@ -1331,7 +1334,7 @@ google-update() {
             size="\${icon##*/product_logo_}"
             \$XDG_ICON_RESOURCE install --size \${size%%.png} \$icon 'google-chrome'
         done
-        sudo rm /opt/google/chrome/product_logo_*.{png,xpm}
+        sudo rm /opt/google/chrome/product_logo_*.png
     fi
 }
 EOF
