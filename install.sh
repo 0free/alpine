@@ -968,6 +968,7 @@ enable_services() {
     rc-update -q add bluetooth default
     rc-update -q add ufw default
     rc-update -q add rsyncd default
+    rc-update -q add agetty default
 
     if ! grep -q qemu /root/list; then
         rc-update -q add iwd default
@@ -976,7 +977,6 @@ enable_services() {
 
     if grep -q gnome /root/list; then
         rc-update -q add gdm default
-        rc-update -q add agetty default
     fi
 
     if grep -q kde /root/list; then
@@ -1932,15 +1932,24 @@ install() {
 remove() {
     sudo apk del
 }
-clean() {
-    sudo apk del grub* *-doc
-    sudo rm -rf /var/tmp/*
-    find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o -iname *.docbook \) -type f -exec rm {} \;
-}
 disk() {
     lsblk -o name,type,mountpoints,size,fsused,fsuse%,uuid,model
 }
+clean() {
+    sudo rm -rf /var/tmp/*
+    find / ! -path /sys/kernel ! -prune \( -iname readme -o -iname *.md -o -iname readme.txt -o -iname license -o -iname license.txt -o -iname *.license -o -iname *.docbook \) -type f -exec rm {} \;
 EOF
+
+    if grep -q grup /root/list; then
+        cat > /etc/profile.d/commands.sh <<EOF
+    sudo apk del grub* *-doc
+}
+EOF
+    else
+        cat > /etc/profile.d/commands.sh <<EOF
+}
+EOF
+    fi
 
     if [ -f /usr/bin/yt-dlp ]; then
     cat >> /etc/profile.d/commands.sh <<EOF
