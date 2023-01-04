@@ -39,7 +39,7 @@ profile_linux() {
    image_ext='iso'
    arch='x86_64'
    hostname='alpine'
-   kernel_cmdline="console=tty0 console=ttyS0,115200"
+   kernel_cmdline='console=tty0 console=ttyS0,115200'
 	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage mitigations=off'
 	initfs_features='ata base bootchart cdrom btrfs zfs xfs ext4 mmc nvme raid scsi squashfs usb virtio'
 	modloop_sign=yes
@@ -51,7 +51,7 @@ profile_linux() {
    kernel_addons='zfs'
    apks="\$apks
       alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
-      alsaconf alsa-lib alsa-tools alsa-tools-gui alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
+      alsaconf alsa-lib alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
       bash bash-completion
       attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
       brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd

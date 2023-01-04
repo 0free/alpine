@@ -52,7 +52,7 @@ EOF
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
-alsaconf alsa-lib alsa-tools alsa-tools-gui alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
+alsaconf alsa-lib alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
 bash bash-completion
 attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
 brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
@@ -122,9 +122,9 @@ if [ -f /etc/dconf-settings.ini ]; then
   dconf load / < /etc/dconf-settings.ini
   rm /etc/dconf-settings.ini
 fi
-PS1='\[\e[31m\]\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\]\[\e[38;5;214m\] \w\[\e[m\]\[\e[31m\]\[\e[m\] \$ '
+export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u@\[\033[1;32m\]\h: \[\e[35m\]$SHELL\[\e[0m\] \[\e[33m\]\w\[\e[0m\]\n\$  \[\033[0m\]'
 install() {
-	if ping -q -c1 alpinelinux.org &>/dev/null; then
+	if curl -s -o /dev/null alpinelinux.org; then
 	    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install.sh && bash install.sh
     else
         echo "no internet"
@@ -140,9 +140,15 @@ rc_add modloop sysinit
 
 rc_add udev sysinit
 rc_add udev-trigger sysinit
-rc_add dbus sysinit
 rc_add udev-settle sysinit
 rc_add udev-postmount sysinit
+
+rc_add dbus sysinit
+
+rc_add procfs boot
+rc_add devfs boot
+rc_add sysfs boot
+rc_add root boot
 
 rc_add hwclock boot
 rc_add modules boot
@@ -150,11 +156,8 @@ rc_add sysctl boot
 rc_add hostname boot
 rc_add bootmisc boot
 rc_add syslog boot
-
 rc_add networking boot
 rc_add local boot
-rc_add dbus boot
-rc_add iwd boot
 
 rc_add spl boot
 rc_add zfs boot
@@ -162,18 +165,20 @@ rc_add efivars boot
 
 rc_add iwd default
 rc_add rsyncd default
-rc_add elogind default
-rc_add polkit default
 rc_add networkmanager default
 rc_add networkmanager-dispatcher default
+rc_add alsa default
 rc_add bluealsa default
 rc_add bluetooth default
+rc_add agetty default
+rc_add elogind default
+rc_add polkit default
 rc_add gdm default
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
 rc_add savecache shutdown
 
-tar -c -C "$tmp" etc | gzip -9n > $HOSTNAME.apkovl.tar.gz
+tar -c -C "$tmp" etc | gzip -9n > "$HOSTNAME".apkovl.tar.gz
 
 #end

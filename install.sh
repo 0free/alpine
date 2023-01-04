@@ -13,7 +13,7 @@ packages_list() {
     packages=(
         #alpine
         alpine-base alpine-baselayout alpine-baselayout-data
-        alpine-conf alpine-keys alpine-release
+        alpine-conf alpine-keys alpine-release apk-tools
         #openrc
         openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
         #busybox
@@ -961,6 +961,7 @@ enable_services() {
     rc-update -q add dmesg sysinit
     rc-update -q add mdev sysinit
     rc-update -q add hwdrivers sysinit
+    rc-update -q add modloop sysinit
 
     rc-update -q add udev sysinit
     rc-update -q add udev-trigger sysinit
@@ -986,6 +987,7 @@ enable_services() {
     rc-update -q add bootmisc boot
     rc-update -q add syslog boot
     rc-update -q add networking boot
+    rc-update -q add local boot
 
     if grep -q zfs /root/list; then
         rc-update -q add zfs-mount sysinit
@@ -1978,7 +1980,7 @@ custom_commands() {
 
     echo ">>> adding custom commands"
     cat > /etc/profile.d/commands.sh <<EOF
-PS1='\[\033[1;36m\]\u\[\033[1;31m\]@\[\033[1;32m\]\h:\[\033[1;35m\]\w\[\033[1;31m\]\$ \[\033[0m\]'
+export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u@\[\033[1;32m\]\h: \[\e[35m\]$SHELL\[\e[0m\] \[\e[33m\]\w\[\e[0m\]\n\$  \[\033[0m\]'
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
