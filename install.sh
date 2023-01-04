@@ -1006,12 +1006,13 @@ enable_services() {
     rc-update -q add networkmanager default
     rc-update -q add networkmanager-dispatcher default
 
+    rc-update -q add agetty.tty1  default
+
     rc-update -q add alsa default
     rc-update -q add bluealsa default
     rc-update -q add bluetooth default
     rc-update -q add ufw default
     rc-update -q add rsyncd default
-    rc-update -q add agetty default
 
     if ! grep -q qemu /root/list; then
         rc-update -q add iwd default

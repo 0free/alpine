@@ -163,7 +163,7 @@ rc_add spl boot
 rc_add zfs boot
 rc_add efivars boot
 
-rc_add agetty.ttyS0 default
+rc_add agetty.tty1 default
 
 rc_add iwd default
 rc_add rsyncd default
