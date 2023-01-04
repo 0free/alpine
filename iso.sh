@@ -39,7 +39,6 @@ profile_linux() {
    image_ext='iso'
    arch='x86_64'
    hostname='alpine'
-   kernel_cmdline='console=tty0 console=ttyS0,115200'
 	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage mitigations=off'
 	initfs_features='ata base bootchart cdrom btrfs zfs xfs ext4 mmc nvme raid scsi squashfs usb virtio'
 	modloop_sign=yes
