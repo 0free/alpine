@@ -96,9 +96,9 @@ zfs zfs-openrc zfs-libs
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
-https://dl-cdn.alpinelinux.org/alpine/edge/main
-https://dl-cdn.alpinelinux.org/alpine/edge/community
-https://dl-cdn.alpinelinux.org/alpine/edge/testing
+https://uk.alpinelinux.org/alpine/edge/main
+https://uk.alpinelinux.org/alpine/edge/community
+https://uk.alpinelinux.org/alpine/edge/testing
 EOF
 
 mkdir -p "$tmp"/etc/gdm

@@ -382,7 +382,7 @@ packages_list() {
 
     fi
 
-    if grep -Eq 'server|workstation'  /root/list; then
+    if grep -Eq 'server|workstation' /root/list; then
         packages+=(
             #php
             phpmyadmin composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
@@ -1267,8 +1267,8 @@ EOF
     echo ">>> installing google-chrome from flathub"
     flatpak install -y flathub com.google.Chrome
     echo ">>> adding access to google-chrome"
-    flatpak override com.google.Chrome --filesystem=$H/
-    flatpak override com.google.Chrome --filesystem=/media/
+    flatpak override com.google.Chrome --filesystem=/home/
+    flatpak override com.google.Chrome --filesystem=/run/media/
 
 }
 
