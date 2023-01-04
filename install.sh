@@ -12,7 +12,8 @@ packages_list() {
 
     packages=(
         #alpine
-        alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release
+        alpine-base alpine-baselayout alpine-baselayout-data
+        alpine-conf alpine-keys alpine-release
         #openrc
         openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
         #busybox
@@ -43,9 +44,14 @@ packages_list() {
         #input
         xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
         #base
-        sudo bash bash-completion binutils fakeroot file fortify-headers g++ gcc libc-dev patch remake-make shadow rsyslog rsyslog-openrc sed attr dialog which grep pciutils usbutils findutils readline lsof less nano curl wget coreutils gawk diffutils autoconf
+        sudo bash bash-completion binutils fakeroot file fortify-headers
+        g++ gcc libc-dev patch remake-make shadow
+        rsyslog rsyslog-openrc sed attr dialog
+        which grep pciutils usbutils findutils readline
+        lsof less nano curl wget coreutils gawk diffutils autoconf
         #util-linux
-        util-linux util-linux-openrc util-linux-login util-linux-misc util-linux-bash-completion
+        util-linux util-linux-openrc util-linux-login
+        util-linux-misc util-linux-bash-completion
         #utilities
         openssl ncurses-dev
         #git
@@ -53,20 +59,27 @@ packages_list() {
         #compression
         brotli-libs zstd zlib zip lz4 lzo unzip xz bzip2 gzip
         #disks
-        e2fsprogs lvm2 gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs xfsprogs hfsprogs exfatprogs f2fs-tools udftools sfdisk sgdisk mmc-utils jfsutils
+        e2fsprogs lvm2 gptfdisk dosfstools mtools ntfs-3g ntfs-3g-progs
+        xfsprogs hfsprogs exfatprogs f2fs-tools
+        udftools sfdisk sgdisk mmc-utils jfsutils
         udisks2 udisks2-bash-completion
         #rsync
         rsync rsync-openrc
         #network
-        networkmanager networkmanager-openrc networkmanager-common networkmanager-bash-completion networkmanager-elogind
+        networkmanager networkmanager-openrc
+        networkmanager-common networkmanager-bash-completion
+        networkmanager-elogind
         #firewall
         ufw ufw-openrc ufw-bash-completion
         iptables iptables-openrc
         #pipewire
-        pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez
+        pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse
+        pipewire-tools
+        pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez
         pipewire-media-session wireplumber
         #alsa
-        alsaconf alsa-lib alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf 
+        alsaconf alsa-lib alsa-utils alsa-utils-openrc
+        alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf 
         #bluetooth
         bluez-alsa bluez-alsa-openrc bluez-alsa-utils
         #intel hda
@@ -105,7 +118,9 @@ packages_list() {
             #firmware
             fwupd fwupd-openrc fwupd-efi
             #mesa
-            mesa mesa-dri-gallium mesa-va-gallium mesa-vdpau-gallium mesa-gl mesa-glapi mesa-egl mesa-gles mesa-gbm
+            mesa mesa-dri-gallium mesa-va-gallium
+            mesa-vdpau-gallium
+            mesa-gl mesa-glapi mesa-egl mesa-gles mesa-gbm
             mesa-vulkan-layers mesa-libd3dadapter9
             #intel GPU
             mesa-vulkan-intel intel-media-driver
@@ -114,14 +129,16 @@ packages_list() {
             #wireless
             wireless-regdb iwd iwd-openrc
             #network
-            networkmanager-wwan networkmanager-wifi networkmanager-openvpn networkmanager-initrd-generator
+            networkmanager-wwan networkmanager-wifi networkmanager-openvpn
+            networkmanager-initrd-generator
         )
     fi
 
     if grep -q gnome /root/list; then
         packages+=(
             #gnome session
-            gdm gdm-openrc mutter mutter-schemas gnome-desktop gnome-desktop-lang gnome-session
+            gdm gdm-openrc mutter mutter-schemas
+            gnome-desktop gnome-desktop-lang gnome-session
             gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus
             gnome-control-center gnome-control-center-bash-completion
             gnome-tweaks gnome-colors-common gsettings-desktop-schemas
@@ -179,7 +196,9 @@ packages_list() {
             #audio
             kpipewire kmix
             #kde
-            kde-cli-tools ki18n kwin kinit kcron kdecoration krecorder kscreen kscreenlocker libkscreen kmenuedit konsole kde-gtk-config khotkeys
+            kde-cli-tools ki18n kwin kinit kcron kdecoration krecorder
+            kscreen kscreenlocker libkscreen kmenuedit konsole
+            kde-gtk-config khotkeys
             #file manager
             dolphin dolphin-plugins kfind
             #text
@@ -194,7 +213,11 @@ packages_list() {
         if grep -q gnome /root/list; then
             packages+=(
                 #gnome apps
-                gnome-software gnome-software-plugin-apk gnome-software-plugin-flatpak gnome-photos gnome-music gnome-clocks gnome-contacts gnome-calculator gnome-maps gnome-logs gnome-remote-desktop gnome-screenshot gnome-boxes gnome-calendar gnome-sound-recorder gnome-font-viewer gnome-colors gnome-bluetooth gnome-podcasts gnome-characters gnome-builder gnome-shortwave getting-things-gnome sushi simple-scan
+                gnome-software gnome-software-plugin-apk gnome-software-plugin-flatpak
+                gnome-photos gnome-music gnome-clocks gnome-contacts gnome-calculator gnome-maps
+                gnome-logs gnome-remote-desktop gnome-screenshot gnome-boxes gnome-calendar
+                gnome-sound-recorder gnome-font-viewer gnome-colors gnome-bluetooth gnome-podcasts
+                gnome-characters gnome-builder gnome-shortwave getting-things-gnome sushi simple-scan
                 #config
                 dconf dconf-bash-completion
                 #web
@@ -212,7 +235,8 @@ packages_list() {
                 #bluetooth
                 blueman
                 #flatpak
-                xdg-desktop-portal xdg-desktop-portal-gnome xdg-desktop-portal-gtk xdg-user-dirs
+                xdg-desktop-portal xdg-desktop-portal-gnome
+                xdg-desktop-portal-gtk xdg-user-dirs
             )
         fi
 
@@ -223,7 +247,10 @@ packages_list() {
                 plasma-camera plasma-videoplayer plasma-phonebook
                 #kde
                 kactivities kactivities-stats kactivitymanagerd ksystemstats
-                shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum kmymoney kdeedu-data kalk rocs calligra marble clip buho vvave communicator qrca step kmousetool krename kcolorchooser kunitconversion
+                shelf knetattach kmail ktorrent kdeconnect akregator kphotoalbum
+                kmymoney kdeedu-data kalk rocs calligra marble clip
+                buho vvave communicator qrca step kmousetool krename
+                kcolorchooser kunitconversion
                 #widgets
                 kconfigwidgets
                 #print
@@ -271,7 +298,9 @@ packages_list() {
             #fonts tools
             font-manager font-viewer
             #office
-            libreoffice-base libreoffice-common libreoffice-writer libreoffice-math libreoffice-calc libreoffice-draw libreoffice-lang-en_us libreoffice-lang-ar
+            libreoffice-base libreoffice-common libreoffice-writer
+            libreoffice-math libreoffice-calc libreoffice-draw
+            libreoffice-lang-en_us libreoffice-lang-ar
             #google
             google-authenticator
             #mail
@@ -311,7 +340,9 @@ packages_list() {
             #printer
             cups cups-openrc cups-pdf bluez-cups
             #driver
-            xinput gkraken ccid solaar razercfg razercfg-gui razergenie openrazer piper
+            xinput gkraken ccid solaar
+            razercfg razercfg-gui razergenie openrazer
+            piper
             #math
             mathjax2
             #finance
@@ -325,7 +356,8 @@ packages_list() {
             #text editor
             kakoune
             #mauikit
-            mauikit mauikit-accounts mauikit-filebrowsing mauikit-imagetools mauikit-texteditor
+            mauikit mauikit-accounts mauikit-filebrowsing
+            mauikit-imagetools mauikit-texteditor
             #bitcoin
             bitcoin bitcoin-openrc
             #game emu
@@ -335,9 +367,11 @@ packages_list() {
             #go
             go
             #android
-            gradle android-tools android-tools-bash-completion go-mtpfs scrcpy scrcpy-bash-completion
+            gradle android-tools android-tools-bash-completion
+            go-mtpfs scrcpy scrcpy-bash-completion
             #iPhone/iPod/mac
-            ifuse ideviceinstaller idevicerestore libirecovery libirecovery-progs libideviceactivation libimobiledevice libimobiledevice-progs
+            ifuse ideviceinstaller idevicerestore libirecovery libirecovery-progs
+            libideviceactivation libimobiledevice libimobiledevice-progs
             #pdf
             corepdf pdfarranger poppler
             #drives
@@ -355,7 +389,8 @@ packages_list() {
             #music server
             navidrome navidrome-openrc
             #youtube
-            ffmpeg yt-dlp yt-dlp-bash-completion pipe-viewer-gtk audiotube tartube youtube-viewer-gtk
+            ffmpeg yt-dlp yt-dlp-bash-completion pipe-viewer-gtk
+            audiotube tartube youtube-viewer-gtk
             #javascript/css
             minify minify-bash-completion
             #photos
@@ -385,7 +420,12 @@ packages_list() {
     if grep -Eq 'server|workstation' /root/list; then
         packages+=(
             #php
-            phpmyadmin composer php82 php82-bcmath php82-bz2 php82-cgi php82-curl php82-common php82-phpdbg php82-dom php82-exif php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv php82-intl php82-litespeed php82-mbstring php82-mysqli php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear php82-session php82-snmp php82-soap php82-xml php82-zip
+            phpmyadmin composer php82 php82-bcmath php82-bz2 php82-cgi
+            php82-curl php82-common php82-phpdbg php82-dom php82-exif
+            php82-fileinfo php82-fpm php82-gd php82-gettext php82-iconv
+            php82-intl php82-litespeed php82-mbstring php82-mysqli
+            php82-mysqlnd php82-opcache php82-openssl php82-phar php82-pear
+            php82-session php82-snmp php82-soap php82-xml php82-zip
         )
     fi
 
@@ -399,7 +439,8 @@ packages_list() {
             mariadb
             #mail
             postfix postfix-openrc postfix-mysql postfix-pcre postfixadmin
-            dovecot dovecot-openrc dovecot-submissiond dovecot-ldap dovecot-lmtpd dovecot-pop3d dovecot-sql dovecot-mysql
+            dovecot dovecot-openrc dovecot-submissiond dovecot-ldap
+            dovecot-lmtpd dovecot-pop3d dovecot-sql dovecot-mysql
             opendkim opendkim-utils
             cyrus-sasl
             #tools
@@ -755,7 +796,7 @@ install_linux() {
     else
         list='linux-lts linux-edge'
         if grep -q zfs /root/list; then
-            list+=' zfs-lts'  
+            list+=' zfs-lts'
         fi
         list+=' amd-ucode intel-ucode'
         list+=' linux-firmware-intel'
@@ -885,7 +926,7 @@ setup_desktop() {
         fi
     fi
 
-    if ! grep -q qemu /root/list; then   
+    if ! grep -q qemu /root/list; then
         install_nvidia
     fi
 
@@ -1136,7 +1177,11 @@ custom_kernel() {
     cat > /etc/profile.d/kernel.sh <<EOF
 kernel() {
     echo ">>> installing required packages to build Linux kernel"
-    depend='bc file fortify-headers g++ gcc kmod libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools btrfs-progs pcmciautils quota-tools ppp nfs-utils procps udev mcelog iptables openssl libcrypto cpio'
+    depend='bc file fortify-headers g++ gcc kmod libc-dev patch
+    remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf
+    bison pahole e2fsprogs jfsutils reiserfsprogs squashfs-tools
+    btrfs-progs pcmciautils quota-tools ppp nfs-utils procps
+    udev mcelog iptables openssl libcrypto cpio'
     apk add \$depend
     echo ">>> getting latest stable Linux kernel version"
     curl -o ~/Makefile -LO "git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/Makefile"
@@ -1198,7 +1243,12 @@ version='$version'
 zfs-install() {
     if ! grep -q \$(apk search -e zfs-src) /etc/profile.d/zfs.sh; then
         echo ">>> installing zfs-src"
-        depend='akms zfs-src installkernel fortify-headers libc-dev patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf bison autoconf automake libtool gawk alien fakeroot dkms libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev libattr1-dev libelf-dev python3 python3-dev python3-setuptools python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
+        depend='akms zfs-src installkernel fortify-headers libc-dev
+        patch remake-make ncurses-dev xz-libs libssl1.1 bc flex libelf
+        bison autoconf automake libtool gawk alien fakeroot dkms
+        libblkid-dev uuid-dev libudev-dev libssl-dev zlib1g-dev libaio-dev
+        libattr1-dev libelf-dev python3 python3-dev python3-setuptools
+        python3-cffi libffi-dev python3-packaging libcurl4-openssl-dev'
         apk add \$depend
         echo ">>> building zfs-src"
         cd /usr/src/zfs/ && sh autogen.sh
@@ -1275,7 +1325,16 @@ EOF
 install_google_chrome() {
 
     echo ">>> installing google-chrome dependencies"
-    depend='alsa-lib ca-certificates alsa-lib aom-libs at-spi2-core brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs flac-libs font-liberation font-opensans fontconfig freetype glib gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0 libatomic libcurl libc6-compat libdav1d libdrm libevent libexpat libgcc libglibutil libjpeg-turbo libpng libpulse libstdc++ libwebp libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes libxkbcommon libxml2 libxrandr libxscrnsaver libxtst libxslt libwoff2common mesa-gbm minizip nspr nss opus pango pipewire-libs re2 snappy vulkan-loader wayland-libs-client xdg-utils wget zlib'
+    depend='alsa-lib ca-certificates alsa-lib aom-libs at-spi2-core
+    brotli-libs cairo cups-libs dbus-libs eudev-libs ffmpeg-libs
+    flac-libs font-liberation font-opensans fontconfig freetype glib
+    gtk+3.0 harfbuzz icu-libs jsoncpp lcms2 libatk-1.0 libatk-bridge-2.0
+    libatomic libcurl libc6-compat libdav1d libdrm libevent libexpat
+    libgcc libglibutil libjpeg-turbo libpng libpulse libstdc++ libwebp
+    libwoff2enc libx11 libxcb libxcomposite libxdamage libxext libxfixes
+    libxkbcommon libxml2 libxrandr libxscrnsaver libxtst libxslt
+    libwoff2common mesa-gbm minizip nspr nss opus pango pipewire-libs
+    re2 snappy vulkan-loader wayland-libs-client xdg-utils wget zlib'
     apk add $depend
 
     echo ">>> installing google-signing-key"
