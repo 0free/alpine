@@ -80,7 +80,6 @@ gdm gdm-openrc mutter mutter-schemas
 gnome-desktop gnome-desktop-lang
 gnome-session gnome-shell gnome-shell-schemas
 gnome-control-center gnome-control-center-bash-completion
-gnome-tweaks gnome-shell-extensions arc-dark-gnome
 gsettings-desktop-schemas
 pinentry-gnome
 pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez pipewire-media-session wireplumber

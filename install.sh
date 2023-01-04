@@ -1006,7 +1006,7 @@ enable_services() {
     rc-update -q add networkmanager default
     rc-update -q add networkmanager-dispatcher default
 
-    rc-update -q add agetty.tty1  default
+    rc-update -q add agetty.tty1 default
 
     rc-update -q add alsa default
     rc-update -q add bluealsa default

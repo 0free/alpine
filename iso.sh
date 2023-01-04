@@ -5,7 +5,7 @@ clear && cd ~
 sudo apk update
 sudo apk upgrade
 sudo apk add build-base busybox fakeroot
-sudo apk add syslinux xorriso squashfs-tools git
+sudo apk add xorriso squashfs-tools git
 sudo apk add alpine-sdk apk-tools alpine-conf
 sudo apk add mtools dosfstools grub grub-efi
 
@@ -78,7 +78,6 @@ profile_linux() {
       gnome-desktop gnome-desktop-lang
       gnome-session gnome-shell gnome-shell-schemas
       gnome-control-center gnome-control-center-bash-completion
-      gnome-tweaks gnome-shell-extensions arc-dark-gnome
       gsettings-desktop-schemas
       pinentry-gnome
       pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez pipewire-media-session wireplumber
