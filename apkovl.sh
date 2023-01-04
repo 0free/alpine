@@ -163,6 +163,8 @@ rc_add spl boot
 rc_add zfs boot
 rc_add efivars boot
 
+rc_add agetty.tty1 default
+
 rc_add iwd default
 rc_add rsyncd default
 rc_add networkmanager default
@@ -170,7 +172,6 @@ rc_add networkmanager-dispatcher default
 rc_add alsa default
 rc_add bluealsa default
 rc_add bluetooth default
-rc_add agetty default
 rc_add elogind default
 rc_add polkit default
 rc_add gdm default
