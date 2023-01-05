@@ -7,7 +7,8 @@ sudo apk upgrade
 sudo apk add build-base busybox fakeroot
 sudo apk add xorriso squashfs-tools git
 sudo apk add alpine-sdk apk-tools alpine-conf
-sudo apk add mtools dosfstools grub grub-efi
+sudo apk add mtools dosfstools
+sudo apk add syslinux grub grub-efi
 
 USER=$(whoami)
 
@@ -42,7 +43,6 @@ profile_linux() {
 	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage mitigations=off'
 	initfs_features='ata base bootchart cdrom btrfs zfs xfs ext4 mmc nvme raid scsi squashfs usb virtio'
 	modloop_sign=yes
-	grub_mod='all_video disk part_gpt part_msdos linux normal configfile search search_label efi_gop fat iso9660 cat echo ls true gzio'
    boot_addons='amd-ucode intel-ucode'
    initrd_ucode='/boot/amd-ucode.img /boot/intel-ucode.img'
    apkovl='./aports/scripts/apkovl.sh'
@@ -68,28 +68,37 @@ profile_linux() {
       iptables iptables-openrc
       iwd iwd-openrc wireless-regdb
       linux-pam
-      linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
+      linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu
+      linux-firmware-i915 linux-firmware-intel linux-firmware-other
+      linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
       mesa mesa-dri-gallium
       musl musl-locales musl-utils
       networkmanager networkmanager-bash-completion networkmanager-common networkmanager-elogind networkmanager-openrc networkmanager-wifi
       openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
       polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
-      gdm gdm-openrc mutter mutter-schemas
-      gnome-desktop gnome-desktop-lang
-      gnome-session gnome-shell gnome-shell-schemas
-      gnome-control-center gnome-control-center-bash-completion
-      gsettings-desktop-schemas
-      pinentry-gnome
       pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez pipewire-media-session wireplumber
-      gnome-terminal gnome-disk-utility gnome-system-monitor gedit
-      nautilus
-      network-manager-applet
-      adwaita-icon-theme hicolor-icon-theme
       udev-init-scripts udev-init-scripts-openrc
       util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
       xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
       xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
       zfs zfs-openrc zfs-libs
+      sddm sddm-openrc sddm-kcm sddm-breeze
+      plasma-desktop plasma-settings plasma-framework
+      plasma-workspace plasma-workspace-lang plasma-workspace-libs
+      plasma-integration plasma-browser-integration
+      plasma-thunderbolt plasma-disks
+      kwrited systemsettings ksysguard polkit-kde-agent-1 konsole
+      breeze-gtk breeze-icons
+      bluedevil powerdevil
+      kwayland
+      plasma-nm
+      iproute2 net-tools
+      kpipewire kmix
+      ki18n kwin kinit kcron kdecoration
+      kscreen kscreenlocker libkscreen
+      kde-gtk-config khotkeys
+      dolphin dolphin-plugins kfind
+      kate kate-common hunspell-en
    "
 }
 EOF

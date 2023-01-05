@@ -70,28 +70,37 @@ ibus ibus-bash-completion
 iptables iptables-openrc
 iwd iwd-openrc wireless-regdb
 linux-pam
-linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu linux-firmware-i915 linux-firmware-intel linux-firmware-other linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
+linux-firmware-amd linux-firmware-amd-ucode linux-firmware-amdgpu
+linux-firmware-i915 linux-firmware-intel linux-firmware-other
+linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
 mesa mesa-dri-gallium
 musl musl-locales musl-utils
 networkmanager networkmanager-bash-completion networkmanager-common networkmanager-elogind networkmanager-openrc networkmanager-wifi
 openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
 polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
-gdm gdm-openrc mutter mutter-schemas
-gnome-desktop gnome-desktop-lang
-gnome-session gnome-shell gnome-shell-schemas
-gnome-control-center gnome-control-center-bash-completion
-gsettings-desktop-schemas
-pinentry-gnome
 pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez pipewire-media-session wireplumber
-gnome-terminal gnome-disk-utility gnome-system-monitor gedit
-nautilus
-network-manager-applet
-adwaita-icon-theme hicolor-icon-theme
 udev-init-scripts udev-init-scripts-openrc
 util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linux-openrc
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
+sddm sddm-openrc sddm-kcm sddm-breeze
+plasma-desktop plasma-settings plasma-framework
+plasma-workspace plasma-workspace-lang plasma-workspace-libs
+plasma-integration plasma-browser-integration
+plasma-thunderbolt plasma-disks
+kwrited systemsettings ksysguard polkit-kde-agent-1 konsole
+breeze-gtk breeze-icons
+bluedevil powerdevil
+kwayland
+plasma-nm
+iproute2 net-tools
+kpipewire kmix
+ki18n kwin kinit kcron kdecoration
+kscreen kscreenlocker libkscreen
+kde-gtk-config khotkeys
+dolphin dolphin-plugins kfind
+kate kate-common hunspell-en
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
@@ -100,12 +109,15 @@ https://uk.alpinelinux.org/alpine/edge/community
 https://uk.alpinelinux.org/alpine/edge/testing
 EOF
 
-mkdir -p "$tmp"/etc/gdm
-makefile root:root 0644 "$tmp"/etc/gdm/custom.conf <<EOF
-[daemon]
-AutomaticLogin=root
-AutomaticLoginEnable=true
-WaylandEnable=true
+mkdir -p "$tmp"/etc/sddm.conf.d/
+makefile root:root 0644 "$tmp"/etc/sddm.conf.d/autologin.conf <<EOF
+[Autologin]
+User=root
+Session=plasma
+EOF
+makefile root:root 0644 "$tmp"/etc/sddm.conf.d/10-wayland.conf <<EOF
+[Wayland]
+CompositorCommand=kwin_wayland --no-lockscreen
 EOF
 
 mkdir -p "$tmp"/etc/
@@ -164,6 +176,7 @@ rc_add efivars boot
 
 rc_add agetty.tty1 default
 
+rc_add acpid default
 rc_add iwd default
 rc_add rsyncd default
 rc_add networkmanager default
@@ -173,7 +186,7 @@ rc_add bluealsa default
 rc_add bluetooth default
 rc_add elogind default
 rc_add polkit default
-rc_add gdm default
+rc_add sddm default
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
