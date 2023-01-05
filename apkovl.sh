@@ -84,23 +84,8 @@ util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linu
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
-sddm sddm-openrc sddm-kcm sddm-breeze
-plasma-desktop plasma-settings plasma-framework
-plasma-workspace plasma-workspace-lang plasma-workspace-libs
-plasma-integration plasma-browser-integration
-plasma-thunderbolt plasma-disks
-kwrited systemsettings ksysguard polkit-kde-agent-1 konsole
-breeze-gtk breeze-icons
-bluedevil powerdevil
-kwayland
-plasma-nm
-iproute2 net-tools
-kpipewire kmix
-ki18n kwin kinit kcron kdecoration
-kscreen kscreenlocker libkscreen
-kde-gtk-config khotkeys
-dolphin dolphin-plugins kfind
-kate kate-common hunspell-en
+sddm sddm-openrc
+wayfire paperde alacritty
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
@@ -113,27 +98,19 @@ mkdir -p "$tmp"/etc/sddm.conf.d/
 makefile root:root 0644 "$tmp"/etc/sddm.conf.d/autologin.conf <<EOF
 [Autologin]
 User=root
-Session=plasma
+Session=paperdesktop
 EOF
 makefile root:root 0644 "$tmp"/etc/sddm.conf.d/10-wayland.conf <<EOF
 [Wayland]
-CompositorCommand=kwin_wayland --no-lockscreen
+CompositorCommand=papershell --no-lockscreen
 EOF
-
-mkdir -p "$tmp"/etc/
-curl -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
-mv dconf-settings.ini "$tmp"/etc/
 
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/bash.sh <<EOF
 sed -i 's|/bin/ash|/bin/bash|' /etc/passwd
 ln -sf /bin/bash /bin/sh
 ln -sf /bin/bash /bin/ash
-if [ -f /etc/dconf-settings.ini ]; then 
-  dconf load / < /etc/dconf-settings.ini
-  rm /etc/dconf-settings.ini
-fi
-export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u@\[\033[1;32m\]\h: \[\e[35m\]$SHELL\[\e[0m\] \[\e[33m\]\w\[\e[0m\]\n\$  \[\033[0m\]'
+export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u:\[\033[1;32m\]\h \> \[\e[35m\]$SHELL\[\e[0m\] \> \[\e[33m\]\w\[\e[0m\]\n\> \[\033[0m\]'
 install() {
 	if curl -s -o /dev/null alpinelinux.org; then
 	    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install.sh && bash install.sh

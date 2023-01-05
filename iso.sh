@@ -43,6 +43,7 @@ profile_linux() {
 	initfs_cmdline='modules=loop,squashfs,sd-mod,usb-storage mitigations=off'
 	initfs_features='ata base bootchart cdrom btrfs zfs xfs ext4 mmc nvme raid scsi squashfs usb virtio'
 	modloop_sign=yes
+   grub_mod='all_video disk part_gpt part_msdos linux normal configfile search search_label efi_gop fat iso9660 gzio'
    boot_addons='amd-ucode intel-ucode'
    initrd_ucode='/boot/amd-ucode.img /boot/intel-ucode.img'
    apkovl='./aports/scripts/apkovl.sh'
@@ -82,23 +83,8 @@ profile_linux() {
       xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
       xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
       zfs zfs-openrc zfs-libs
-      sddm sddm-openrc sddm-kcm sddm-breeze
-      plasma-desktop plasma-settings plasma-framework
-      plasma-workspace plasma-workspace-lang plasma-workspace-libs
-      plasma-integration plasma-browser-integration
-      plasma-thunderbolt plasma-disks
-      kwrited systemsettings ksysguard polkit-kde-agent-1 konsole
-      breeze-gtk breeze-icons
-      bluedevil powerdevil
-      kwayland
-      plasma-nm
-      iproute2 net-tools
-      kpipewire kmix
-      ki18n kwin kinit kcron kdecoration
-      kscreen kscreenlocker libkscreen
-      kde-gtk-config khotkeys
-      dolphin dolphin-plugins kfind
-      kate kate-common hunspell-en
+      sddm sddm-openrc
+      wayfire paperde alacritty
    "
 }
 EOF
