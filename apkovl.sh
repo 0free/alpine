@@ -83,7 +83,7 @@ util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linu
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
-greetd greetd-openrc greetd-agreety
+greetd greetd-openrc greetd-gtkgreet
 wayfire paperde alacritty
 EOF
 
@@ -93,16 +93,16 @@ https://uk.alpinelinux.org/alpine/edge/community
 https://uk.alpinelinux.org/alpine/edge/testing
 EOF
 
-mkdir -p "$tmp"/etc/greetd/config.toml
+mkdir -p "$tmp"/etc/greetd/
 makefile root:root 0644 "$tmp"/etc/greetd/config.toml <<EOF
 [terminal]
 vt = 1
 [default_session]
-command = "agreety --cmd /bin/sh"
-user = "greeter"
+command = "wayfire -c /usr/share/paperde/wayfire.ini"
+user = "greetd"
 [initial_session]
-command = "paperdesktop"
-user = "user"
+command = "wayfire -c /usr/share/paperde/wayfire.ini"
+user = "root"
 EOF
 
 mkdir -p "$tmp"/etc/profile.d/

@@ -210,7 +210,7 @@ packages_list() {
 
     if grep -q paperDE /root/list; then
         packages+=(
-            lightdm lightdm-gtk-greeter lightdm-openrc
+            greetd greetd-openrc greetd-gtkgreet
             wayfire paperde paper-icon-theme
             alacritty
         )
@@ -922,8 +922,8 @@ setup_desktop() {
     enable_services
     configure_alpine
 
-    if [ -f /etc/lightdm/lightdm.conf ]; then
-        configure_lightdm
+    if [ -f /etc/greetd/config.toml ]; then
+        configure_greetd
     fi
 
     custom_kernel
@@ -1170,16 +1170,35 @@ setup_mariadb() {
 
 }
 
-configure_lightdm() {
+configure_greetd() {
 
-    echo ">>> configuring lightdm"
-    sed -i 's|#allow-guest=.*|allow-guest=false|' /etc/lightdm/lightdm.conf
-    sed -i 's|#autologin-guest=.*|autologin-guest=false|' /etc/lightdm/lightdm.conf
-    sed -i "s|#autologin-user=.*|autologin-user=$user|" /etc/lightdm/lightdm.conf
-    sed -i 's|#autologin-user-timeout=.*|autologin-user-timeout=0|' /etc/lightdm/lightdm.conf
-    sed -i 's|#autologin-in-background=.*|autologin-in-background=false|' /etc/lightdm/lightdm.conf
-    sed -i 's|#user-session=.*|user-session=default|' /etc/lightdm/lightdm.conf
-    sed -i 's|#greeter-session=.*|greeter-session=lightdm-gtk-greeter|' /etc/lightdm/lightdm.conf
+    echo ">>> configuring greetd"
+    cat > /etc/greetd/config.toml <<EOF
+[terminal]
+vt = 1
+[default_session]
+command = "wayfire -c /usr/share/paperde/wayfire.ini"
+user = "greetd"
+[initial_session]
+command = "wayfire -c /usr/share/paperde/wayfire.ini"
+user = "$user"
+EOF
+
+    cat > /etc/greetd/gtkgreet.css <<EOF
+window {
+   background-image: url("file:///usr/share/backgrounds/default.png");
+   background-size: cover;
+   background-position: center;
+}
+
+box#body {
+   background-color: rgba(50, 50, 50, 0.5);
+   border-radius: 10px;
+   padding: 50px;
+}
+EOF
+
+    gtkgreet -l -s /etc/greetd/gtkgreet.css
 
 }
 
