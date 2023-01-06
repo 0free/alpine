@@ -1989,7 +1989,7 @@ custom_commands() {
 
     echo ">>> adding custom commands"
     cat > /etc/profile.d/commands.sh <<EOF
-export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u:\[\033[1;32m\]\h \> \[\e[35m\]$SHELL\[\e[0m\] \> \[\e[33m\]\w\[\e[0m\]\n\> \[\033[0m\]'
+export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u | \[\033[1;32m\]\h | \[\e[35m\]$SHELL\[\e[0m\] | \[\e[33m\]\w\[\e[0m\]\n\> \[\033[0m\]'
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus

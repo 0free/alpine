@@ -82,8 +82,8 @@ profile_linux() {
       xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
       xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
       zfs zfs-openrc zfs-libs
-      lightdm lightdm-gtk-greeter lightdm-openrc
-      wayfire paperde paper-icon-theme alacritty
+      greetd greetd-openrc greetd-agreety
+      wayfire paperde alacritty
    "
 }
 EOF

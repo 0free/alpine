@@ -83,8 +83,8 @@ util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linu
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
-lightdm lightdm-gtk-greeter lightdm-openrc
-wayfire paperde paper-icon-theme alacritty
+greetd greetd-openrc greetd-agreety
+wayfire paperde alacritty
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
@@ -93,26 +93,16 @@ https://uk.alpinelinux.org/alpine/edge/community
 https://uk.alpinelinux.org/alpine/edge/testing
 EOF
 
-mkdir -p "$tmp"/etc/lightdm/lightdm.conf.d/lightdm.conf
-makefile root:root 0644 "$tmp"/etc/lightdm/lightdm.conf.d/50-myconfig.conf <<EOF
-[SeatDefaults]
-user-session=paperdesktop
-EOF
-makefile root:root 0644 "$tmp"/etc/lightdm/lightdm.conf <<EOF
-[LightDM]
-sessions-directory=/usr/share/xsessions:/usr/share/wayland-sessions
-greeters-directory=$XDG_DATA_DIRS/lightdm/greeters:$XDG_DATA_DIRS/xgreeters
-[Seat:*]
-pam-service=lightdm
-pam-autologin-service=lightdm-autologin
-pam-greeter-service=lightdm-greeter
-greeter-session=lightdm-gtk-greeter
-allow-guest=false
-autologin-user=root
-autologin-user-timeout=0
-autologin-in-background=true
-autologin-session=paperdesktop
-exit-on-failure=true
+mkdir -p "$tmp"/etc/greetd/config.toml
+makefile root:root 0644 "$tmp"/etc/greetd/config.toml <<EOF
+[terminal]
+vt = 1
+[default_session]
+command = "agreety --cmd /bin/sh"
+user = "greeter"
+[initial_session]
+command = "paperdesktop"
+user = "user"
 EOF
 
 mkdir -p "$tmp"/etc/profile.d/
@@ -120,7 +110,7 @@ makefile root:root 0755 "$tmp"/etc/profile.d/bash.sh <<EOF
 sed -i 's|/bin/ash|/bin/bash|' /etc/passwd
 ln -sf /bin/bash /bin/sh
 ln -sf /bin/bash /bin/ash
-export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u:\[\033[1;32m\]\h \> \[\e[35m\]$SHELL\[\e[0m\] \> \[\e[33m\]\w\[\e[0m\]\n\> \[\033[0m\]'
+export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u | \[\033[1;32m\]\h | \[\e[35m\]$SHELL\[\e[0m\] | \[\e[33m\]\w\[\e[0m\]\n\> \[\033[0m\]'
 install() {
 	if curl -s -o /dev/null alpinelinux.org; then
 	    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install.sh && bash install.sh
@@ -173,7 +163,8 @@ rc_add bluealsa default
 rc_add bluetooth default
 rc_add elogind default
 rc_add polkit default
-rc_add lightdm default
+
+rc_add greetd default
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
