@@ -73,7 +73,7 @@ profile_linux() {
       linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
       mesa mesa-dri-gallium
       musl musl-locales musl-utils
-      networkmanager networkmanager-bash-completion networkmanager-common networkmanager-elogind networkmanager-openrc networkmanager-wifi
+      networkmanager networkmanager-openrc networkmanager-bash-completion networkmanager-common networkmanager-wifi
       openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
       polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
       pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez pipewire-media-session wireplumber
@@ -82,7 +82,7 @@ profile_linux() {
       xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
       xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
       zfs zfs-openrc zfs-libs
-      greetd greetd-openrc greetd-gtkgreet
+      greetd greetd-openrc greetd-gtkgreet seatd seatd-openrc seatd-launch
       wayfire paperde alacritty
    "
 }

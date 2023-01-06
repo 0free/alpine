@@ -74,7 +74,7 @@ linux-firmware-i915 linux-firmware-intel linux-firmware-other
 linux-firmware-rtl_bt linux-firmware-rtl_nic linux-firmware-rtlwifi
 mesa mesa-dri-gallium
 musl musl-locales musl-utils
-networkmanager networkmanager-bash-completion networkmanager-common networkmanager-elogind networkmanager-openrc networkmanager-wifi
+networkmanager networkmanager-openrc networkmanager-bash-completion networkmanager-common networkmanager-wifi
 openrc openrc-bash-completion openrc-settingsd openrc-settingsd-openrc
 polkit polkit-common polkit-elogind polkit-elogind-libs polkit-openrc
 pipewire pipewire-libs pipewire-alsa pipewire-jack pipewire-pulse pipewire-tools pipewire-spa-tools pipewire-spa-vulkan pipewire-spa-bluez pipewire-media-session wireplumber
@@ -83,7 +83,7 @@ util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linu
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
-greetd greetd-openrc greetd-gtkgreet
+greetd greetd-openrc greetd-gtkgreet seatd seatd-openrc seatd-launch
 wayfire paperde alacritty
 EOF
 
@@ -96,10 +96,10 @@ EOF
 mkdir -p "$tmp"/etc/greetd/
 makefile root:root 0644 "$tmp"/etc/greetd/config.toml <<EOF
 [terminal]
-vt = 1
+vt = current
 [default_session]
 command = "wayfire -c /usr/share/paperde/wayfire.ini"
-user = "greetd"
+user = "root"
 [initial_session]
 command = "wayfire -c /usr/share/paperde/wayfire.ini"
 user = "root"
@@ -110,7 +110,7 @@ makefile root:root 0755 "$tmp"/etc/profile.d/bash.sh <<EOF
 sed -i 's|/bin/ash|/bin/bash|' /etc/passwd
 ln -sf /bin/bash /bin/sh
 ln -sf /bin/bash /bin/ash
-export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u | \[\033[1;32m\]\h | \[\e[35m\]$SHELL\[\e[0m\] | \[\e[33m\]\w\[\e[0m\]\n\> \[\033[0m\]'
+export PS1='\[\e[33m\]$SHELL\[\e[0m\] | \[\e]0;\w\a\]\[\e[32m\]\u | \[\033[1;32m\]\h | \[\e[35m\]\w\[\e[0m\]\n> \[\033[0m\]'
 install() {
 	if curl -s -o /dev/null alpinelinux.org; then
 	    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install.sh && bash install.sh
@@ -164,6 +164,7 @@ rc_add bluetooth default
 rc_add elogind default
 rc_add polkit default
 
+rc-add seatd default
 rc_add greetd default
 
 rc_add mount-ro shutdown
