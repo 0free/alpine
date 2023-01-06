@@ -63,7 +63,6 @@ efibootmgr
 elogind elogind-bash-completion elogind-openrc
 ethtool ethtool-bash-completion
 eudev eudev-libs eudev-openrc
-font-noto-arabic
 git git-bash-completion
 hwids-net hwids-pci hwids-udev hwids-usb
 ibus ibus-bash-completion
@@ -84,8 +83,8 @@ util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linu
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
-sddm sddm-openrc
-wayfire paperde alacritty
+lightdm lightdm-gtk-greeter lightdm-openrc
+wayfire paperde paper-icon-theme alacritty
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
@@ -94,15 +93,26 @@ https://uk.alpinelinux.org/alpine/edge/community
 https://uk.alpinelinux.org/alpine/edge/testing
 EOF
 
-mkdir -p "$tmp"/etc/sddm.conf.d/
-makefile root:root 0644 "$tmp"/etc/sddm.conf.d/autologin.conf <<EOF
-[Autologin]
-User=root
-Session=paperdesktop
+mkdir -p "$tmp"/etc/lightdm/lightdm.conf.d/lightdm.conf
+makefile root:root 0644 "$tmp"/etc/lightdm/lightdm.conf.d/50-myconfig.conf <<EOF
+[SeatDefaults]
+user-session=paperdesktop
 EOF
-makefile root:root 0644 "$tmp"/etc/sddm.conf.d/10-wayland.conf <<EOF
-[Wayland]
-CompositorCommand=papershell --no-lockscreen
+makefile root:root 0644 "$tmp"/etc/lightdm/lightdm.conf <<EOF
+[LightDM]
+sessions-directory=/usr/share/xsessions:/usr/share/wayland-sessions
+#greeters-directory=$XDG_DATA_DIRS/lightdm/greeters:$XDG_DATA_DIRS/xgreeters
+[Seat:*]
+pam-service=lightdm
+pam-autologin-service=lightdm-autologin
+pam-greeter-service=lightdm-greeter
+greeter-session=lightdm-gtk-greeter
+allow-guest=false
+autologin-user=root
+autologin-user-timeout=0
+autologin-in-background=true
+autologin-session=paperdesktop
+exit-on-failure=true
 EOF
 
 mkdir -p "$tmp"/etc/profile.d/
@@ -163,7 +173,7 @@ rc_add bluealsa default
 rc_add bluetooth default
 rc_add elogind default
 rc_add polkit default
-rc_add sddm default
+rc_add lightdm default
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown

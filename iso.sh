@@ -62,7 +62,6 @@ profile_linux() {
       elogind elogind-bash-completion elogind-openrc
       ethtool ethtool-bash-completion
       eudev eudev-libs eudev-openrc
-      font-noto-arabic
       git git-bash-completion
       hwids-net hwids-pci hwids-udev hwids-usb
       ibus ibus-bash-completion
@@ -83,8 +82,8 @@ profile_linux() {
       xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
       xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
       zfs zfs-openrc zfs-libs
-      sddm sddm-openrc
-      wayfire paperde alacritty
+      lightdm lightdm-gtk-greeter lightdm-openrc
+      wayfire paperde paper-icon-theme alacritty
    "
 }
 EOF

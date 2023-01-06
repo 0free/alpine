@@ -208,6 +208,13 @@ packages_list() {
         )
     fi
 
+    if grep -q paperDE /root/list; then
+        packages+=(
+            lightdm lightdm-gtk-greeter lightdm-openrc
+            wayfire paperde paper-icon-theme
+            alacritty
+        )
+
     if grep -q workstation /root/list; then
 
         if grep -q gnome /root/list; then
@@ -540,7 +547,7 @@ setup_drive() {
     menu 'select a computer' computer ${computers[@]}
     echo "computer=$computer" >> /root/list
 
-    desktops=(kde gnome none)
+    desktops=(kde gnome paperDE none)
     menu 'select a desktop' desktop ${desktops[@]}
     echo "desktop=$desktop" >> /root/list
 
@@ -1171,7 +1178,7 @@ configure_lightdm() {
     sed -i 's|#autologin-user-timeout=.*|autologin-user-timeout=0|' /etc/lightdm/lightdm.conf
     sed -i 's|#autologin-in-background=.*|autologin-in-background=false|' /etc/lightdm/lightdm.conf
     sed -i 's|#user-session=.*|user-session=default|' /etc/lightdm/lightdm.conf
-    sed -i 's|#greeter-session=.*|greeter-session=slick-greeter|' /etc/lightdm/lightdm.conf
+    sed -i 's|#greeter-session=.*|greeter-session=lightdm-gtk-greeter|' /etc/lightdm/lightdm.conf
 
 }
 
