@@ -101,7 +101,7 @@ EOF
 makefile root:root 0644 "$tmp"/etc/lightdm/lightdm.conf <<EOF
 [LightDM]
 sessions-directory=/usr/share/xsessions:/usr/share/wayland-sessions
-#greeters-directory=$XDG_DATA_DIRS/lightdm/greeters:$XDG_DATA_DIRS/xgreeters
+greeters-directory=$XDG_DATA_DIRS/lightdm/greeters:$XDG_DATA_DIRS/xgreeters
 [Seat:*]
 pam-service=lightdm
 pam-autologin-service=lightdm-autologin

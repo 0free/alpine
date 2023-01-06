@@ -214,6 +214,7 @@ packages_list() {
             wayfire paperde paper-icon-theme
             alacritty
         )
+    fi
 
     if grep -q workstation /root/list; then
 
