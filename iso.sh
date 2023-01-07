@@ -82,10 +82,26 @@ profile_linux() {
       xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
       xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
       zfs zfs-openrc zfs-libs
-      greetd greetd-openrc greetd-gtkgreet
-      seatd seatd-openrc seatd-launch
-      wayfire waybar
-      weston-terminal
+      sddm sddm-openrc sddm-kcm sddm-breeze
+      plasma-desktop
+      plasma-workspace plasma-workspace-libs
+      plasma-settings
+      plasma-framework
+      plasma-integration plasma-browser-integration
+      plasma-thunderbolt plasma-disks
+      kwrited systemsettings ksysguard polkit-kde-agent-1
+      breeze-gtk breeze-icons
+      bluedevil powerdevil
+      kwayland
+      plasma-nm iproute2 net-tools
+      kpipewire kmix
+      ki18n kwin kinit kcron kdecoration krecorder
+      kscreen kscreenlocker libkscreen
+      kde-gtk-config khotkeys
+      konsole
+      dolphin dolphin-plugins kfind
+      kate kate-common hunspell-en
+      ark
    "
 }
 EOF

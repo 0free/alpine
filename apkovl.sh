@@ -83,10 +83,26 @@ util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linu
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
-greetd greetd-openrc greetd-gtkgreet
-seatd seatd-openrc seatd-launch
-wayfire waybar
-weston-terminal
+sddm sddm-openrc sddm-kcm sddm-breeze
+plasma-desktop
+plasma-workspace plasma-workspace-libs
+plasma-settings
+plasma-framework
+plasma-integration plasma-browser-integration
+plasma-thunderbolt plasma-disks
+kwrited systemsettings ksysguard polkit-kde-agent-1
+breeze-gtk breeze-icons
+bluedevil powerdevil
+kwayland
+plasma-nm iproute2 net-tools
+kpipewire kmix
+ki18n kwin kinit kcron kdecoration krecorder
+kscreen kscreenlocker libkscreen
+kde-gtk-config khotkeys
+konsole
+dolphin dolphin-plugins kfind
+kate kate-common hunspell-en
+ark
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
@@ -95,36 +111,20 @@ https://uk.alpinelinux.org/alpine/edge/community
 https://uk.alpinelinux.org/alpine/edge/testing
 EOF
 
-mkdir -p "$tmp"/etc/
-makefile root:root 0644 "$tmp"/etc/wayfire.ini <<EOF
-[autostart]
-autostart_wf_shell = false
-gtkgreet = /usr/bin/gtkgreet -l
-[core]
-plugins = autostart
-vheight = 1
-vwidth = 1
-xwayland = true
+mkdir -p "$tmp"/etc/sddm.conf.d/
+makefile root:root 0644 "$tmp"/etc/sddm.conf.d/autologin.conf <<EOF
+[Autologin]
+User=root
+Session=plasma
 EOF
 
-mkdir -p "$tmp"/etc/greetd/
-makefile root:root 0644 "$tmp"/etc/greetd/config.toml <<EOF
-[terminal]
-vt = current
-[default_session]
-command = "wayfire -c /etc/wayfire.ini"
-user = "root"
-[initial_session]
-command = "wayfire -c /etc/wayfire.ini"
-user = "root"
-EOF
 
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/bash.sh <<EOF
 sed -i 's|/bin/ash|/bin/bash|' /etc/passwd
 ln -sf /bin/bash /bin/sh
 ln -sf /bin/bash /bin/ash
-export PS1='\[\e[33m\]$SHELL\[\e[0m\] | \[\e]0;\w\a\]\[\e[32m\]\u | \[\033[1;32m\]\h | \[\e[35m\]\w\[\e[0m\]\n> \[\033[0m\]'
+export PS1='\[\e[33m\]$SHELL\[\e[0m\] | \[\e]0;\w\a\]\[\e[32m\]\u | \[\033[1;32m\]\h\n\[\e[35m\]\w\[\e[0m\] > \[\033[0m\]'
 install() {
 	if curl -s -o /dev/null alpinelinux.org; then
 	    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install.sh && bash install.sh
@@ -139,7 +139,7 @@ makefile root:root 0755 "$tmp"/root/.config/autostart/terminal.desktop <<EOF
 [Desktop Entry]
 Name=terminal
 Type=Application
-Exec=/usr/bin/weston-terminal
+Exec=/usr/bin/konsole
 EOF
 
 rc_add devfs sysinit
@@ -186,8 +186,7 @@ rc_add bluetooth default
 rc_add elogind default
 rc_add polkit default
 
-rc_add seatd default
-rc_add greetd default
+rc_add sddm default
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown

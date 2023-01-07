@@ -139,7 +139,7 @@ packages_list() {
             #gnome session
             gdm gdm-openrc mutter mutter-schemas
             gnome-desktop gnome-desktop-lang gnome-session
-            gnome-shell gnome-shell-schemas gnome-shell-extensions gnome-menus
+            gnome-shell gnome-shell-schemas gnome-menus
             gnome-control-center gnome-control-center-bash-completion
             gnome-tweaks gnome-colors-common gsettings-desktop-schemas
             tracker tracker-bash-completion
@@ -2019,7 +2019,7 @@ custom_commands() {
 
     echo ">>> adding custom commands"
     cat > /etc/profile.d/commands.sh <<EOF
-export PS1='\[\e[33m\]$SHELL\[\e[0m\] | \[\e]0;\w\a\]\[\e[32m\]\u | \[\033[1;32m\]\h | \[\e[35m\]\w\[\e[0m\]\n> \[\033[0m\]'
+export PS1='\[\e[33m\]$SHELL\[\e[0m\] | \[\e]0;\w\a\]\[\e[32m\]\u | \[\033[1;32m\]\h\n\[\e[35m\]\w\[\e[0m\] > \[\033[0m\]'
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
