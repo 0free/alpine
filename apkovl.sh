@@ -164,7 +164,7 @@ rc_add bluetooth default
 rc_add elogind default
 rc_add polkit default
 
-rc-add seatd default
+rc_add seatd default
 rc_add greetd default
 
 rc_add mount-ro shutdown
