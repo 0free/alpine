@@ -112,10 +112,11 @@ https://uk.alpinelinux.org/alpine/edge/testing
 EOF
 
 mkdir -p "$tmp"/etc/sddm.conf.d/
-makefile root:root 0644 "$tmp"/etc/sddm.conf.d/autologin.conf <<EOF
+makefile root:root 0644 "$tmp"/etc/sddm.conf.d/autologin <<EOF
 [Autologin]
 User=root
-Session=plasma
+Session=plasma.desktop
+Relogin=true
 EOF
 
 
