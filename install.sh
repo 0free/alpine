@@ -208,11 +208,11 @@ packages_list() {
         )
     fi
 
-    if grep -q paperDE /root/list; then
+    if grep -q wayfire /root/list; then
         packages+=(
+            seatd seatd-openrc
             greetd greetd-openrc greetd-gtkgreet
-            wayfire paperde paper-icon-theme
-            alacritty
+            wayfire waybar alacritty
         )
     fi
 
@@ -548,7 +548,7 @@ setup_drive() {
     menu 'select a computer' computer ${computers[@]}
     echo "computer=$computer" >> /root/list
 
-    desktops=(kde gnome paperDE none)
+    desktops=(kde gnome wayfire none)
     menu 'select a desktop' desktop ${desktops[@]}
     echo "desktop=$desktop" >> /root/list
 
@@ -1173,14 +1173,25 @@ setup_mariadb() {
 configure_greetd() {
 
     echo ">>> configuring greetd"
+    cat > /etc/wayfire.ini <<EOF
+[autostart]
+autostart_wf_shell = false
+gtkgreet = /usr/bin/gtkgreet -l
+[core]
+plugins = autostart
+vheight = 1
+vwidth = 1
+xwayland = true
+EOF
+
     cat > /etc/greetd/config.toml <<EOF
 [terminal]
 vt = 1
 [default_session]
-command = "wayfire -c /usr/share/paperde/wayfire.ini"
-user = "greetd"
+command = "wayfire -c /etc/wayfire.ini"
+user = "$user"
 [initial_session]
-command = "wayfire -c /usr/share/paperde/wayfire.ini"
+command = "wayfire -c /etc/wayfire.ini"
 user = "$user"
 EOF
 

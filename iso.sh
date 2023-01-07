@@ -53,7 +53,7 @@ profile_linux() {
       alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
       alsaconf alsa-lib alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
       bash bash-completion
-      attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
+      attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils vim wget which
       brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
       btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
       dbus dbus-libs dbus-openrc dbus-x11
@@ -82,8 +82,10 @@ profile_linux() {
       xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
       xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
       zfs zfs-openrc zfs-libs
-      greetd greetd-openrc greetd-gtkgreet seatd seatd-openrc seatd-launch
-      wayfire paperde alacritty
+      greetd greetd-openrc greetd-gtkgreet
+      seatd seatd-openrc seatd-launch
+      wayfire waybar
+      weston-terminal
    "
 }
 EOF

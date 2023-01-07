@@ -54,7 +54,7 @@ makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
 alsaconf alsa-lib alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
 bash bash-completion
-attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less nano ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
+attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils vim wget which
 brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
 btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
 dbus dbus-libs dbus-openrc dbus-x11
@@ -83,8 +83,10 @@ util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linu
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
-greetd greetd-openrc greetd-gtkgreet seatd seatd-openrc seatd-launch
-wayfire paperde alacritty
+greetd greetd-openrc greetd-gtkgreet
+seatd seatd-openrc seatd-launch
+wayfire waybar
+weston-terminal
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
@@ -93,15 +95,27 @@ https://uk.alpinelinux.org/alpine/edge/community
 https://uk.alpinelinux.org/alpine/edge/testing
 EOF
 
+mkdir -p "$tmp"/etc/
+makefile root:root 0644 "$tmp"/etc/wayfire.ini <<EOF
+[autostart]
+autostart_wf_shell = false
+gtkgreet = /usr/bin/gtkgreet -l
+[core]
+plugins = autostart
+vheight = 1
+vwidth = 1
+xwayland = true
+EOF
+
 mkdir -p "$tmp"/etc/greetd/
 makefile root:root 0644 "$tmp"/etc/greetd/config.toml <<EOF
 [terminal]
 vt = current
 [default_session]
-command = "wayfire -c /usr/share/paperde/wayfire.ini"
+command = "wayfire -c /etc/wayfire.ini"
 user = "root"
 [initial_session]
-command = "wayfire -c /usr/share/paperde/wayfire.ini"
+command = "wayfire -c /etc/wayfire.ini"
 user = "root"
 EOF
 
@@ -118,6 +132,14 @@ install() {
         echo "no internet"
 	fi
 }
+EOF
+
+mkdir -p "$tmp"/root/.config/autostart/
+makefile root:root 0755 "$tmp"/root/.config/autostart/terminal.desktop <<EOF
+[Desktop Entry]
+Name=terminal
+Type=Application
+Exec=/usr/bin/weston-terminal
 EOF
 
 rc_add devfs sysinit
