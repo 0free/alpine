@@ -113,6 +113,8 @@ sed -i 's|linux-firmware | |' ~/aports/scripts/mkimg.base.sh
 sed -i 's|timeout=1|timeout=0|' ~/aports/scripts/mkimg.base.sh
 sed -i 's|"alpine-${profile_abbrev:-$PROFILE} $RELEASE $ARCH"|"alpineLinux"|g' ~/aports/scripts/mkimg.base.sh
 
+sed -i 's|overlay_size=0|overlay_size=30%|' ~/aports/main/openrc/modloop.condf
+
 sed -i 's|/bin/busybox|/bin/bash|g' ~/aports/scripts/genrootfs.sh
 
 sed -i 's|ln -s /bin/busybox|ln -s /bin/bash|' ~/aports/main/busybox/APKBUILD
