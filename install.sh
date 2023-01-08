@@ -753,7 +753,6 @@ set_network() {
     cat > /mnt/etc/resolv.conf <<EOF
 nameserver 94.140.14.49
 nameserver 94.140.14.59
-nameserver 10.0.254.3
 EOF
 
     echo ">>> adding interfaces"
