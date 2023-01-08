@@ -49,6 +49,7 @@ profile_linux() {
    apkovl='./aports/scripts/apkovl.sh'
    kernel_flavors='lts'
    kernel_addons='zfs'
+   kernel_cmdline='unionfs_size=1024M'
    apks="\$apks
       alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
       alsaconf alsa-lib alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
@@ -113,7 +114,7 @@ sed -i 's|linux-firmware | |' ~/aports/scripts/mkimg.base.sh
 sed -i 's|timeout=1|timeout=0|' ~/aports/scripts/mkimg.base.sh
 sed -i 's|"alpine-${profile_abbrev:-$PROFILE} $RELEASE $ARCH"|"alpineLinux"|g' ~/aports/scripts/mkimg.base.sh
 
-sed -i 's|overlay_size=0|overlay_size=30%|' ~/aports/main/openrc/modloop.condf
+sed -i 's|overlay_size=0|overlay_size=20%|' ~/aports/main/openrc/modloop.condf
 
 sed -i 's|/bin/busybox|/bin/bash|g' ~/aports/scripts/genrootfs.sh
 

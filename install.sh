@@ -196,7 +196,7 @@ packages_list() {
             #audio
             kpipewire kmix
             #kde
-            kde-cli-tools ki18n kwin kinit kcron kdecoration krecorder
+            ki18n kwin kinit kcron kdecoration krecorder
             kscreen kscreenlocker libkscreen kmenuedit konsole
             kde-gtk-config khotkeys
             #file manager
