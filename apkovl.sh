@@ -86,10 +86,11 @@ zfs zfs-openrc zfs-libs
 gdm gdm-openrc mutter mutter-schemas
 gnome-desktop gnome-desktop-lang gnome-session
 gnome-shell gnome-shell-schemas
+gnome-control-center gnome-control-center-bash-completion
 gsettings-desktop-schemas
 tracker tracker-bash-completion
 adwaita-icon-theme hicolor-icon-theme
-gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
+gnome-terminal gnome-disk-utility gnome-system-monitor
 nautilus
 gedit py3-cairo aspell-en hunspell-en nuspell
 network-manager-applet
