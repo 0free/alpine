@@ -54,7 +54,7 @@ profile_linux() {
       alpine-base alpine-baselayout alpine-baselayout-data alpine-conf alpine-keys alpine-release apk-tools
       alsaconf alsa-lib alsa-utils alsa-utils-openrc alsa-plugins-pulse alsa-plugins-jack alsa-ucm-conf
       bash bash-completion
-      attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils vim wget which
+      attr binutils bolt coreutils diffutils curl dialog fakeroot findutils gawk grep less ncurses-dev net-tools openssl pciutils readline rsync rsync-openrc rsyslog rsyslog-openrc sed shadow sudo usbutils wget which
       brotli-libs bzip2 lz4 lzo unzip xz zip zlib zstd
       btrfs-progs btrfs-progs-bash-completion btrfs-progs-extra btrfs-progs-libs
       dbus dbus-libs dbus-openrc dbus-x11

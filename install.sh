@@ -48,7 +48,7 @@ packages_list() {
         g++ gcc libc-dev patch remake-make shadow
         rsyslog rsyslog-openrc sed attr dialog
         which grep pciutils usbutils findutils readline
-        lsof less nano curl wget coreutils gawk diffutils autoconf
+        lsof less curl wget coreutils gawk diffutils autoconf
         #util-linux
         util-linux util-linux-openrc util-linux-login
         util-linux-misc util-linux-bash-completion
