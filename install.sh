@@ -640,7 +640,7 @@ create_zfs() {
     echo ">>> checking ZFS modules"
     if ! lsmod | grep -qi zfs; then
        echo 'ERROR: ZFS modules are missing'
-       create_rootfs
+       setup_drive
     fi
     echo ">>> creating ZFS pool"
     zpool create -f -o ashift=9 -o autotrim=on \
