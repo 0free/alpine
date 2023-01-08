@@ -754,7 +754,6 @@ set_network() {
 nameserver 94.140.14.49
 nameserver 94.140.14.59
 EOF
-
     echo ">>> adding interfaces"
     cat > /mnt/etc/network/interfaces <<EOF
 auto lo

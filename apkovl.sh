@@ -111,7 +111,8 @@ AutomaticLoginEnable=true
 AutomaticLogin=root
 EOF
 
-curl -o "$tmp"/etc/dconf-settings.ini -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+curl -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
+mv dconf-settings.ini "$tmp"/etc/
 
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/bash.sh <<EOF
@@ -119,7 +120,7 @@ sed -i 's|/bin/ash|/bin/bash|' /etc/passwd
 ln -sf /bin/bash /bin/sh
 ln -sf /bin/bash /bin/ash
 export PS1='\[\e[33m\]$SHELL\[\e[0m\] | \[\e]0;\w\a\]\[\e[32m\]\u\[\e[0m\] | \[\033[1;32m\]\h\n\[\e[35m\]\w\[\e[0m\] > \[\033[0m\]'
-if [ -d /etc/dconf-settings.ini ]; then
+if [ -f /etc/dconf-settings.ini ]; then
 	dconf load / < dconf-settings.ini
 	rm /etc/dconf-settings.ini
 fi
