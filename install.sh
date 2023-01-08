@@ -909,7 +909,7 @@ create_user() {
     sed -i 's|# %wheel ALL=(ALL:ALL) ALL|%wheel ALL=(ALL:ALL) ALL|' /etc/sudoers
     echo ">>> creating user"
     echo -en "$password\n$password" | adduser -h /home/$user -s /bin/bash -G wheel -g $user $user
-    usermod -aG input,audio,video,netdev,usb,disk,lp,adm $user
+    usermod -aG plugdev,input,audio,video,netdev,usb,disk,lp,adm $user
     if grep -q zfs /root/list; then
         zfs allow $user create,mount,mountpoint,snapshot $pool
     fi

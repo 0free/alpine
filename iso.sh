@@ -85,9 +85,8 @@ profile_linux() {
       zfs zfs-openrc zfs-libs
       gdm gdm-openrc mutter mutter-schemas
       gnome-desktop gnome-desktop-lang gnome-session
-      gnome-shell gnome-shell-schemas gnome-menus
-      gnome-control-center gnome-control-center-bash-completion
-      gnome-tweaks gnome-colors-common gsettings-desktop-schemas
+      gnome-shell gnome-shell-schemas
+      gsettings-desktop-schemas
       tracker tracker-bash-completion
       adwaita-icon-theme hicolor-icon-theme
       gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
