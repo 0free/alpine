@@ -89,7 +89,6 @@ profile_linux() {
       gnome-control-center gnome-control-center-bash-completion
       gnome-tweaks gnome-colors-common gsettings-desktop-schemas
       tracker tracker-bash-completion
-      chrome-gnome-shell gnome-browser-connector
       adwaita-icon-theme hicolor-icon-theme
       gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
       nautilus
