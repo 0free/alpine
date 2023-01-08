@@ -111,6 +111,7 @@ AutomaticLoginEnable=true
 AutomaticLogin=root
 EOF
 
+mkdir -p "$tmp"/etc/
 curl -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
 mv dconf-settings.ini "$tmp"/etc/
 
