@@ -83,7 +83,8 @@ util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linu
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
-gdm gdm-openrc mutter mutter-schemas
+gdm gdm-openrc
+mutter mutter-schemas
 gnome-desktop gnome-desktop-lang gnome-session
 gnome-shell gnome-shell-schemas
 gnome-control-center gnome-control-center-bash-completion
@@ -115,7 +116,7 @@ makefile root:root 0755 "$tmp"/etc/profile.d/bash.sh <<EOF
 sed -i 's|/bin/ash|/bin/bash|' /etc/passwd
 ln -sf /bin/bash /bin/sh
 ln -sf /bin/bash /bin/ash
-export PS1='\[\e[33m\]$SHELL\[\e[0m\] | \[\e]0;\w\a\]\[\e[32m\]\u | \[\033[1;32m\]\h\n\[\e[35m\]\w\[\e[0m\] > \[\033[0m\]'
+export PS1='\[\e[33m\]$SHELL\[\e[0m\] | \[\e]0;\w\a\]\[\e[32m\]\u\[\e[0m\] | \[\033[1;32m\]\h\n\[\e[35m\]\w\[\e[0m\] > \[\033[0m\]'
 install() {
 	if curl -s -o /dev/null alpinelinux.org; then
 	    curl -LO https://raw.githubusercontent.com/0free/alpine/1/install.sh && bash install.sh

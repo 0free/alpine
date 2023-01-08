@@ -83,7 +83,8 @@ profile_linux() {
       xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
       xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
       zfs zfs-openrc zfs-libs
-      gdm gdm-openrc mutter mutter-schemas
+      gdm gdm-openrc
+      mutter mutter-schemas
       gnome-desktop gnome-desktop-lang gnome-session
       gnome-shell gnome-shell-schemas
       gnome-control-center gnome-control-center-bash-completion
