@@ -83,26 +83,18 @@ profile_linux() {
       xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
       xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
       zfs zfs-openrc zfs-libs
-      sddm sddm-openrc sddm-kcm sddm-breeze
-      plasma-desktop
-      plasma-workspace plasma-workspace-libs
-      plasma-settings
-      plasma-framework
-      plasma-integration plasma-browser-integration
-      plasma-thunderbolt plasma-disks
-      kwrited systemsettings ksysguard polkit-kde-agent-1
-      breeze-gtk breeze-icons
-      bluedevil powerdevil
-      kwayland
-      plasma-nm iproute2 net-tools
-      kpipewire kmix
-      ki18n kwin kinit kcron kdecoration krecorder
-      kscreen kscreenlocker libkscreen
-      kde-gtk-config khotkeys
-      konsole
-      dolphin dolphin-plugins kfind
-      kate kate-common hunspell-en
-      ark
+      gdm gdm-openrc mutter mutter-schemas
+      gnome-desktop gnome-desktop-lang gnome-session
+      gnome-shell gnome-shell-schemas gnome-menus
+      gnome-control-center gnome-control-center-bash-completion
+      gnome-tweaks gnome-colors-common gsettings-desktop-schemas
+      tracker tracker-bash-completion
+      chrome-gnome-shell gnome-browser-connector
+      adwaita-icon-theme hicolor-icon-theme
+      gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
+      nautilus
+      gedit py3-cairo aspell-en hunspell-en nuspell
+      network-manager-applet
    "
 }
 EOF

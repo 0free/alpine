@@ -83,26 +83,18 @@ util-linux util-linux-bash-completion util-linux-login util-linux-misc util-linu
 xauth xinit xkbcomp xkeyboard-config xorg-server xorg-server-common xwayland
 xf86-input-evdev xf86-input-mtrack xf86-input-synaptics
 zfs zfs-openrc zfs-libs
-sddm sddm-openrc sddm-kcm sddm-breeze
-plasma-desktop
-plasma-workspace plasma-workspace-libs
-plasma-settings
-plasma-framework
-plasma-integration plasma-browser-integration
-plasma-thunderbolt plasma-disks
-kwrited systemsettings ksysguard polkit-kde-agent-1
-breeze-gtk breeze-icons
-bluedevil powerdevil
-kwayland
-plasma-nm iproute2 net-tools
-kpipewire kmix
-ki18n kwin kinit kcron kdecoration krecorder
-kscreen kscreenlocker libkscreen
-kde-gtk-config khotkeys
-konsole
-dolphin dolphin-plugins kfind
-kate kate-common hunspell-en
-ark
+gdm gdm-openrc mutter mutter-schemas
+gnome-desktop gnome-desktop-lang gnome-session
+gnome-shell gnome-shell-schemas gnome-menus
+gnome-control-center gnome-control-center-bash-completion
+gnome-tweaks gnome-colors-common gsettings-desktop-schemas
+tracker tracker-bash-completion
+chrome-gnome-shell gnome-browser-connector
+adwaita-icon-theme hicolor-icon-theme
+gnome-terminal gnome-disk-utility gnome-system-monitor file-roller
+nautilus
+gedit py3-cairo aspell-en hunspell-en nuspell
+network-manager-applet
 EOF
 
 makefile root:root 0644 "$tmp"/etc/apk/repositories <<EOF
@@ -111,14 +103,13 @@ https://uk.alpinelinux.org/alpine/edge/community
 https://uk.alpinelinux.org/alpine/edge/testing
 EOF
 
-mkdir -p "$tmp"/etc/sddm.conf.d/
-makefile root:root 0644 "$tmp"/etc/sddm.conf.d/autologin <<EOF
-[Autologin]
-User=root
-Session=plasma.desktop
-Relogin=true
+mkdir -p "$tmp"/etc/gdm/
+makefile root:root 0644 "$tmp"/etc/gdm/custom.conf <<EOF
+[daemon]
+WaylandEnable=true
+AutomaticLoginEnable=true
+AutomaticLogin=root
 EOF
-
 
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/bash.sh <<EOF
@@ -140,7 +131,7 @@ makefile root:root 0755 "$tmp"/root/.config/autostart/terminal.desktop <<EOF
 [Desktop Entry]
 Name=terminal
 Type=Application
-Exec=/usr/bin/konsole
+Exec=/usr/bin/gnome-terminal
 EOF
 
 rc_add devfs sysinit
@@ -187,7 +178,7 @@ rc_add bluetooth default
 rc_add elogind default
 rc_add polkit default
 
-rc_add sddm default
+rc_add gdm default
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
