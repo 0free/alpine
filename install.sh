@@ -1220,7 +1220,7 @@ kernel() {
     echo ">>> downloading Linux-\$kernel source"
     curl -o ~/linux-\$kernel.tar.xz -LO \$url
     echo ">>> extracting Linux-\$kernel source"
-    tar -xf ~/linux-\kernel.tar.xz -C ~/
+    tar x -Jf ~/linux-\kernel.tar.xz -C ~/
     echo ">>> deleting linux-\$kernel.tar.xz"
     rm ~/linux-\$kernel.tar.xz
     echo ">>> copying alpine linux kernel configuration"
@@ -1372,8 +1372,8 @@ install_google_chrome() {
     ar -x google-chrome.deb data.tar.xz
     rm google-chrome.deb
     echo ">>> extracting data.tar.xz"
-    tar -xf data.tar.xz ./opt/
-    tar -xf data.tar.xz ./usr/share/applications/google-chrome.desktop
+    tar x -Jf data.tar.xz ./opt/
+    tar x -Jf data.tar.xz ./usr/share/applications/google-chrome.desktop
     rm data.tar.xz
     echo ">>> adding google-chrome"
     mv $H/opt/google/ /opt/
@@ -1405,7 +1405,7 @@ google-update() {
         echo ">>> updating google-chrome"
         ar -x ~/google-chrome.deb data.tar.xz
         rm ~/google-chrome.deb
-        tar -xf ~/data.tar.xz ./opt/
+        tar x -Jf ~/data.tar.xz ./opt/
         sudo mv ~/opt/google/ /opt/
         rm -r ~/opt/
         sudo chown -R root:root /opt/
@@ -1431,7 +1431,7 @@ install_miner() {
         echo ">>> downloading T-Rex $version"
         curl -o /root/trex.tar.gz -LO trex-miner.com/download/t-rex-$version-linux.tar.gz
         echo ">>> extracting T-Rex $version"
-        tar -zxf /root/trex.tar.gz t-rex -C /usr/bin/
+        tar x -zf /root/trex.tar.gz t-rex -C /usr/bin/
         echo ">>> deleting T-Rex file"
         rm /root/trex.tar.gz
     fi
@@ -1476,7 +1476,7 @@ update_trex() {
         echo ">>> downloading T-Rex \$latest"
         curl -o ~/trex.tar.gz -LO trex-miner.com/download/t-rex-\$latest-linux.tar.gz
         echo ">>> extracting T-Rex \$latest"
-        sudo tar -zxf trex.tar.gz t-rex -C /usr/bin/
+        sudo tar x -zf trex.tar.gz t-rex -C /usr/bin/
         sudo sed -Ei "s|^version='.*'|version='\$latest'|" /etc/prfile.d/trex.sh
         echo ">>> deleting T-Rex file"
         rm ~/trex.tar.gz
