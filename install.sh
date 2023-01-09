@@ -1206,10 +1206,10 @@ kernel() {
     echo ">>> getting latest stable Linux kernel version"
     curl -o ~/Makefile -LO "git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/Makefile"
     #curl -o ~/Makefile -LO "git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/Makefile"
-    version=$(grep -E '^VERSION = ' ~/Makefile | grep -o '[0-9]{1,4}')
-    patchLevel=$(grep -E '^PATCHLEVEL = ' ~/Makefile | grep -o '[0-9]{1,4}')
-    subLevel=$(grep -E '^SUBLEVEL = ' ~/Makefile | grep -o '[0-9]{1,4}')
-    extraVersion=$(grep -E '^EXTRAVERSION = ' ~/Makefile | grep -o '-rc[0-9]{1,2}')
+    version=\$(grep -E '^VERSION = ' ~/Makefile | grep -o '[0-9]{1,4}')
+    patchLevel=\$(grep -E '^PATCHLEVEL = ' ~/Makefile | grep -o '[0-9]{1,4}')
+    subLevel=\$(grep -E '^SUBLEVEL = ' ~/Makefile | grep -o '[0-9]{1,4}')
+    extraVersion=\$(grep -E '^EXTRAVERSION = ' ~/Makefile | grep -o '-rc[0-9]{1,2}')
     rm ~/Makefile
     kernel="\${version}.\${patchLevel}.\${subLevel}\${extraVersion}"
     if [[ \$extraVersion ]]; then
@@ -1234,11 +1234,11 @@ kernel() {
     sed -i 's|CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=""|' ~/linux-\$kernel/.config
     sed -i 's|CONFIG_DEFAULT_HOSTNAME=.*|CONFIG_DEFAULT_HOSTNAME=""|' ~/linux-\$kernel/.config
     echo ">>> configuring Linux-\$kernel"
-    cd ~/linux-\$kernel/ && make -j$(nproc) xconfig
+    cd ~/linux-\$kernel/ && make -j\$(nproc) xconfig
     echo ">>> making Linux kernel"
-    cd ~/linux-\$kernel/ && make -j$(nproc)
+    cd ~/linux-\$kernel/ && make -j\$(nproc)
     echo ">>> installing modules"
-    cd ~/linux-\$kernel/ && make -j$(nproc) modules_install
+    cd ~/linux-\$kernel/ && make -j\$(nproc) modules_install
     cd ~
     echo ">>> installing Linux-\$kernel"
     installkernel \$kernel ~/linux-\$kernel/arch/x86/boot/bzImage ~/linux-\$kernel/System.map /boot/
@@ -1273,13 +1273,13 @@ zfs-install() {
         echo ">>> building zfs-src"
         cd /usr/src/zfs/ && sh autogen.sh
         cd /usr/src/zfs/ && ./configure
-        cd /usr/src/zfs/ && make -s -j"$(nproc)"
+        cd /usr/src/zfs/ && make -s -j\$(nproc)
         cd /usr/src/zfs/ && make install
         cd /usr/src/zfs/ && ldconfig
         cd /usr/src/zfs/ && depmod
         cd /root/
         echo '>>> building kernel modules'
-        kernel_edge=$(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
+        kernel_edge=\$(apk search -e linux-edge | sed 's|linux-edge-||' | sed 's|r||')-edge)
         sudo akms install -k \$kernel_edge all
         sudo sed -i "s|^version='.*'|version='\$(apk search -e zfs-src)'|" /etc/profile.d/zfs.sh
         echo ">>> cleaning packages"
@@ -1368,12 +1368,13 @@ install_google_chrome() {
     curl -o $H/google-chrome.deb -LO $url
 
     echo ">>> extracting .deb file"
-    ar -x $H/google-chrome.deb data.tar.xz
-    rm $H/google-chrome.deb
+    cd $H/
+    ar -x google-chrome.deb data.tar.xz
+    rm google-chrome.deb
     echo ">>> extracting data.tar.xz"
-    tar -xf /data.tar.xz ./opt/
-    tar -xf /data.tar.xz ./usr/share/applications/google-chrome.desktop
-    rm /data.tar.xz
+    tar -xf data.tar.xz ./opt/
+    tar -xf data.tar.xz ./usr/share/applications/google-chrome.desktop
+    rm data.tar.xz
     echo ">>> adding google-chrome"
     mv $H/opt/google/ /opt/
     rm -r /opt/google/chrome/cron/
