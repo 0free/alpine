@@ -987,7 +987,7 @@ enable_services() {
     #openrc
     services 'devfs procfs dmesg hwdrivers modloop root' sysinit
     services 'modules cgroups mtab hwclock swap localmount sysctl hostname bootmisc networking local' boot
-    service 'mount-ro killprocs savecache' shutdown
+    services 'mount-ro killprocs savecache' shutdown
     #busybox
     services 'mdev' sysinit
     services 'syslog' boot
