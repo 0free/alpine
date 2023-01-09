@@ -1000,7 +1000,7 @@ enable_services() {
     services 'lvm' boot
     #zfs
     services 'zfs-mount' sysinit
-    service 'zfs-import zfs-share zfs-zed zfs-load-key' boot
+    services 'zfs-import zfs-share zfs-zed zfs-load-key' boot
     #logind
     services 'elogind' default
     #polkit
@@ -1020,7 +1020,7 @@ enable_services() {
     #firmware
     services 'fwupd' default
     #login-manager
-    service 'seatd' boot
+    services 'seatd' boot
     services 'gdm greetd sddm' default
     #printer
     services 'cupsd' default
@@ -1367,11 +1367,13 @@ install_google_chrome() {
     echo ">>> downloading google-chrome-stable"
     curl -o $H/google-chrome.deb -LO $url
 
-    echo ">>> installing google-chrome"
+    echo ">>> extracting .deb file"
     ar -x $H/google-chrome.deb data.tar.xz
     rm $H/google-chrome.deb
+    echo ">>> extracting data.tar.xz"
     tar -xf $H/data.tar.xz ./opt/
     tar -xf $H/data.tar.xz ./usr/share/applications/google-chrome.desktop
+    echo ">>> adding google-chrome"
     mv $H/opt/google/ /opt/
     rm -r /opt/google/chrome/cron/
     mv $H/usr/share/applications/google-chrome.desktop /usr/share/applications/
