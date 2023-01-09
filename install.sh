@@ -969,8 +969,9 @@ setup_desktop() {
 
 services() {
 
-    services="$1"
-    run_level="$2"
+    local run_level="$2"
+    shift 2
+    local services=($@)
     for i in $services[@]; do
         if [ -f /etc/init.d/$i ]; then
             rc-update -q add $i $run_level
@@ -985,7 +986,7 @@ enable_services() {
 
     echo ">>> enabling services"
     #openrc
-    services 'procfs devfs dmesg hwdrivers modloop root' sysinit
+    services 'devfs procfs dmesg hwdrivers modloop root' sysinit
     services 'modules cgroups mtab hwclock swap localmount sysctl hostname bootmisc networking local' boot
     service 'mount-ro killprocs savecache' shutdown
     #busybox
