@@ -1372,6 +1372,7 @@ install_google_chrome() {
     ar -x google-chrome.deb data.tar.xz
     rm google-chrome.deb
     echo ">>> extracting data.tar.xz"
+    apk add --force-overwrite tar
     tar x -Jf data.tar.xz ./opt/
     tar x -Jf data.tar.xz ./usr/share/applications/google-chrome.desktop
     rm data.tar.xz
