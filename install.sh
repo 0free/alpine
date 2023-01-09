@@ -935,7 +935,7 @@ setup_desktop() {
     custom_kernel
 
     if grep -q zfs /root/list; then
-        if ! grep qemu /root/list ; then
+        if ! grep -q qemu /root/list; then
             build_zfs
         fi
     fi
@@ -944,7 +944,7 @@ setup_desktop() {
         install_nvidia
     fi
 
-    if ! grep server /root/list; then
+    if ! grep -q server /root/list; then
         install_flatpak
     fi
 
@@ -1371,8 +1371,9 @@ install_google_chrome() {
     ar -x $H/google-chrome.deb data.tar.xz
     rm $H/google-chrome.deb
     echo ">>> extracting data.tar.xz"
-    tar -xf $H/data.tar.xz ./opt/
-    tar -xf $H/data.tar.xz ./usr/share/applications/google-chrome.desktop
+    tar -xf /data.tar.xz ./opt/
+    tar -xf /data.tar.xz ./usr/share/applications/google-chrome.desktop
+    rm /data.tar.xz
     echo ">>> adding google-chrome"
     mv $H/opt/google/ /opt/
     rm -r /opt/google/chrome/cron/
