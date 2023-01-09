@@ -2020,8 +2020,26 @@ install_clover() {
 custom_commands() {
 
     echo ">>> adding custom commands"
+    cat > /etc/profile.d/colors.sh <<EOF
+export color_black='\e[0;30m'
+export color_gray='\e[1;30m'
+export color_red='\e[0;31m'
+export color_light_red='\e[1;31m'
+export color_green='\e[0;32m'
+export color_light_green='\e[1;32m'
+export color_brown='\e[0;33m'
+export color_yellow='\e[1;33m'
+export color_blue='\e[0;34m'
+export color_light_blue='\e[1;34m'
+export color_purple='\e[0;35m'
+export color_light_purple='\e[1;35m'
+export color_cyan='\e[0;36m'
+export color_light_cyan='\e[1;36m'
+export color_light_gray='\e[0;37m'
+export color_white='\e[1;37m'
+EOF
     cat > /etc/profile.d/commands.sh <<EOF
-export PS1='\[\e[33m\]$SHELL\[\e[0m\] | \[\e]0;\w\a\]\[\e[32m\]\u\[\e[0m\] | \[\033[1;32m\]\h\n\[\e[35m\]\w\[\e[0m\] > \[\033[0m\]'
+export PS1=' \[color_yellow\]shell: \[color_blue\]$SHELL \[color_red\]| \[color_yellow\]user: \[color_cyan\]\u \[color_red\]| \[color_yellow\]host: \[color_light_cyan\]\h \[color_red\]| \[color_yellow\]dir: \[color_purple\]\w\n \[color_red\]> \[color_gray\]'
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
