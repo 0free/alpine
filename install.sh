@@ -960,10 +960,7 @@ setup_desktop() {
     fi
 
     make_initramfs
-
-    if mountpoint -q /mnt/boot/; then
-        setup_bootloader
-    fi
+    setup_bootloader
 
 }
 
