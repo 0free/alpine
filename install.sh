@@ -969,10 +969,9 @@ setup_desktop() {
 
 services() {
 
-    local run_level="$2"
-    shift 2
-    local services=($@)
-    for i in $services[@]; do
+    services="$1"
+    run_level="$2"
+    for i in ${services[@]}; do
         if [ -f /etc/init.d/$i ]; then
             rc-update -q add $i $run_level
         else
