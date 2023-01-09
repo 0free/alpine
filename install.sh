@@ -924,6 +924,10 @@ setup_desktop() {
     enable_services
     configure_alpine
 
+    if grep -q server /root/list; then
+        setup_mariadb
+    fi
+
     if [ -f /etc/greetd/config.toml ]; then
         configure_greetd
     fi
@@ -963,94 +967,69 @@ setup_desktop() {
 
 }
 
+services() {
+
+    services="$1"
+    run_level="$2"
+    for i in $services[@]; do
+        if [ -f /etc/init.d/$i ]; then
+            rc-update -q add $i $run_level
+        else
+            echo "no service '$i'"
+        fi
+    done
+
+}
+
 enable_services() {
 
     echo ">>> enabling services"
-
-    rc-update -q add devfs sysinit
-    rc-update -q add dmesg sysinit
-    rc-update -q add mdev sysinit
-    rc-update -q add hwdrivers sysinit
-    rc-update -q add modloop sysinit
-
-    rc-update -q add udev sysinit
-    rc-update -q add udev-trigger sysinit
-    rc-update -q add udev-settle sysinit
-    rc-update -q add udev-postmount sysinit
-
-    rc-update -q add dbus sysinit
-
-    rc-update -q add procfs boot
-    rc-update -q add devfs boot
-    rc-update -q add sysfs boot
-    rc-update -q add root boot
-
-    rc-update -q add modules boot
-    rc-update -q add cgroups boot
-    rc-update -q add mtab boot
-    rc-update -q add hwclock boot
-    rc-update -q add lvm boot
-    rc-update -q add swap boot
-    rc-update -q add localmount boot
-    rc-update -q add sysctl boot
-    rc-update -q add hostname boot
-    rc-update -q add bootmisc boot
-    rc-update -q add syslog boot
-    rc-update -q add networking boot
-    rc-update -q add local boot
-
-    if grep -q zfs /root/list; then
-        rc-update -q add zfs-mount sysinit
-        rc-update -q add zfs-import boot
-        rc-update -q add zfs-share boot
-        rc-update -q add zfs-zed boot
-        rc-update -q add zfs-load-key boot
-    fi
-
-    rc-update -q add acpid default
-    rc-update -q add crond default
-
-    rc-update -q add elogind default
-    rc-update -q add polkit default
-
-    rc-update -q add networkmanager default
-    rc-update -q add networkmanager-dispatcher default
-
-    rc-update -q add alsa default
-    rc-update -q add bluealsa default
-    rc-update -q add bluetooth default
-    rc-update -q add ufw default
-    rc-update -q add rsyncd default
-
-    if ! grep -q qemu /root/list; then
-        rc-update -q add iwd default
-        rc-update -q add fwupd default
-    fi
-
-    if grep -q gnome /root/list; then
-        rc-update -q add gdm default
-    fi
-
-    if grep -q kde /root/list; then
-        rc-update -q add sddm default
-    fi
-
-    if grep -q workstation /root/list; then
-        rc-update -q add cupsd default
-    fi
-
-    if grep -q server /root/list; then
-        setup_mariadb
-        rc-update -q add mariadb default
-        rc-update -q add litespeed default
-        rc-update -q add postfix default
-        rc-update -q add dovecot default
-        rc-update -q add opendkim default
-    fi
-
-    rc-update -q add mount-ro shutdown
-    rc-update -q add killprocs shutdown
-    rc-update -q add savecache shutdown
+    #openrc
+    services 'procfs devfs dmesg hwdrivers modloop root' sysinit
+    services 'modules cgroups mtab hwclock swap localmount sysctl hostname bootmisc networking local' boot
+    service 'mount-ro killprocs savecache' shutdown
+    #busybox
+    services 'mdev' sysinit
+    services 'syslog' boot
+    services 'acpid crond' default
+    #udev
+    services 'udev udev-trigger udev-settle udev-postmount' sysinit
+    #dbus
+    services 'dbus' sysinit
+    #lvm2
+    services 'lvm' boot
+    #zfs
+    services 'zfs-mount' sysinit
+    service 'zfs-import zfs-share zfs-zed zfs-load-key' boot
+    #logind
+    services 'elogind' default
+    #polkit
+    services 'polkit' default
+    #networkmanager
+    services 'networkmanager networkmanager-dispatcher' default
+    #alsa
+    services 'alsa' default
+    #bluez
+    services 'bluetooth bluealsa' default
+    #firewall
+    services 'ufw' default
+    #rsync
+    services 'rsyncd' default
+    #wireless
+    services 'iwd' default
+    #firmware
+    services 'fwupd' default
+    #login-manager
+    service 'seatd' boot
+    services 'gdm greetd sddm' default
+    #printer
+    services 'cupsd' default
+    #database
+    services 'mariadb' default
+    #web-server
+    services 'litespeed' default
+    #mail-server
+    services 'postfix dovecot opendkim' default
 
 }
 
