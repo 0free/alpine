@@ -635,6 +635,10 @@ setup_drive() {
 
 create_zfs() {
 
+    echo ">>> unloading ZFS modules"
+    for i in zavl icp zlua znvpair spl zunicode zcommon zfs zzstd; do
+        find /lib/modules -name $i.ko.gz | modprobe -r $i
+    done
     echo ">>> loading ZFS modules"
     modprobe zfs
     echo ">>> checking ZFS modules"
