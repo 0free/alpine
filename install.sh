@@ -1999,14 +1999,16 @@ install_clover() {
 custom_commands() {
 
     echo ">>> adding custom commands"
-    cat > /etc/profile.d/colors.sh <<EOF
+    cat > /etc/profile.d/bash.sh <<EOF
+#format
+export textBold='\e[1m'; export textDim='\e[2m'; export textBlink='\e[5m'; export textHidden='\e[8m'; export textInvert='\e[7m'; export textDefault='\e[21m';
 #foreground
-export colorDefault='\e[39'; export colorBlack='\e[30m'; export colorRed='\e[31m'; export colorGreen='\e[32m'; export colorYellow='\e[33m'; export colorBlue='\e[34m'; export colorMagenta='\e[35m'; export colorCyan='\e[36m'; export colorLightGray='\e[37m'; export colorDarkGray='\e[90m'; export colorLightRed='\e[91m'; export colorLightGreen='\e[92m'; export colorLightYellow='\e[93m'; export colorLightBlue='\e[94m'; export colorLightMagenta='\e[95m'; export colorLightCyan='\e[96m'; export colorWhite='\e[97m'; 
+export colorDefault='\e[39'; export colorBlack='\e[30m'; export colorRed='\e[31m'; export colorGreen='\e[32m'; export colorYellow='\e[33m'; export colorBlue='\e[34m'; export colorMagenta='\e[35m'; export colorCyan='\e[36m'; export colorLightGray='\e[37m'; export colorDarkGray='\e[90m'; export colorLightRed='\e[91m'; export colorLightGreen='\e[92m'; export colorLightYellow='\e[93m'; export colorLightBlue='\e[94m'; export colorLightMagenta='\e[95m'; export colorLightCyan='\e[96m'; export colorWhite='\e[97m';
 #background
-export BcolorDefault='\e[49'; export BcolorBlack='\e[40m'; export BcolorRed='\e[41m'; export BcolorGreen='\e[42m'; export BcolorYellow='\e[43m'; export BcolorBlue='\e[44m'; export BcolorMagenta='\e[45m'; export BcolorCyan='\e[46m'; export BcolorLightGray='\e[47m'; export BcolorDarkGray='\e[100m'; export BcolorLightRed='\e[101m'; export BcolorLightGreen='\e[102m'; export BcolorLightYellow='\e[103m'; export BcolorLightBlue='\e[104m'; export BcolorLightMagenta='\e[105m'; export BcolorLightCyan='\e[106m'; export BcolorWhite='\e[107m'; 
+export BcolorDefault='\e[49'; export BcolorBlack='\e[40m'; export BcolorRed='\e[41m'; export BcolorGreen='\e[42m'; export BcolorYellow='\e[43m'; export BcolorBlue='\e[44m'; export BcolorMagenta='\e[45m'; export BcolorCyan='\e[46m'; export BcolorLightGray='\e[47m'; export BcolorDarkGray='\e[100m'; export BcolorLightRed='\e[101m'; export BcolorLightGreen='\e[102m'; export BcolorLightYellow='\e[103m'; export BcolorLightBlue='\e[104m'; export BcolorLightMagenta='\e[105m'; export BcolorLightCyan='\e[106m'; export BcolorWhite='\e[107m';
 EOF
     cat > /etc/profile.d/commands.sh <<EOF
-export PS1="\$BcolorYellow shell:\$color_blue \$SHELL \$color_red|\$BcolorYellow user:\$color_cyan \u \$color_red|\$BcolorYellow host:\$color_light_cyan \h \$color_red|\$BcolorYellow dir:\$color_purple \w\n\$color_red > \$color_gray"
+export PS1="\$BcolorYellow shell: \$colorBlue \$SHELL \$BcolorYellow user: \$colorCyan \u \$BcolorYellow host: \$colorLightCyan \h \$BcolorYellow dir: \$colorMagenta \w \n\$colorRed \$textBold>\$textDefault \$colorDefault "
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
