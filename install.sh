@@ -1048,7 +1048,7 @@ configure_alpine() {
 
     echo ">>> configuring alpineLinux"
     if [ -f /etc/profile.d/color_prompt.sh.disabled ]; then
-        mv /etc/profile.d/color_prompt.sh.disabled /etc/profile.d/color_prompt.sh
+        rm /etc/profile.d/color_prompt.sh.disabled
     fi
 
     if [ -d /etc/NetworkManager/ ]; then
@@ -2000,25 +2000,13 @@ custom_commands() {
 
     echo ">>> adding custom commands"
     cat > /etc/profile.d/colors.sh <<EOF
-export color_black='\e[0;30m'
-export color_gray='\e[1;30m'
-export color_red='\e[0;31m'
-export color_light_red='\e[1;31m'
-export color_green='\e[0;32m'
-export color_light_green='\e[1;32m'
-export color_brown='\e[0;33m'
-export color_yellow='\e[1;33m'
-export color_blue='\e[0;34m'
-export color_light_blue='\e[1;34m'
-export color_purple='\e[0;35m'
-export color_light_purple='\e[1;35m'
-export color_cyan='\e[0;36m'
-export color_light_cyan='\e[1;36m'
-export color_light_gray='\e[0;37m'
-export color_white='\e[1;37m'
+#foreground
+export colorDefault='\e[39'; export colorBlack='\e[30m'; export colorRed='\e[31m'; export colorGreen='\e[32m'; export colorYellow='\e[33m'; export colorBlue='\e[34m'; export colorMagenta='\e[35m'; export colorCyan='\e[36m'; export colorLightGray='\e[37m'; export colorDarkGray='\e[90m'; export colorLightRed='\e[91m'; export colorLightGreen='\e[92m'; export colorLightYellow='\e[93m'; export colorLightBlue='\e[94m'; export colorLightMagenta='\e[95m'; export colorLightCyan='\e[96m'; export colorWhite='\e[97m'; 
+#background
+export BcolorDefault='\e[49'; export BcolorBlack='\e[40m'; export BcolorRed='\e[41m'; export BcolorGreen='\e[42m'; export BcolorYellow='\e[43m'; export BcolorBlue='\e[44m'; export BcolorMagenta='\e[45m'; export BcolorCyan='\e[46m'; export BcolorLightGray='\e[47m'; export BcolorDarkGray='\e[100m'; export BcolorLightRed='\e[101m'; export BcolorLightGreen='\e[102m'; export BcolorLightYellow='\e[103m'; export BcolorLightBlue='\e[104m'; export BcolorLightMagenta='\e[105m'; export BcolorLightCyan='\e[106m'; export BcolorWhite='\e[107m'; 
 EOF
     cat > /etc/profile.d/commands.sh <<EOF
-export PS1=' \[color_yellow\]shell: \[color_blue\]$SHELL \[color_red\]| \[color_yellow\]user: \[color_cyan\]\u \[color_red\]| \[color_yellow\]host: \[color_light_cyan\]\h \[color_red\]| \[color_yellow\]dir: \[color_purple\]\w\n \[color_red\]> \[color_gray\]'
+export PS1="\$BcolorYellow shell:\$color_blue \$SHELL \$color_red|\$BcolorYellow user:\$color_cyan \u \$color_red|\$BcolorYellow host:\$color_light_cyan \h \$color_red|\$BcolorYellow dir:\$color_purple \w\n\$color_red > \$color_gray"
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
