@@ -2001,14 +2001,14 @@ custom_commands() {
     echo ">>> adding custom commands"
     cat > /etc/profile.d/bash.sh <<EOF
 #format
-export textBold='\e[1m'; export textDim='\e[2m'; export textBlink='\e[5m'; export textHidden='\e[8m'; export textInvert='\e[7m'; export textDefault='\e[21m';
+export textReset='\e[0m'; export textBold='\e[1m'; export textDim='\e[2m'; export textBlink='\e[5m'; export textHidden='\e[8m'; export textInvert='\e[7m'; export textDefault='\e[21m';
 #foreground
-export colorDefault='\e[39'; export colorBlack='\e[30m'; export colorRed='\e[31m'; export colorGreen='\e[32m'; export colorYellow='\e[33m'; export colorBlue='\e[34m'; export colorMagenta='\e[35m'; export colorCyan='\e[36m'; export colorLightGray='\e[37m'; export colorDarkGray='\e[90m'; export colorLightRed='\e[91m'; export colorLightGreen='\e[92m'; export colorLightYellow='\e[93m'; export colorLightBlue='\e[94m'; export colorLightMagenta='\e[95m'; export colorLightCyan='\e[96m'; export colorWhite='\e[97m';
+export color30='\e[30m'; export color31='\e[31m'; export color32='\e[32m'; export color33='\e[33m'; export color34='\e[34m'; export color5='\e[35m'; export color6='\e[36m'; export color37='\e[37m'; export color39='\e[39'; export color90='\e[90m'; export color91='\e[91m'; export color92='\e[92m'; export color93='\e[93m'; export color94='\e[94m'; export color95='\e[95m'; export color96='\e[96m'; export color97='\e[97m';
 #background
-export BcolorDefault='\e[49'; export BcolorBlack='\e[40m'; export BcolorRed='\e[41m'; export BcolorGreen='\e[42m'; export BcolorYellow='\e[43m'; export BcolorBlue='\e[44m'; export BcolorMagenta='\e[45m'; export BcolorCyan='\e[46m'; export BcolorLightGray='\e[47m'; export BcolorDarkGray='\e[100m'; export BcolorLightRed='\e[101m'; export BcolorLightGreen='\e[102m'; export BcolorLightYellow='\e[103m'; export BcolorLightBlue='\e[104m'; export BcolorLightMagenta='\e[105m'; export BcolorLightCyan='\e[106m'; export BcolorWhite='\e[107m';
+export colorB40='\e[40m'; export color41='\e[41m'; export colorB42='\e[42m'; export colorB43='\e[43m'; export colorB44='\e[44m'; export colorB45='\e[45m'; export colorB46='\e[46m'; export colorB47='\e[47m'; export colorB49='\e[49'; export colorB100='\e[100m'; export colorB101='\e[101m'; export colorB102='\e[102m'; export colorB103='\e[103m'; export colorB104='\e[104m'; export colorB105='\e[105m'; export colorB106n='\e[106m'; export colorB107='\e[107m';
 EOF
     cat > /etc/profile.d/commands.sh <<EOF
-export PS1="\$BcolorYellow shell: \$colorBlue \$SHELL \$BcolorYellow user: \$colorCyan \u \$BcolorYellow host: \$colorLightCyan \h \$BcolorYellow dir: \$colorMagenta \w \n\$colorRed \$textBold>\$textDefault \$colorDefault "
+export PS1="\$colorB44 shell:\$SHELL \$colorB102 user:\u \$colorB104 host:\h \$colorB45 dir:\$textBold \w \$textReset\n\$colorB41\$textBold > \$textReset "
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
