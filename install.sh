@@ -1374,9 +1374,9 @@ install_google_chrome() {
     tar x -Jf data.tar.xz ./usr/share/applications/google-chrome.desktop
     rm data.tar.xz
     echo ">>> adding google-chrome"
-    mv $H/opt/google/ /opt/
+    mv -f $H/opt/google/ /opt/
     rm -r /opt/google/chrome/cron/
-    mv $H/usr/share/applications/google-chrome.desktop /usr/share/applications/
+    mv -f $H/usr/share/applications/google-chrome.desktop /usr/share/applications/
     rm -r $H/opt/
     rm -r $H/usr/
     chown -R root:root /opt/
