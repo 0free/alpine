@@ -1374,9 +1374,9 @@ install_google_chrome() {
     tar x -Jf data.tar.xz ./usr/share/applications/google-chrome.desktop
     rm data.tar.xz
     echo ">>> adding google-chrome"
-    mv -f $H/opt/google/ /opt/
-    rm -r /opt/google/chrome/cron/
-    mv -f $H/usr/share/applications/google-chrome.desktop /usr/share/applications/
+    cp -rf $H/opt/google/ /opt/
+    rm -rf /opt/google/chrome/cron/
+    mv $H/usr/share/applications/google-chrome.desktop /usr/share/applications/
     rm -r $H/opt/
     rm -r $H/usr/
     chown -R root:root /opt/
@@ -1404,7 +1404,8 @@ google-update() {
         ar -x ~/google-chrome.deb data.tar.xz
         rm ~/google-chrome.deb
         tar x -Jf ~/data.tar.xz ./opt/
-        sudo mv -f ~/opt/google/ /opt/
+        sudo cp -rf ~/opt/google/ /opt/
+        sudo rm -rf /opt/google/chrome/cron/
         rm -r ~/opt/
         sudo chown -R root:root /opt/
         sudo sed -i "s|^version='.*'|version='\$current'|" /etc/profile.d/google-chrome.sh
@@ -1753,7 +1754,7 @@ install_syslinux() {
 
     mkdir -p /boot/efi/syslinux/
     cp /usr/share/syslinux/efi64/* /boot/efi/syslinux/
-    mv -f /boot/efi/syslinux/*.efi /boot/efi/syslinux/bootx64.efi
+    mv /boot/efi/syslinux/*.efi /boot/efi/syslinux/bootx64.efi
 
     echo ">>> configuring extlinux"
     sed -i "s|overwrite=1|overwrite=0|" /etc/update-extlinux.conf
@@ -1810,7 +1811,7 @@ install_grub() {
         echo ">>> cloning grub-theme"
         git clone https://github.com/0free/grub-theme.git
         rm -r grub-theme/.git/
-        mv -f grub-theme/ /boot/grub/themes/
+        mv grub-theme/ /boot/grub/themes/
     fi
 
     sed -i "s|CLASS=\".*\"|CLASS=\"--class \$( . /etc/os-release; echo \"$ID\")\"|" /etc/grub.d/10_linux
