@@ -1386,7 +1386,7 @@ install_google_chrome() {
 	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
 		install -Dm644 /opt/google/chrome/product_logo_${i/x*/}.png /usr/share/icons/hicolor/$i/apps/google-chrome.png
 	done
-    sudo rm /opt/google/chrome/product_logo_*.png
+    rm /opt/google/chrome/product_logo_*.png
 
     version=$(curl -s -o /dev/null $url | head -c96 | cut -c 5-)
 
@@ -1453,7 +1453,7 @@ Exec=konsole -e t-rex -c ~/config
 EOF
     fi
 
-    sudo chmod +x $H/.config/autostart/*.desktop
+    chmod +x $H/.config/autostart/*.desktop
 
     cat > /etc/profile.d/trex.sh << EOF
 version='$version'
