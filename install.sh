@@ -2005,10 +2005,10 @@ export textReset='\e[0m'; export textBold='\e[1m'; export textDim='\e[2m'; expor
 #foreground
 export color30='\e[30m'; export color31='\e[31m'; export color32='\e[32m'; export color33='\e[33m'; export color34='\e[34m'; export color5='\e[35m'; export color6='\e[36m'; export color37='\e[37m'; export color39='\e[39'; export color90='\e[90m'; export color91='\e[91m'; export color92='\e[92m'; export color93='\e[93m'; export color94='\e[94m'; export color95='\e[95m'; export color96='\e[96m'; export color97='\e[97m';
 #background
-export colorB40='\e[40m'; export color41='\e[41m'; export colorB42='\e[42m'; export colorB43='\e[43m'; export colorB44='\e[44m'; export colorB45='\e[45m'; export colorB46='\e[46m'; export colorB47='\e[47m'; export colorB49='\e[49'; export colorB100='\e[100m'; export colorB101='\e[101m'; export colorB102='\e[102m'; export colorB103='\e[103m'; export colorB104='\e[104m'; export colorB105='\e[105m'; export colorB106n='\e[106m'; export colorB107='\e[107m';
+export color40='\e[40m'; export color41='\e[41m'; export color42='\e[42m'; export color43='\e[43m'; export color44='\e[44m'; export color45='\e[45m'; export color46='\e[46m'; export color47='\e[47m'; export color49='\e[49'; export color100='\e[100m'; export color101='\e[101m'; export color102='\e[102m'; export color103='\e[103m'; export color104='\e[104m'; export color105='\e[105m'; export color106n='\e[106m'; export color107='\e[107m';
 EOF
     cat > /etc/profile.d/commands.sh <<EOF
-export PS1="\$colorB44 shell:\$SHELL \$colorB102 user:\u \$colorB104 host:\h \$colorB45 dir:\$textBold \w \$textReset\n\$colorB41\$textBold > \$textReset "
+export PS1="\$color44 shell:\$SHELL \$color102 user:\u \$color104 host:\h \$color45 dir:\$textBold \w \$textReset\n \$color31\$textBold>\$textReset"
 export QT_IM_MODULE=ibus
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
