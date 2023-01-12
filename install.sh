@@ -1110,12 +1110,8 @@ EOF
         if [ ! -f $H/dconf-settings.ini ]; then
             echo ">>> downloading gnome dconf-settings"
             curl -o $H/dconf-settings.ini -LO https://raw.githubusercontent.com/0free/alpine/1/dconf-settings.ini
-            cat > /etc/profile.d/gnome.sh <<EOF
-if [ -f ~/dconf-settings.ini ]; then
-    dconf load / < ~/dconf-settings.ini
-    rm ~/dconf-settings.ini
-fi
-EOF
+            dconf load / < ~/dconf-settings.ini
+            rm ~/dconf-settings.ini
         fi
     fi
 
