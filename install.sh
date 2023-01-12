@@ -1123,7 +1123,7 @@ EOF
             cd $H/
             git clone https://github.com/0free/kde-settings.git
             echo ">>> configuring KDE"
-            cp -rf /kde-settings/config/* $H/.config/
+            cp -rf /kde-settings/config/ $H/.config/
             rm -r $H/kde-settings/
         fi
         mkdir -p /etc/sddm.conf.d/
