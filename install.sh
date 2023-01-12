@@ -917,6 +917,7 @@ create_user() {
     if grep -q zfs /root/list; then
         zfs allow $user create,mount,mountpoint,snapshot $pool
     fi
+    H='/home/$user'
     mkdir -p $H/.config/autostart/
 
 }
@@ -2191,7 +2192,7 @@ else
             setup_bootloader
         elif [[ $(find /home -maxdepth 1 -type d | wc -l) -ne 1 ]]; then
             user=$(ls /home/)
-            H="/home/$user"
+            H='/home/$user'
             setup_desktop
         else
             configure
