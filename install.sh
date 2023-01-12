@@ -826,8 +826,8 @@ install_linux() {
     fi
 
     echo ">>> installing linux"
-    apk add --root=/mnt/ linux-firmware-none
-    apk add --root=/mnt/ $list
+    apk --root=/mnt/ add linux-firmware-none
+    apk --root=/mnt/ add $list
 
 }
 
@@ -841,8 +841,9 @@ install_packages() {
         list+="$p "
     done
     echo ">>> installing packages"
-    apk add --root=/mnt/ $list
-    apk fix --root=/mnt/
+    apk --root=/mnt/ update
+    apk --root=/mnt/ fix
+    apk --root=/mnt/ add $list
 
 }
 
@@ -1380,7 +1381,7 @@ install_google_chrome() {
     rm -r $H/opt/
     rm -r $H/usr/
     chown -R root:root /opt/
-    ln -s /opt/google/chrome/chrome /usr/bin/google-chrome-stable
+    ln -sf /opt/google/chrome/chrome /usr/bin/google-chrome-stable
 
     echo ">>> configuring google-chrome"
 	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
