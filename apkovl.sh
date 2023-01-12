@@ -139,6 +139,9 @@ install() {
 	if curl -s -o /dev/null alpinelinux.org; then
 	    curl -o ~/install.sh -LO https://raw.githubusercontent.com/0free/alpine/1/install.sh
 		bash ~/install.sh
+		if [ -f /mnt/reboot ]; then
+			bash ~/install.sh
+		fi
     else
         echo 'no internet'
 	fi
