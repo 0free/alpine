@@ -1118,10 +1118,11 @@ EOF
     fi
 
     if grep -q kde /root/list; then
-        if [ ! -d $H/.config/kde.org/ ]; then
-            echo ">>> configuring kde"
+        if [ ! -d $H/kde-settings/ ]; then
+            echo ">>> cloning KDE settings"
             cd $H/
-            git clone https://github.com/0free/kde-settings.git
+            git clone https://github.com/0free/kde-settings.git\
+            echo ">>> configuring KDE"
             cp -rf /kde-settings/config/* $H/.config/
             rm -r $H/kde-settings/
         fi
