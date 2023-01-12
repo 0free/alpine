@@ -617,6 +617,7 @@ setup_drive() {
 
     echo ">>> creating root filesystem"
     if [[ $filesystem == zfs ]]; then
+        apk add zfs
         create_zfs
         set_zfs
     elif [[ $filesystem == btrfs ]]; then
@@ -1250,6 +1251,17 @@ kernel() {
     rm -r ~/Linux-\$kernel/
     echo ">>> cleaning packages"
     apk del \$depend
+    echo ">>> adding gummiboot entry"
+    if [ -f /boot/initramfs ]; then
+        cat > /boot/loader/entries/linux.conf <<EOF
+title      Linux-\$kernel
+linux      /vmlinuz
+initrd     /amd-ucode.img
+initrd     /intel-ucode.img
+initrd     /initramfs
+\EOF
+        echo $(grep 'options' /boot/loader/entries/linux-lts.conf) >> /boot/loader/entries/linux.conf
+    fi
 }
 EOF
 
@@ -1674,7 +1686,7 @@ install_gummiboot() {
 
     echo ">>> configuring gummiboot"
     cat > /boot/loader/loader.conf <<EOF
-default linux.conf
+default linux-lts.conf
 timeout 1
 console-mode auto
 EOF
@@ -1687,50 +1699,40 @@ initrd      /EFI/Microsoft/Boot/BOOTMGFW.EFI
 options     'root=$(blkid $windowsBoot -o export | grep ^UUID=)'
 EOF
     fi
-    if [ -f /boot/initramfs ]; then
-        cat > /boot/loader/entries/linux.conf <<EOF
-title       Linux-$kernel
-linux       /vmlinuz
-initrd      /amd-ucode.img
-initrd      /intel-ucode.img
-initrd      /initramfs
-options     $disk
-EOF
-    fi
     if [ -f /boot/initramfs-virt ]; then
         cat > /boot/loader/entries/linux-virt.conf <<EOF
-title       alpine Linux virt
-linux       /vmlinuz-virt
-initrd      /initramfs-virt
-options     $disk
+title      alpine Linux virt
+linux      /vmlinuz-virt
+initrd     /initramfs-virt
+options    $disk
 EOF
     fi
     if [ -f /boot/initramfs-edge ]; then
         cat > /boot/loader/entries/linux-edge.conf <<EOF
-title       alpine Linux edge
-linux       /vmlinuz-edge
-initrd      /amd-ucode.img
-initrd      /intel-ucode.img
-initrd      /initramfs-edge
-options     $disk
+title      alpine Linux edge
+linux      /vmlinuz-edge
+initrd     /amd-ucode.img
+initrd     /intel-ucode.img
+initrd     /initramfs-edge
+options    $disk
 EOF
     fi
     if [ -f /boot/initramfs-lts ]; then
         cat > /boot/loader/entries/linux-lts.conf <<EOF
-title       alpine Linux LTS
-linux       /vmlinuz-lts
-initrd      /amd-ucode.img
-initrd      /intel-ucode.img
-initrd      /initramfs-lts
-options     $disk
+title      alpine Linux LTS
+linux      /vmlinuz-lts
+initrd     /amd-ucode.img
+initrd     /intel-ucode.img
+initrd     /initramfs-lts
+options    $disk
 EOF
     fi
 
     if [ -f /boot/fwupd/efi/fwupdx64.efi ]; then
         echo ">>> adding fwupd to gummiboot"
         cat > /boot/loader/entries/fwupd.conf <<EOF
-title       firmware-update
-efi         /efi/fwupd/fwupdx64.efi
+title    firmware-update
+efi      /efi/fwupd/fwupdx64.efi
 EOF
     fi
 
